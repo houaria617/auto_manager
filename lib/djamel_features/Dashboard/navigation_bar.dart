@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import '../Clients/clients_list.dart';
+import 'dashboard.dart';
+
+class NavBar extends StatefulWidget {
+  const NavBar({super.key});
+
+  @override
+  State<NavBar> createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
+  static int selectedIndex = 2;
+
+  void onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    switch (selectedIndex) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ClientsList()),
+        );
+        break;
+      case 1:
+        // Navigate to Rentals page
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Dashboard()),
+        );
+        break;
+      case 3:
+        // Navigate to Cars page
+        break;
+      case 4:
+        // Navigate to Analytics page
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      currentIndex: selectedIndex,
+      onTap: onItemTapped,
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clients'),
+        BottomNavigationBarItem(icon: Icon(Icons.car_rental), label: 'Rentals'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.directions_car),
+          label: 'Cars',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.analytics),
+          label: 'Analytics',
+        ),
+      ],
+    );
+  }
+}
