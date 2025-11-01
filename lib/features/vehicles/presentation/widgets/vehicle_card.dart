@@ -1,106 +1,136 @@
+// vehicle_card.dart
 import 'package:flutter/material.dart';
+import '../screens/vehicle_details_screen.dart';
+import '../../data/models/vehicle_model.dart';
 
 class VehicleCard extends StatelessWidget {
-  final Map<String, dynamic> vehicle;
+  final Vehicle vehicle;
+
   const VehicleCard({super.key, required this.vehicle});
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Available':
-        return const Color(0xFF34C759);
-      case 'Rented':
-        return const Color(0xFF007AFF);
-      case 'Maintenance':
-        return const Color(0xFFFF9500);
+    switch (status.toLowerCase()) {
+      case 'available':
+        return const Color(0xFF28A745); // green
+      case 'rented':
+        return const Color(0xFF007BFF); // primary blue
+      case 'maintenance':
+        return const Color(0xFFFFA500); // orange
       default:
-        return Colors.grey;
+        return const Color(0xFF6B7280); // gray
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(vehicle['status']);
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top (image)
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              vehicle['image'],
-              width: double.infinity,
-              height: 150,
-              fit: BoxFit.cover,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VehicleDetailsScreen(vehicle: vehicle),
           ),
-          // Bottom info
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  vehicle['status'],
-                  style: TextStyle(
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+        );
+      },
+      child: Card(
+        elevation: 4,
+        color: Colors.white,
+        shadowColor: Colors.black.withOpacity(0.05),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status Row
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.circle,
+                    color: _getStatusColor(vehicle.status),
+                    size: 10,
                   ),
-                ),
-                Text(
-                  vehicle['name'],
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 6),
+                  Text(
+                    vehicle.status,
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      color: _getStatusColor(vehicle.status),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      letterSpacing: -0.2,
+                    ),
                   ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Vehicle name
+              Text(
+                vehicle.name,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1A1A1A),
+                  letterSpacing: -0.3,
                 ),
-                Text(
-                  vehicle['plate'],
-                  style: const TextStyle(color: Colors.grey),
+              ),
+
+              const SizedBox(height: 4),
+
+              // Plate number
+              Text(
+                "Plate: ${vehicle.plate}",
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 14,
+                  color: Color(0xFF6B7280),
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.build_circle,
-                      size: 18,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Maint: ${vehicle['maintenance']}',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Edit',
-                        style: TextStyle(color: Color(0xFF007AFF)),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Conditional info rows
+              if (vehicle.status.toLowerCase() == 'rented' &&
+                  vehicle.returnDate != null)
+                _infoRow("Return Date", vehicle.returnDate!),
+
+              if (vehicle.status.toLowerCase() == 'maintenance' &&
+                  vehicle.availableFrom != null)
+                _infoRow("Available on", vehicle.availableFrom!),
+
+              _infoRow("Next Maintenance", vehicle.nextMaintenanceDate),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  /// helper for clean info rows
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(
+            fontFamily: 'Manrope',
+            fontSize: 13,
+            color: Color(0xFF6B7280),
+            height: 1.4,
+          ),
+          children: [
+            TextSpan(
+              text: "$label: ",
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }
