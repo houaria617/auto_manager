@@ -111,7 +111,11 @@ class _ClientsListState extends State<ClientsList> {
                         decoration: InputDecoration(
                           focusColor: const Color.fromARGB(83, 33, 149, 243),
                           border: OutlineInputBorder(
-                            borderSide: const BorderSide(width: 0.5),
+                            borderSide: const BorderSide(
+                              width: 0.5,
+                              color: Color.fromARGB(149, 95, 191, 229),
+                            ),
+
                             borderRadius: BorderRadius.circular(10),
                           ),
                           prefixIcon: const Icon(Icons.search),
@@ -132,8 +136,8 @@ class _ClientsListState extends State<ClientsList> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                               side: const BorderSide(
-                                color: Colors.black,
-                                width: 0.2,
+                                color: Colors.blue,
+                                width: 0.5,
                               ),
                             ),
                             child: InkWell(
@@ -157,6 +161,19 @@ class _ClientsListState extends State<ClientsList> {
                                       height: 60,
                                       width: 60,
                                       alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                        color: Color.fromARGB(
+                                          149,
+                                          95,
+                                          191,
+                                          229,
+                                        ),
+                                        border: Border.all(
+                                          color: Colors.blue,
+                                          width: 0.5,
+                                        ),
+                                      ),
                                       child: Icon(Icons.person, size: 40),
                                     ),
                                     Column(
@@ -167,20 +184,16 @@ class _ClientsListState extends State<ClientsList> {
                                           filteredClients[i]['first_name'] +
                                               ' ' +
                                               filteredClients[i]['last_name'],
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w700,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                         Text(
                                           filteredClients[i]['phone'],
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w300,
-                                            color: Color.fromARGB(
-                                              255,
-                                              90,
-                                              87,
-                                              87,
-                                            ),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
                                           ),
                                         ),
                                       ],

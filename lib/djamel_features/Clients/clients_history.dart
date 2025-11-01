@@ -57,14 +57,14 @@ class _ClientProfileState extends State<ClientProfile> {
                                   ' ' +
                                   widget.client['last_name'],
                               style: TextStyle(
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
                             ),
                             Text(
                               'Phone: ' + widget.client['phone'],
                               style: TextStyle(
-                                fontWeight: FontWeight.w300,
+                                fontWeight: FontWeight.w500,
                                 fontSize: 16,
                               ),
                             ),
@@ -73,7 +73,7 @@ class _ClientProfileState extends State<ClientProfile> {
                               child: Text(
                                 'NIN: ' + widget.client['phone'],
                                 style: TextStyle(
-                                  fontWeight: FontWeight.w300,
+                                  fontWeight: FontWeight.w500,
                                   fontSize: 16,
                                 ),
                               ),
@@ -107,7 +107,7 @@ class _ClientProfileState extends State<ClientProfile> {
                                   Text(
                                     widget.client['state'],
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                       color: Colors.black,
                                     ),
@@ -135,7 +135,7 @@ class _ClientProfileState extends State<ClientProfile> {
                                   Text(
                                     'Total Rents',
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                       color: Colors.black,
                                     ),
@@ -172,12 +172,18 @@ class _ClientProfileState extends State<ClientProfile> {
                     return Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadiusGeometry.circular(10),
-                        side: BorderSide(color: Colors.grey, width: 0.5),
+                        side: BorderSide(color: Colors.blue, width: 0.5),
                       ),
                       child: InkWell(
                         onTap: () {},
                         child: ListTile(
-                          title: Text(rentHistory[index]['item']),
+                          title: Text(
+                            rentHistory[index]['item'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           subtitle: Text(rentHistory[index]['details']),
                           trailing: Container(
                             padding: EdgeInsets.all(10),
@@ -200,7 +206,7 @@ class _ClientProfileState extends State<ClientProfile> {
                             ),
                             child: Text(
                               rentHistory[index]['status'],
-                              style: TextStyle(fontWeight: FontWeight.w400),
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -216,130 +222,3 @@ class _ClientProfileState extends State<ClientProfile> {
     );
   }
 }
-
-
-
-/*
-                          Text(
-                            widget.client['phone'],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w300,
-                              color: const Color.fromARGB(255, 90, 87, 87),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          
-                          SizedBox(height: 40),
-                          Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(color: Colors.blue, width: 1),
-                            ),
-                            child: Text(
-                              'Total Rents: 11',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w300,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      
-                      
-                      
-                      
-                      
-                      
-                      
-                      
-                      
-                      
-                      
-                      Container(
-                            alignment: Alignment.centerLeft,
-                            width: 300,
-                            child: Row(
-                              children: [
-                                
-                                Spacer(),
-                                Container(
-                                  padding: EdgeInsets.only(left: 5, right: 5),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    color: Color.fromARGB(150, 255, 0, 0),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        widget.client['state'],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        '3 Days',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          
-                          
-                          
-                          
-                          
-                          
-                          
-                          
-                          
-                          
-                          Container(
-                            width: 320,
-                            child: Row(
-                              children: [
-                                Spacer(),
-                                Container(
-                                  padding: EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    color: Color.fromARGB(149, 178, 210, 223),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Total Rents',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        '11 Rents',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),*/

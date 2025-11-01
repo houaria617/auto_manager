@@ -23,133 +23,332 @@ class _DashboardState extends State<Dashboard> {
         child: Container(
           margin: EdgeInsets.all(10),
 
-          child: Column(
+          child: Stack(
             children: [
-              SizedBox(height: 20),
-              // LOGO
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'LOGO',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontFamily: 'ManropeExtraBold',
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20),
-
-              // INFORMATION BOXES
-              Wrap(
+              Column(
                 children: [
+                  SizedBox(height: 20),
+                  // LOGO
                   Container(
-                    margin: EdgeInsets.only(left: 50, right: 50, bottom: 10),
-                    height: 60,
-                    padding: EdgeInsets.only(left: 5, right: 5),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black),
                       borderRadius: BorderRadius.circular(10),
-                      color: Color.fromARGB(149, 95, 191, 229),
                     ),
-                    child: Row(
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.car_rental, size: 30),
-                            SizedBox(width: 5),
-                            Text(
-                              'Ongoing Rentals',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        Text(
-                          '15',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'LOGO',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontFamily: 'ManropeExtraBold',
+                      ),
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Container(
-                    padding: EdgeInsets.only(left: 5, right: 5),
 
-                    height: 60,
-                    margin: EdgeInsets.only(left: 50, right: 50, bottom: 10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromARGB(79, 25, 219, 31),
-                    ),
-                    child: Row(
-                      children: [
-                        Row(
+                  SizedBox(height: 20),
+
+                  // INFORMATION BOXES
+                  Wrap(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(
+                          left: 50,
+                          right: 50,
+                          bottom: 10,
+                        ),
+                        height: 60,
+                        padding: EdgeInsets.only(left: 5, right: 5),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                          color: Color.fromARGB(149, 95, 191, 229),
+                        ),
+                        child: Row(
                           children: [
-                            Icon(Icons.directions_car, size: 30),
-                            SizedBox(width: 10),
+                            Row(
+                              children: [
+                                Icon(Icons.car_rental, size: 30),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Ongoing Rentals',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
                             Text(
-                              'Available Cars',
+                              '15',
                               style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                        Spacer(),
+                      ),
+                      SizedBox(width: 10),
+                      Container(
+                        padding: EdgeInsets.only(left: 5, right: 5),
+
+                        height: 60,
+                        margin: EdgeInsets.only(
+                          left: 50,
+                          right: 50,
+                          bottom: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                          color: const Color.fromARGB(79, 25, 219, 31),
+                        ),
+                        child: Row(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.directions_car, size: 30),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Available Cars',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Text(
+                              '50',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Container(
+                        padding: EdgeInsets.only(left: 5, right: 5),
+
+                        height: 60,
+                        margin: EdgeInsets.only(left: 50, right: 50),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(10),
+                          color: const Color.fromARGB(98, 158, 158, 158),
+                        ),
+                        child: Row(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.directions_car, size: 30),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Due Today',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Text(
+                              '3',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // RECENT ACTIVITIES
+                  Container(
+                    margin: EdgeInsets.only(top: 30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          '50',
+                          'Recent Activities',
                           style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            fontFamily: 'ManropeExtraBold',
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    padding: EdgeInsets.only(left: 5, right: 5),
-
-                    height: 60,
-                    margin: EdgeInsets.only(left: 50, right: 50),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromARGB(98, 158, 158, 158),
-                    ),
-                    child: Row(
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.directions_car, size: 30),
-                            SizedBox(width: 10),
-                            Text(
-                              'Due Today',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                        SizedBox(height: 10),
+                        Container(
+                          child: Column(
+                            children: [
+                              Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: const BorderSide(
+                                    color: Colors.blue,
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.directions_car),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Car ABC-123 rented by John Doe',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                              Text(
+                                                '2025-01-15 at 10:30 AM',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(Icons.arrow_forward),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        Text(
-                          '3',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                              Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: const BorderSide(
+                                    color: Colors.blue,
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.directions_car),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Car ABC-123 rented by John Doe',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                              Text(
+                                                '2025-01-15 at 10:30 AM',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(Icons.arrow_forward),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: const BorderSide(
+                                    color: Colors.blue,
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () {},
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.directions_car),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Car ABC-123 rented by John Doe',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                              Text(
+                                                '2025-01-15 at 10:30 AM',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                softWrap: false,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(Icons.arrow_forward),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -157,169 +356,35 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ],
               ),
-
-              // RECENT ACTIVITIES
-              Container(
-                margin: EdgeInsets.only(top: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Recent Activities',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontFamily: 'ManropeExtraBold',
+              Positioned(
+                top: 600,
+                left: 240,
+                child: Center(
+                  child: Container(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(149, 95, 191, 229),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(10),
+                          side: BorderSide(width: 1),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      child: Column(
+                      onPressed: () {},
+                      child: Row(
                         children: [
-                          Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: const BorderSide(
-                                color: Colors.blue,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: () {},
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.directions_car),
-                                    SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Car ABC-123 rented by John Doe',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          '2025-01-15 at 10:30 AM',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Spacer(),
-                                    IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(Icons.arrow_forward),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          Text(
+                            'Rental',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
                             ),
                           ),
-                          Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: const BorderSide(
-                                color: Colors.blue,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: () {},
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.directions_car),
-                                    SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Car ABC-123 rented by John Doe',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          '2025-01-15 at 10:30 AM',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Spacer(),
-                                    IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(Icons.arrow_forward),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: const BorderSide(
-                                color: Colors.blue,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: () {},
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.directions_car),
-                                    SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Car ABC-123 rented by John Doe',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          '2025-01-15 at 10:30 AM',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Spacer(),
-                                    IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(Icons.arrow_forward),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                          Icon(Icons.add, size: 20, color: Colors.black),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
