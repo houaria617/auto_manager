@@ -27,3 +27,4 @@ flutter:
     - family: ManropeExtraBold
       fonts:
         - asset: assets/fonts/static/Manrope-ExtraBold.ttf
+
