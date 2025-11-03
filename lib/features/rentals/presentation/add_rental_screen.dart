@@ -31,7 +31,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2026),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
@@ -78,9 +78,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         return;
       }
 
-      
+      // Create rental data object
+      final rentalData = {
+        'clientName': _clientNameController.text.trim(),
+        'carModel': _carModelController.text.trim(),
+        'startDate': _startDate,
+        'endDate': _endDate,
+        'price': double.parse(_priceController.text),
+      };
 
-      Navigator.pop(context);
+      // Pop with the rental data instead of just popping
+      Navigator.of(context).pop(rentalData);
     }
   }
 
@@ -93,7 +101,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'New Rental',
@@ -295,7 +303,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
