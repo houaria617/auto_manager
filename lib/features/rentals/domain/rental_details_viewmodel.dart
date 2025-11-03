@@ -17,12 +17,12 @@ class RentalDetailsViewModel extends ChangeNotifier {
   DateTime _endDate = DateTime.now();
 
   // Client data
-  String _clientName = '';
-  String _clientPhone = '';
+  String _clientName = 'Riwan';
+  String _clientPhone = '+213 734 567 8901';
 
   // Car data
-  String _carModel = '';
-  String _carPlate = '';
+  String _carModel = 'Toyota Corolla';
+  String _carPlate = 'TOY-1234';
 
   // Getters
   bool get isLoading => _isLoading;
