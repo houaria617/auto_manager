@@ -31,7 +31,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2026),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
@@ -300,7 +300,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(

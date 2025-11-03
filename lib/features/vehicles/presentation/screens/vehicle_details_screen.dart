@@ -28,6 +28,14 @@ class VehicleDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
         centerTitle: true,
+        title: Text(
+          vehicle.name,
+          style: const TextStyle(
+            fontFamily: 'Manrope',
+            color: Color(0xFF2D3748),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit, color: Color(0xFF007BFF)),
@@ -43,6 +51,7 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -158,9 +167,9 @@ class VehicleDetailsScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(
+        title: const Text(
           'Delete vehicle',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -193,10 +202,8 @@ class VehicleDetailsScreen extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              // Close dialog
               Navigator.of(dialogContext).pop(true);
 
-              // Show feedback and pop details screen
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Deleted "${vehicle.name}"'),
