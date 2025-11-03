@@ -1,6 +1,8 @@
+import 'package:auto_manager/features/analytics/presentation/analytics.dart';
+import 'package:auto_manager/features/rentals/presentation/rentals.dart';
+import 'package:auto_manager/features/vehicles/presentation/screens/vehicles_screen.dart';
 import 'package:flutter/material.dart';
 import '../Clients/clients_list.dart';
-import '../analytics/presentation/analytics.dart';
 import 'dashboard.dart';
 
 class NavBar extends StatefulWidget {
@@ -26,6 +28,11 @@ class _NavBarState extends State<NavBar> {
         break;
       case 1:
         // Navigate to Rentals page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RentalsScreen()),
+        );
+
         break;
       case 2:
         Navigator.pushReplacement(
@@ -35,6 +42,10 @@ class _NavBarState extends State<NavBar> {
         break;
       case 3:
         // Navigate to Cars page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => VehiclesScreen()),
+        );
         break;
       case 4:
         // Navigate to Analytics page
