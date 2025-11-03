@@ -1,3 +1,4 @@
+import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
 import 'package:auto_manager/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
@@ -777,7 +778,14 @@ class _DashboardState extends State<Dashboard> {
                       side: BorderSide(width: 1, color: Colors.transparent),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddRentalScreen(),
+                      ),
+                    );
+                  },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

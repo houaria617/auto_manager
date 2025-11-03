@@ -132,9 +132,9 @@ class _RentalsScreenContent extends StatelessWidget {
 
   void _handleAddRental(BuildContext context) {
     //  Navigate to add rental screen
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddRentalScreen()),
+      MaterialPageRoute(builder: (context) => const AddRentalScreen()),
     );
   }
 }
