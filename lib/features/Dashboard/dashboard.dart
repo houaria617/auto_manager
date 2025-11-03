@@ -1,3 +1,4 @@
+import 'package:auto_manager/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
 
@@ -14,6 +15,20 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 241, 239, 239),
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
+                );
+              },
+              icon: Icon(Icons.settings),
+            ),
+          ),
+        ],
         title: const Text(
           'Dashboard',
           style: TextStyle(fontFamily: 'ManropeExtraBold'),
