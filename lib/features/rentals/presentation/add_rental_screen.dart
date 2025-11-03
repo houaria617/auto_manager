@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AddRentalScreen extends StatefulWidget {
-  const AddRentalScreen({super.key});
+  const AddRentalScreen({Key? key}) : super(key: key);
 
   @override
   State<AddRentalScreen> createState() => _AddRentalScreenState();
