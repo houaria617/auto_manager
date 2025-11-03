@@ -1,3 +1,4 @@
+import 'package:auto_manager/features/Clients/clients_history.dart';
 import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
 
@@ -11,12 +12,26 @@ class ClientInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> client = {
+      'first_name': 'John',
+      'last_name': 'Doe',
+      'phone': '+1-202-555-0125',
+      'picture_path': 'assets/clients_pictures/john_doe.png',
+      'state': 'active',
+    };
     return InfoCard(
       icon: Icons.person,
       title: viewModel.clientName,
       subtitle: viewModel.clientPhone,
       actionLabel: 'View Client',
-      onActionPressed: () => viewModel.viewClient(),
+      onActionPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ClientProfile(client: client),
+          ),
+        );
+      },
     );
   }
 }
