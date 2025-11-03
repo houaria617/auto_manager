@@ -31,7 +31,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2026),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
@@ -72,13 +72,11 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       }
 
       if (_dateError != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_dateError!)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_dateError!)));
         return;
       }
-
-      
 
       Navigator.pop(context);
     }
@@ -93,7 +91,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'New Rental',
@@ -175,21 +173,25 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                 color: Colors.grey[100],
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: _dateError != null && _startDate == null
+                                  color:
+                                      _dateError != null && _startDate == null
                                       ? Colors.red
                                       : Colors.transparent,
                                   width: 1,
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     _startDate == null
                                         ? 'Select Date'
                                         : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
                                     style: TextStyle(
-                                      color: _startDate == null ? Colors.grey[600] : Colors.black,
+                                      color: _startDate == null
+                                          ? Colors.grey[600]
+                                          : Colors.black,
                                     ),
                                   ),
                                   const Icon(Icons.calendar_today, size: 20),
@@ -221,14 +223,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     _endDate == null
                                         ? 'Select Date'
                                         : '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
                                     style: TextStyle(
-                                      color: _endDate == null ? Colors.grey[600] : Colors.black,
+                                      color: _endDate == null
+                                          ? Colors.grey[600]
+                                          : Colors.black,
                                     ),
                                   ),
                                   const Icon(Icons.calendar_today, size: 20),
@@ -246,10 +251,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                     padding: const EdgeInsets.only(top: 8, left: 12),
                     child: Text(
                       _dateError!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),
                 const SizedBox(height: 20),
@@ -269,7 +271,10 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       padding: EdgeInsets.all(16),
                       child: Text(
                         '\$',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -295,7 +300,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -350,10 +355,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }
