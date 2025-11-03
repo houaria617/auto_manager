@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:auto_manager/djamel_features/Dashboard/navigation_bar.dart';
+import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
 import 'clients_history.dart';
 
 class ClientsList extends StatefulWidget {

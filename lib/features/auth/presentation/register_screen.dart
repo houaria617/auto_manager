@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../../Dashboard/dashboard.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -45,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const Dashboard()),
       );
     }
   }

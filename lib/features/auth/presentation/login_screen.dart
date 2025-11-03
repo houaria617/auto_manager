@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
+import '../../Dashboard/dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const Dashboard()),
       );
     }
   }

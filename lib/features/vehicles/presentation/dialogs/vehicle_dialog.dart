@@ -120,7 +120,7 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
 
                   // Status Dropdown
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     items: const [
                       DropdownMenuItem(
                         value: 'Available',

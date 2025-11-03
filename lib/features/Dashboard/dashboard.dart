@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:auto_manager/djamel_features/Dashboard/navigation_bar.dart';
+import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});

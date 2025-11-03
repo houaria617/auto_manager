@@ -190,7 +190,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
 /// Empty state card used in the grid
 class _EmptyStateCard extends StatelessWidget {
-  const _EmptyStateCard({super.key});
+  const _EmptyStateCard();
 
   @override
   Widget build(BuildContext context) {
