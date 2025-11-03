@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Clients/clients_list.dart';
+import 'package:auto_manager/features/analytics/presentation/analytics.dart'
 import 'dashboard.dart';
 
 class NavBar extends StatefulWidget {
@@ -37,6 +38,10 @@ class _NavBarState extends State<NavBar> {
         break;
       case 4:
         // Navigate to Analytics page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) =>  ReportsScreen()),
+        );
         break;
     }
   }
