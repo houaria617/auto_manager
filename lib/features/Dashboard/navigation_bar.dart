@@ -37,12 +37,12 @@ class _NavBarState extends State<NavBar> {
         // Navigate to Cars page
         break;
       case 4:
-      // Navigate to Analytics page
-      /*Navigator.pushReplacement(
+        // Navigate to Analytics page
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) =>  ReportsScreen()),
+          MaterialPageRoute(builder: (context) => ReportsScreen()),
         );
-        break;*/
+        break;
     }
   }
 
