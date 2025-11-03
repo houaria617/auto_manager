@@ -104,7 +104,7 @@ class SettingsScreen extends StatelessWidget {
             color: const Color(0xFF007BFF).withOpacity(0.18),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF007BFF)),
+          child: Icon(icon, color: const Color.fromARGB(113, 0, 123, 255)),
         ),
         title: Text(
           title,

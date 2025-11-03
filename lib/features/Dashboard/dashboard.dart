@@ -58,19 +58,31 @@ class _DashboardState extends State<Dashboard> {
                     height: 60,
                     padding: EdgeInsets.only(left: 5, right: 5),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.transparent),
                       borderRadius: BorderRadius.circular(10),
-                      color: Color.fromARGB(149, 95, 191, 229),
+                      color: const Color(0xFF007BFF),
                     ),
                     child: Row(
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.car_rental, size: 30),
+                            Icon(
+                              Icons.car_rental,
+                              size: 30,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 5),
                             Text(
                               'Ongoing Rentals',
                               style: TextStyle(
+                                color: const Color.fromARGB(255, 255, 255, 255),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -83,8 +95,10 @@ class _DashboardState extends State<Dashboard> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
+                        SizedBox(width: 5),
                       ],
                     ),
                   ),
@@ -94,21 +108,33 @@ class _DashboardState extends State<Dashboard> {
                     height: 60,
                     margin: EdgeInsets.only(left: 50, right: 50, bottom: 10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.transparent),
                       borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromARGB(79, 25, 219, 31),
+                      color: Colors.green.shade500,
                     ),
                     child: Row(
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.directions_car, size: 30),
+                            Icon(
+                              Icons.directions_car,
+                              size: 30,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               'Available Cars',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
                             ),
                           ],
@@ -119,8 +145,10 @@ class _DashboardState extends State<Dashboard> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
+                        SizedBox(width: 5),
                       ],
                     ),
                   ),
@@ -130,21 +158,33 @@ class _DashboardState extends State<Dashboard> {
                     height: 60,
                     margin: EdgeInsets.only(left: 50, right: 50),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.transparent),
                       borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromARGB(98, 158, 158, 158),
+                      color: const Color.fromARGB(205, 244, 67, 54),
                     ),
                     child: Row(
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.directions_car, size: 30),
+                            Icon(
+                              Icons.car_crash,
+                              size: 30,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               'Due Today',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
                             ),
                           ],
@@ -155,8 +195,10 @@ class _DashboardState extends State<Dashboard> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
+                        SizedBox(width: 5),
                       ],
                     ),
                   ),
@@ -725,12 +767,14 @@ class _DashboardState extends State<Dashboard> {
               Positioned(
                 bottom: 10,
                 right: 0,
+
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(149, 95, 191, 229),
+                    elevation: 5,
+                    backgroundColor: const Color(0xFF007BFF),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(width: 1),
+                      side: BorderSide(width: 1, color: Colors.transparent),
                     ),
                   ),
                   onPressed: () {},
@@ -738,18 +782,23 @@ class _DashboardState extends State<Dashboard> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: EdgeInsets.all(10),
+                        padding: EdgeInsets.all(8),
                         child: Text(
                           'Rental',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),
                         ),
                       ),
-                      SizedBox(width: 5),
-                      Icon(Icons.add, size: 20, color: Colors.black),
+                      SizedBox(width: 2),
+                      Icon(
+                        Icons.add,
+                        size: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ],
                   ),
                 ),
