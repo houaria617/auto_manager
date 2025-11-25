@@ -1,4 +1,4 @@
-import 'package:auto_manager/djamel_features/Dashboard/dashboard.dart';
+import 'package:auto_manager/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +12,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Dashboard(),
+      home: LoginScreen(),
     );
   }
 }
