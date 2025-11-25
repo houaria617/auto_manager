@@ -1,23 +1,4 @@
-/*
-class SettingsScreen
-  - AppBar (title: "Settings")
-  - Option Tiles:
-      • Agency Information → navigates to ComingSoonScreen
-      • App Language → navigates to ComingSoonScreen
-  - Subscription Card → shows "You are on the Free Plan"
-  - Logout Button → shows snackbar (logout confirmation)
-
-Helper Widgets (private):
-  - _buildTile(...) → reusable styled ListTile for options
-  - _buildSubscriptionCard(...) → gradient card with subscription info
-  - _buildLogoutButton(...) → red logout button at bottom
-
-class ComingSoonScreen
-  - Simple placeholder page with:
-      • AppBar showing passed title
-      • Centered "Coming Soon" text
-*/
-
+import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -104,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
             color: const Color(0xFF007BFF).withOpacity(0.18),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: const Color(0xFF007BFF)),
+          child: Icon(icon, color: const Color.fromARGB(113, 0, 123, 255)),
         ),
         title: Text(
           title,
@@ -124,56 +105,65 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildSubscriptionCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.green.shade500, Colors.green.shade400],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.green.shade500, Colors.green.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.shade200.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.shade200.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.workspace_premium, color: Colors.white),
             ),
-            child: const Icon(Icons.workspace_premium, color: Colors.white),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Subscription",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Subscription",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "You are on the Free Plan.",
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
+                  SizedBox(height: 4),
+                  Text(
+                    "You are on the Free Plan.",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.chevron_right, color: Colors.white70),
-        ],
+            const Icon(Icons.chevron_right, color: Colors.white70),
+          ],
+        ),
       ),
     );
   }
@@ -183,7 +173,6 @@ class SettingsScreen extends StatelessWidget {
       padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: ElevatedButton.icon(
         onPressed: () {
-          // TODO: Add logout logic
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Logged out successfully')),
           );

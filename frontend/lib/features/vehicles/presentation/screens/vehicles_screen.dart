@@ -5,6 +5,7 @@ import 'vehicle_details_screen.dart';
 import '../widgets/vehicle_card.dart';
 import '../widgets/filter_chip_row.dart';
 import '../dialogs/vehicle_dialog.dart';
+import '../../../Dashboard/navigation_bar.dart';
 
 class VehiclesScreen extends StatefulWidget {
   const VehiclesScreen({super.key});
@@ -55,7 +56,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgLight,
-
+      // ✅ Add the navigation bar at the bottom
+      bottomNavigationBar: const NavBar(),
       // Top App Bar
       appBar: AppBar(
         backgroundColor: cardBg,
@@ -190,7 +192,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
 /// Empty state card used in the grid
 class _EmptyStateCard extends StatelessWidget {
-  const _EmptyStateCard({super.key});
+  const _EmptyStateCard();
 
   @override
   Widget build(BuildContext context) {
