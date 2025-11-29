@@ -83,23 +83,41 @@ class _ClientsListState extends State<ClientsList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 241, 239, 239),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        title: const Text(
           "Clients",
-          style: TextStyle(fontFamily: 'ManropeExtraBold'),
+          style: TextStyle(
+            fontFamily: 'ManropeExtraBold',
+            color: Color(0xFF2D3748),
+            fontSize: 24,
+          ),
         ),
+        iconTheme: const IconThemeData(color: Color(0xFF2D3748)),
       ),
       body: Center(
         child: Container(
-          padding: EdgeInsets.only(right: 5, left: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              SizedBox(height: 15),
+              const SizedBox(height: 20),
               Expanded(
                 child: Column(
                   children: [
-                    Card(
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: TextField(
                         onChanged: (String newText) {
                           setState(() {
@@ -107,114 +125,208 @@ class _ClientsListState extends State<ClientsList> {
                             updateList(newText);
                           });
                         },
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
                         decoration: InputDecoration(
-                          focusColor: const Color.fromARGB(83, 33, 149, 243),
+                          filled: true,
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              width: 0.5,
-                              color: Color.fromARGB(149, 95, 191, 229),
-                            ),
-
-                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          prefixIcon: const Icon(Icons.search),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              width: 1,
+                              color: Color(0xFFE2E8F0),
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              width: 2,
+                              color: Color(0xFF4F46E5),
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Color(0xFF94A3B8),
+                            size: 24,
+                          ),
                           hintText: "Search by name or phone number",
                           hintStyle: const TextStyle(
                             fontWeight: FontWeight.w400,
+                            color: Color(0xFF94A3B8),
+                            fontSize: 15,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
                           ),
                         ),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF2D3748),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 20),
                     Expanded(
                       child: ListView.builder(
                         itemCount: filteredClients.length,
                         itemBuilder: (context, i) {
-                          return Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: const BorderSide(
-                                color: Colors.blue,
-                                width: 0.5,
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                                width: 1,
                               ),
                             ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ClientProfile(
-                                      client: filteredClients[i],
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ClientProfile(
+                                        client: filteredClients[i],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      margin: const EdgeInsets.only(right: 10),
-                                      height: 60,
-                                      width: 60,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        color: Color.fromARGB(
-                                          149,
-                                          95,
-                                          191,
-                                          229,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          right: 16,
                                         ),
-                                        border: Border.all(
-                                          color: Colors.blue,
-                                          width: 0.5,
+                                        height: 56,
+                                        width: 56,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            28,
+                                          ),
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFF007BFF),
+                                              Color.fromARGB(255, 96, 157, 223),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFF4F46E5,
+                                              ).withOpacity(0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.person,
+                                          size: 32,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                      child: Icon(Icons.person, size: 40),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          filteredClients[i]['first_name'] +
-                                              ' ' +
-                                              filteredClients[i]['last_name'],
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              filteredClients[i]['first_name'] +
+                                                  ' ' +
+                                                  filteredClients[i]['last_name'],
+                                              style: const TextStyle(
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF2D3748),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              filteredClients[i]['phone'],
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              filteredClients[i]['state'] ==
+                                                  'active'
+                                              ? const Color(0xFFDCFCE7)
+                                              : filteredClients[i]['state'] ==
+                                                    'idle'
+                                              ? const Color(0xFFF1F5F9)
+                                              : const Color(0xFFFEE2E2),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
                                           ),
                                         ),
-                                        Text(
-                                          filteredClients[i]['phone'],
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 4,
+                                              backgroundColor:
+                                                  filteredClients[i]['state'] ==
+                                                      'active'
+                                                  ? const Color(0xFF16A34A)
+                                                  : filteredClients[i]['state'] ==
+                                                        'idle'
+                                                  ? const Color(0xFF64748B)
+                                                  : const Color(0xFFDC2626),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF8FAFC),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    CircleAvatar(
-                                      radius: 5,
-                                      backgroundColor:
-                                          filteredClients[i]['state'] ==
-                                              'active'
-                                          ? Colors.green
-                                          : filteredClients[i]['state'] ==
-                                                'idle'
-                                          ? Colors.grey
-                                          : Colors.red,
-                                    ),
-                                    IconButton(
-                                      onPressed: () {},
-                                      icon: const Icon(Icons.arrow_forward),
-                                    ),
-                                  ],
+                                        child: IconButton(
+                                          onPressed: () {},
+                                          icon: const Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 18,
+                                          ),
+                                          color: const Color(0xFF64748B),
+                                          padding: const EdgeInsets.all(8),
+                                          constraints: const BoxConstraints(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

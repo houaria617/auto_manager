@@ -22,33 +22,49 @@ class _ClientProfileState extends State<ClientProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 241, 239, 239),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: Text(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        title: const Text(
           'Client Profile',
-          style: TextStyle(fontFamily: 'ManropeExtraBold'),
+          style: TextStyle(
+            fontFamily: 'ManropeExtraBold',
+            color: Color(0xFF2D3748),
+            fontSize: 24,
+          ),
         ),
-        leading: BackButton(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3748)),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Container(
+          padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.circular(10),
-                  side: BorderSide(color: Colors.blue, width: 0.5),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Container(
-                  width: 350,
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(20),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -56,164 +72,305 @@ class _ClientProfileState extends State<ClientProfile> {
                               widget.client['first_name'] +
                                   ' ' +
                                   widget.client['last_name'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                                fontSize: 22,
+                                color: Color(0xFF2D3748),
                               ),
                             ),
-                            Text(
-                              'Phone: ' + widget.client['phone'],
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.only(top: 30),
-                              child: Text(
-                                'NIN: ' + widget.client['phone'],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.phone_outlined,
+                                  size: 18,
+                                  color: Color(0xFF64748B),
                                 ),
-                              ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  widget.client['phone'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.badge_outlined,
+                                  size: 18,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'NIN: ${widget.client['phone']}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      Spacer(),
-                      Container(
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                  color: widget.client['state'] == 'overdue'
-                                      ? Colors.red
-                                      : widget.client['state'] == 'idle'
-                                      ? Colors.grey
-                                      : Colors.green,
-                                ),
-                                color: widget.client['state'] == 'overdue'
-                                    ? Color.fromARGB(150, 255, 0, 0)
+                      const SizedBox(width: 16),
+                      Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: LinearGradient(
+                                colors: widget.client['state'] == 'overdue'
+                                    ? [
+                                        const Color(0xFFFEE2E2),
+                                        const Color(0xFFFECDD3),
+                                      ]
                                     : widget.client['state'] == 'idle'
-                                    ? Color.fromARGB(149, 171, 171, 171)
-                                    : Color.fromARGB(90, 40, 193, 40),
+                                    ? [
+                                        const Color(0xFFF1F5F9),
+                                        const Color(0xFFE2E8F0),
+                                      ]
+                                    : [
+                                        const Color(0xFFDCFCE7),
+                                        const Color(0xFFBBF7D0),
+                                      ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    widget.client['state'],
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Text(
-                                    ' 3 Days',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
+                              border: Border.all(
+                                color: widget.client['state'] == 'overdue'
+                                    ? const Color(0xFFDC2626)
+                                    : widget.client['state'] == 'idle'
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF16A34A),
+                                width: 1.5,
                               ),
                             ),
-                            SizedBox(height: 10),
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Colors.blue),
-                                color: Color.fromARGB(149, 95, 191, 229),
+                            child: Column(
+                              children: [
+                                Text(
+                                  widget.client['state']
+                                      .toString()
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    letterSpacing: 0.5,
+                                    color: widget.client['state'] == 'overdue'
+                                        ? const Color(0xFFDC2626)
+                                        : widget.client['state'] == 'idle'
+                                        ? const Color(0xFF475569)
+                                        : const Color(0xFF16A34A),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '3 Days',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: widget.client['state'] == 'overdue'
+                                        ? const Color(0xFF991B1B)
+                                        : widget.client['state'] == 'idle'
+                                        ? const Color(0xFF64748B)
+                                        : const Color(0xFF15803D),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFDEDDFF), Color(0xFFE0E7FF)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Total Rents',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${rentHistory.length} Rents',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
+                              border: Border.all(
+                                color: const Color(0xFF007BFF),
+                                width: 1.5,
                               ),
                             ),
-                          ],
-                        ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'TOTAL RENTS',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    letterSpacing: 0.5,
+                                    color: Color(0xFF007BFF),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${rentHistory.length}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF007BFF),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              Container(
-                margin: EdgeInsets.all(20),
+              const SizedBox(height: 32),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
-                  'Client Rent History',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
+                  'Rent History',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
+                    color: Color(0xFF2D3748),
+                  ),
                 ),
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: rentHistory.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadiusGeometry.circular(10),
-                        side: BorderSide(color: Colors.blue, width: 0.5),
+              const SizedBox(height: 16),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: rentHistory.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
                       ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
                       child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
                         onTap: () {},
-                        child: ListTile(
-                          title: Text(
-                            rentHistory[index]['item'],
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(rentHistory[index]['details']),
-                          trailing: Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color:
-                                    rentHistory[index]['status'] == 'Returned'
-                                    ? Colors.grey
-                                    : rentHistory[index]['status'] == 'Ongoing'
-                                    ? Colors.green
-                                    : Colors.red,
-                                width: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.inventory_2_outlined,
+                                  color: Color(0xFF007BFF),
+                                  size: 24,
+                                ),
                               ),
-                              color: rentHistory[index]['status'] == 'Returned'
-                                  ? const Color.fromARGB(57, 159, 159, 159)
-                                  : rentHistory[index]['status'] == 'Ongoing'
-                                  ? const Color.fromARGB(84, 84, 223, 89)
-                                  : const Color.fromARGB(83, 244, 67, 54),
-                            ),
-                            child: Text(
-                              rentHistory[index]['status'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      rentHistory[index]['item'],
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF2D3748),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      rentHistory[index]['details'],
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF64748B),
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color:
+                                      rentHistory[index]['status'] == 'Returned'
+                                      ? const Color(0xFFF1F5F9)
+                                      : rentHistory[index]['status'] ==
+                                            'Ongoing'
+                                      ? const Color(0xFFDCFCE7)
+                                      : const Color(0xFFFEE2E2),
+                                  border: Border.all(
+                                    color:
+                                        rentHistory[index]['status'] ==
+                                            'Returned'
+                                        ? const Color(0xFF94A3B8)
+                                        : rentHistory[index]['status'] ==
+                                              'Ongoing'
+                                        ? const Color(0xFF16A34A)
+                                        : const Color(0xFFDC2626),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  rentHistory[index]['status'],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color:
+                                        rentHistory[index]['status'] ==
+                                            'Returned'
+                                        ? const Color(0xFF475569)
+                                        : rentHistory[index]['status'] ==
+                                              'Ongoing'
+                                        ? const Color(0xFF16A34A)
+                                        : const Color(0xFFDC2626),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
