@@ -5,12 +5,13 @@ class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(20), nullable=False)
     last_name = db.Column(db.String(20), nullable=False)
-    phone = db.Column(db.String(12), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
     rentals = db.relationship('Rental', backref='client', lazy=True)
 
 class Car(db.Model):
     __tablename__ = 'car'
     id = db.Column(db.Integer, primary_key=True)
+    agency_id = db.Column(db.Integer, db.ForeignKey('agency.id', ondelete='CASCADE'), nullable=False, index=True)
     name = db.Column(db.String(40))
     plate = db.Column(db.String(30), unique=True, nullable=False)
     rent_price = db.Column(db.Numeric(30, 2))
@@ -30,9 +31,9 @@ class Agency(db.Model):
 class Rental(db.Model):
     __tablename__ = 'rental'
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
-    car_id = db.Column(db.Integer, db.ForeignKey('car.id'), nullable=False)
-    agency_id = db.Column(db.Integer, db.ForeignKey('agency.id'), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey('client.id', ondelete='CASCADE'), nullable=False, index=True)
+    car_id = db.Column(db.Integer, db.ForeignKey('car.id', ondelete='CASCADE'), nullable=False, index=True)
+    agency_id = db.Column(db.Integer, db.ForeignKey('agency.id', ondelete='CASCADE'), nullable=False, index=True)
     date_from = db.Column(db.Date, nullable=False)
     date_to = db.Column(db.Date, nullable=False)
     total_amount = db.Column(db.Numeric(30, 2), nullable=False)
@@ -43,6 +44,6 @@ class Rental(db.Model):
 class Payment(db.Model):
     __tablename__ = 'payment'
     id = db.Column(db.Integer, primary_key=True)
-    rental_id = db.Column(db.Integer, db.ForeignKey('rental.id'), nullable=False)
+    rental_id = db.Column(db.Integer, db.ForeignKey('rental.id', ondelete='CASCADE'), nullable=False, index=True)
     payment_date = db.Column(db.Date, nullable=False)
     amount = db.Column(db.Numeric(20, 2), nullable=False)

@@ -1,5 +1,6 @@
 CREATE TABLE car (
     id SERIAL,
+	agency_id INT NOT NULL,
     name VARCHAR(40),
     plate VARCHAR(30) UNIQUE NOT NULL,
 	rent_price NUMERIC(30,2),
@@ -7,6 +8,10 @@ CREATE TABLE car (
 	maintenance_date date,
 	return_from_maintenance date,
 	CONSTRAINT pk_car_id PRIMARY KEY (id),
+	CONSTRAINT fk_agency_id_in_car
+	FOREIGN KEY (agency_id)
+	REFERENCES agency(id)
+	ON DELETE CASCADE
 );
 
 CREATE TABLE agency (
@@ -21,8 +26,8 @@ CREATE TABLE client (
     id SERIAL,
 	first_name VARCHAR(20) NOT NULL,
     last_name VARCHAR(20) NOT NULL,
-	phone VARCHAR(12) NOT NULL,
-	CONSTRAINT pk_client_id PRIMARY KEY (id),
+	phone VARCHAR(20) NOT NULL,
+	CONSTRAINT pk_client_id PRIMARY KEY (id)
 );
 
 CREATE TABLE rental (
@@ -38,13 +43,13 @@ CREATE TABLE rental (
 	CONSTRAINT pk_rental_id PRIMARY KEY (id),
 	CONSTRAINT fk_client_id_in_rental 
 	FOREIGN KEY (client_id)
-	REFERENCES client(id),
+	REFERENCES client(id) ON DELETE CASCADE,
 	CONSTRAINT fk_car_id_in_rental 
 	FOREIGN KEY (car_id)
-	REFERENCES car(id),
+	REFERENCES car(id) ON DELETE CASCADE,
 	CONSTRAINT fk_agency_id_in_rental 
 	FOREIGN KEY (agency_id)
-	REFERENCES agency(id)
+	REFERENCES agency(id) ON DELETE CASCADE
 );
 
 CREATE TABLE payment (
@@ -55,5 +60,5 @@ CREATE TABLE payment (
 	CONSTRAINT pk_payment_id PRIMARY KEY (id),
 	CONSTRAINT fk_rental_id_in_payment 
 	FOREIGN KEY (rental_id)
-	REFERENCES rental(id)
+	REFERENCES rental(id) ON DELETE CASCADE
 );
