@@ -1,5 +1,5 @@
 import 'package:auto_manager/data/models/rental_model.dart';
-import 'package:auto_manager/data/repo/Rentals/rentals_abstract_repo.dart';
+import 'package:auto_manager/data/repo/Rentals/rentals_db_repo.dart'; // <- change to concrete class
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // States
