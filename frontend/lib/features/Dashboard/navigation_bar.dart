@@ -1,5 +1,6 @@
 import 'package:auto_manager/features/analytics/presentation/analytics.dart';
-import 'package:auto_manager/features/rentals/presentation/rentals.dart';
+import 'package:auto_manager/features/rentals/presentation/screens/add_rental_screen.dart';
+import 'package:auto_manager/features/rentals/presentation/screens/rentals.dart';
 import 'package:auto_manager/features/vehicles/presentation/screens/vehicles_screen.dart';
 import 'package:flutter/material.dart';
 import '../Clients/clients_list.dart';

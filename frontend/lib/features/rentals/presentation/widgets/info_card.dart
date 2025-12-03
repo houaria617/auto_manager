@@ -1,54 +1,111 @@
+import 'package:auto_manager/data/models/rental_model.dart';
 import 'package:auto_manager/features/Clients/clients_history.dart';
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
+import 'package:auto_manager/logic/cubits/rentals_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ============================================================================
 // Widget Components: info_card.dart
 // ============================================================================
 class ClientInfoCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final int clientId;
 
-  const ClientInfoCard({super.key, required this.viewModel});
+  const ClientInfoCard({super.key, required this.clientId});
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> client = {
-      'first_name': 'John',
-      'last_name': 'Doe',
-      'phone': '+1-202-555-0125',
-      'picture_path': 'assets/clients_pictures/john_doe.png',
-      'state': 'active',
-    };
     return InfoCard(
       icon: Icons.person,
-      title: viewModel.clientName,
-      subtitle: viewModel.clientPhone,
+      title: 'Client ID: $clientId',
+      subtitle: 'View client details',
       actionLabel: 'View Client',
       onActionPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ClientProfile(client: client),
-          ),
-        );
+        // Navigate to client profile
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => ClientProfile(clientId: clientId),
+        //   ),
+        // );
       },
     );
   }
 }
 
 class CarInfoCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final int carId;
 
-  const CarInfoCard({super.key, required this.viewModel});
+  const CarInfoCard({super.key, required this.carId});
 
   @override
   Widget build(BuildContext context) {
     return InfoCard(
       icon: Icons.directions_car,
-      title: viewModel.carModel,
-      subtitle: viewModel.carPlate,
+      title: 'Car ID: $carId',
+      subtitle: 'View car details',
       actionLabel: 'View Car',
-      onActionPressed: () => viewModel.viewCar(context),
+      onActionPressed: () {
+        // Navigate to car profile
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => CarProfile(carId: carId),
+        //   ),
+        // );
+      },
+    );
+  }
+}
+
+class RentalInfoCard extends StatelessWidget {
+  final int rentalId;
+
+  const RentalInfoCard({super.key, required this.rentalId});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<RentalCubit, RentalState>(
+      builder: (context, state) {
+        if (state is RentalLoading) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (state is RentalError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error: ${state.message}'),
+            ),
+          );
+        }
+
+        if (state is RentalLoaded) {
+          final rental = state.rentals.firstWhere(
+            (r) => r.id == rentalId,
+            orElse: () => throw Exception('Rental not found'),
+          );
+
+          return Column(
+            children: [
+              ClientInfoCard(clientId: rental.clientId),
+              const SizedBox(height: 8),
+              CarInfoCard(carId: rental.carId),
+            ],
+          );
+        }
+
+        return const Card(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('No rental data available'),
+          ),
+        );
+      },
     );
   }
 }

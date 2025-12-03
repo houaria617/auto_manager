@@ -1,17 +1,66 @@
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
+import 'package:auto_manager/data/models/rental_model.dart';
+import 'package:auto_manager/logic/cubits/rentals_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 // ============================================================================
 // Widget Components: rental_period_card.dart
 // ============================================================================
 class RentalPeriodCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final int rentalId;
 
-  const RentalPeriodCard({super.key, required this.viewModel});
+  const RentalPeriodCard({super.key, required this.rentalId});
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<RentalCubit, RentalState>(
+      builder: (context, state) {
+        if (state is RentalLoading) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (state is RentalError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error: ${state.message}'),
+            ),
+          );
+        }
+
+        if (state is RentalLoaded) {
+          final rental = state.rentals.firstWhere(
+            (r) => r.id == rentalId,
+            orElse: () => throw Exception('Rental not found'),
+          );
+
+          return _buildRentalPeriodCard(rental);
+        }
+
+        return const Card(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text('No rental data available'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRentalPeriodCard(RentalModel rental) {
+    final startDate = DateTime.parse(rental.dateFrom);
+    final endDate = DateTime.parse(rental.dateTo);
+    final now = DateTime.now();
+
+    final daysLeft = endDate.difference(now).inDays;
+    final totalDays = endDate.difference(startDate).inDays;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -20,18 +69,18 @@ class RentalPeriodCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(daysLeft),
             const SizedBox(height: 12),
-            _buildProgressBar(),
+            _buildProgressBar(totalDays, daysLeft),
             const SizedBox(height: 12),
-            _buildDateRange(),
+            _buildDateRange(startDate, endDate),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(int daysLeft) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -40,18 +89,17 @@ class RentalPeriodCard extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Text(
-          '${viewModel.daysLeft} days left',
-          style: TextStyle(color: Colors.blue.shade700),
+          '$daysLeft days left',
+          style: TextStyle(
+            color: daysLeft > 0 ? Colors.blue.shade700 : Colors.red.shade700,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildProgressBar() {
-    final progress = viewModel.totalRentalDays > 0
-        ? (viewModel.totalRentalDays - viewModel.daysLeft) /
-              viewModel.totalRentalDays
-        : 0.0;
+  Widget _buildProgressBar(int totalDays, int daysLeft) {
+    final progress = totalDays > 0 ? (totalDays - daysLeft) / totalDays : 0.0;
 
     return LinearProgressIndicator(
       value: progress,
@@ -62,21 +110,14 @@ class RentalPeriodCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateRange() {
+  Widget _buildDateRange(DateTime startDate, DateTime endDate) {
     final formatter = DateFormat('MMM dd, yyyy');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _DateColumn(
-          label: 'Start',
-          date: formatter.format(viewModel.startDate),
-        ),
-        _DateColumn(
-          label: 'End',
-          date: formatter.format(viewModel.endDate),
-          isEnd: true,
-        ),
+        _DateColumn(label: 'Start', date: formatter.format(startDate)),
+        _DateColumn(label: 'End', date: formatter.format(endDate), isEnd: true),
       ],
     );
   }
