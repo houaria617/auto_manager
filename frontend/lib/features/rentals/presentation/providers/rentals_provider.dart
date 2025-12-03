@@ -1,7 +1,7 @@
 // lib/features/rentals/presentation/providers/rentals_provider.dart
 
 import 'package:flutter/material.dart';
-import '../../data/models/rental.dart';
+import '../../../../data/models/rental.dart';
 
 class RentalsProvider extends ChangeNotifier {
   bool _showCompleted = false;
