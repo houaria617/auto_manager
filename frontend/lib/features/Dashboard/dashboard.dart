@@ -1,8 +1,10 @@
 import 'package:auto_manager/features/rentals/presentation/screens/add_rental_screen.dart';
-import 'package:auto_manager/features/rentals/presentation/screens/rentals.dart';
 import 'package:auto_manager/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
+import 'package:auto_manager/logic/cubits/auth_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth_state.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -31,7 +33,7 @@ class _DashboardState extends State<Dashboard> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SettingsScreen()),
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
                   );
                 },
                 icon: const Icon(
@@ -59,15 +61,46 @@ class _DashboardState extends State<Dashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    "Auto Manager",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontFamily: 'ManropeExtraBold',
-                    ),
-                  ),
+                
+                // Display Welcome Message with Username
+                BlocBuilder<AuthCubit, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthAuthenticated) {
+                      return Center(
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Auto Manager",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontFamily: 'ManropeExtraBold',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Welcome, ${state.user.username}!",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF3B82F6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return const Center(
+                      child: Text(
+                        "Auto Manager",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontFamily: 'ManropeExtraBold',
+                        ),
+                      ),
+                    );
+                  },
                 ),
+                
                 const SizedBox(height: 24),
 
                 _buildStatCard(
@@ -257,7 +290,7 @@ class _DashboardState extends State<Dashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AddRentalScreen(),
+                        builder: (context) => const RentalsScreen(),
                       ),
                     );
                   },

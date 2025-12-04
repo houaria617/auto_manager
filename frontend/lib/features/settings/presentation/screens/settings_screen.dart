@@ -1,5 +1,9 @@
 import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:auto_manager/logic/cubits/auth_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth_state.dart';
+import '../../../auth/presentation/login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -8,6 +12,34 @@ class SettingsScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ComingSoonScreen(title: title)),
+    );
+  }
+
+  void _handleLogout(BuildContext context) {
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // Close dialog
+              // Call logout from AuthCubit
+              context.read<AuthCubit>().logout();
+            },
+            child: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -28,30 +60,41 @@ class SettingsScreen extends StatelessWidget {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildTile(
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthUnauthenticated) {
+            // Navigate to Login screen after logout
+            Navigator.pushAndRemoveUntil(
               context,
-              icon: Icons.business_center,
-              title: "Agency Information",
-              subtitle:
-                  "Update your agency name, address, and contact details.",
-              onTap: () => _navigateToComingSoon(context, "Agency Information"),
-            ),
-            _buildTile(
-              context,
-              icon: Icons.language,
-              title: "App Language",
-              subtitle: "Select your preferred language for the app.",
-              onTap: () => _navigateToComingSoon(context, "App Language"),
-            ),
-            const SizedBox(height: 12),
-            _buildSubscriptionCard(context),
-            const Spacer(),
-            _buildLogoutButton(context),
-          ],
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false, // Remove all previous routes
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildTile(
+                context,
+                icon: Icons.business_center,
+                title: "Agency Information",
+                subtitle: "Update your agency name, address, and contact details.",
+                onTap: () => _navigateToComingSoon(context, "Agency Information"),
+              ),
+              _buildTile(
+                context,
+                icon: Icons.language,
+                title: "App Language",
+                subtitle: "Select your preferred language for the app.",
+                onTap: () => _navigateToComingSoon(context, "App Language"),
+              ),
+              const SizedBox(height: 12),
+              _buildSubscriptionCard(context),
+              const Spacer(),
+              _buildLogoutButton(context),
+            ],
+          ),
         ),
       ),
     );
@@ -172,11 +215,7 @@ class SettingsScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: ElevatedButton.icon(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Logged out successfully')),
-          );
-        },
+        onPressed: () => _handleLogout(context),
         icon: const Icon(Icons.logout),
         label: const Text("Logout"),
         style: ElevatedButton.styleFrom(
