@@ -16,9 +16,9 @@ class CarDB extends AbstractCarRepo {
           name,
           plate,
           price,
-          state,             -- Corresponds to Vehicle.status
-          maintenance,       -- Corresponds to Vehicle.nextMaintenanceDate
-          return_from_maintenance -- Corresponds to Vehicle.availableFrom
+          state,             
+          maintenance,       
+          return_from_maintenance
         FROM cars
         ''');
 

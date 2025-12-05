@@ -7,18 +7,20 @@ import 'cars_state.dart';
 class CarsCubit extends Cubit<CarsState> {
   final AbstractCarRepo _carRepo;
 
-  // 1. Dependency Injection: The Cubit requires the AbstractCarRepo
   CarsCubit(this._carRepo) : super(CarsInitial());
 
-  // 2. Load Vehicles Method
+  // 2. Load Vehicles Method - FIX APPLIED HERE
   Future<void> loadVehicles() async {
     try {
       emit(CarsLoading());
 
-      // Call the data layer
+      // 1. Get List<Vehicle> directly from the repository
+      // The return type is changed from List<Map> to List<Vehicle> to fix the error.
       final List<Vehicle> vehicles = await _carRepo.getData();
 
-      // Emit success state with the list of models
+      // The mapping logic (rawVehicles.map(...)) is no longer needed here
+      // as it is now assumed to be handled within the repository implementation.
+      
       emit(CarsLoaded(vehicles));
     } catch (e) {
       emit(CarsError('Failed to load vehicles: ${e.toString()}'));
@@ -28,37 +30,45 @@ class CarsCubit extends Cubit<CarsState> {
   // 3. Add Vehicle Method
   Future<void> addVehicle(Vehicle vehicle) async {
     try {
-      // Conversion logic for database insertion
-      final Map<String, dynamic> carMap = {
-        // Map Vehicle Model fields to Database Column names
-        'name': vehicle.name,
-        'plate': vehicle.plate,
-        // Database column name is 'state', Model field is 'status'
-        'state': vehicle.status,
-        'maintenance': vehicle.nextMaintenanceDate,
-        // Price is not in the model but may be required by the DB schema,
-        // assuming it can be null or defaulted to 0.0 for now.
-        // If 'price' is a mandatory field in 'cars', it must be added to Vehicle model.
-        // 'price': 0.0,
+      // Use the toMap function on the model for insertion
+      await _carRepo.insertCar(vehicle.toMap());
 
-        // Optional fields should be handled:
-        'return_from_maintenance': vehicle.availableFrom,
-        // Note: 'returnDate' field from Model is not mapped to DB schema.
-        // Assuming it's derived or not stored in 'cars' table.
-      };
-
-      await _carRepo.insertCar(carMap);
-
-      // Refresh the list immediately after insertion
       await loadVehicles();
     } catch (e) {
-      // If insertion fails, you can emit an error,
-      // or optionally keep the existing state (CarsLoaded) and just show a toast.
-      // For simplicity, we just log and skip state change if the error isn't fatal.
       print('Error inserting vehicle: $e');
     }
   }
 
-  // LOGIC: You would also add deleteVehicle, updateVehicle methods here
-  // that also call loadVehicles() upon success.
+  // 4. Update Vehicle Method
+  Future<void> updateVehicle(Vehicle vehicle) async {
+    if (vehicle.id == null) {
+      print('Error: Cannot update vehicle without an ID.');
+      return;
+    }
+
+    try {
+      // Use the toMap function on the model for update
+      await _carRepo.updateCar(vehicle.id!, vehicle.toMap());
+
+      await loadVehicles();
+    } catch (e) {
+      print('Error updating vehicle: $e');
+    }
+  }
+
+  // 5. Delete Vehicle Method
+  Future<void> deleteVehicle(Vehicle vehicle) async {
+    if (vehicle.id == null) {
+      print('Error: Cannot delete vehicle without an ID.');
+      return;
+    }
+
+    try {
+      await _carRepo.deleteCar(vehicle.id!);
+
+      await loadVehicles();
+    } catch (e) {
+      print('Error deleting vehicle: $e');
+    }
+  }
 }
