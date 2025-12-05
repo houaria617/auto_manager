@@ -1,42 +1,88 @@
+import 'package:auto_manager/core/services/pdf_export.dart';
+import 'package:auto_manager/logic/cubits/analytics/analytics_cubit.dart';
+import 'package:auto_manager/logic/cubits/analytics/analytics_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Widgets
 import '../../Dashboard/navigation_bar.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/client_statistics_card.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/metric_card.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/revenue_card.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/timeframe_selector.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/top_rented_cars_card.dart';
-import 'package:flutter/material.dart';
 
-class ReportsScreen extends StatefulWidget {
+class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
 
   @override
-  State<ReportsScreen> createState() => _ReportsScreenState();
+  Widget build(BuildContext context) {
+    // Provide the Cubit and trigger initial load
+    return BlocProvider(
+      create: (context) => AnalyticsCubit()..loadStats('This Week'),
+      child: const _ReportsScreenContent(),
+    );
+  }
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
+class _ReportsScreenContent extends StatefulWidget {
+  const _ReportsScreenContent();
+
+  @override
+  State<_ReportsScreenContent> createState() => _ReportsScreenContentState();
+}
+
+class _ReportsScreenContentState extends State<_ReportsScreenContent> {
   String _selectedTimeframe = 'This Week';
 
   void _onTimeframeSelected(String timeframe) {
     setState(() {
       _selectedTimeframe = timeframe;
     });
-    // TODO: Load data based on selected timeframe when backend is ready
+    // Trigger the Cubit to load new mock data based on selection
+    context.read<AnalyticsCubit>().loadStats(timeframe);
   }
 
-  void _onExportPressed() {
-    // TODO: Implement export functionality when backend is ready
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export functionality coming soon')),
-    );
+  Future<void> _onExportPressed() async {
+    // 1. Get current state
+    final state = context.read<AnalyticsCubit>().state;
+
+    if (state is AnalyticsLoaded) {
+      // 2. Show loading feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Generating PDF Report...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      try {
+        // 3. Generate and Open PDF
+        final pdfService = PdfExportService();
+        await pdfService.generateAndPrintPdf(state, _selectedTimeframe);
+
+        // Note: The 'printing' package handles the native UI (Print/Share dialog)
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error generating PDF: $e')));
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please wait for data to load.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100], // Light grey background
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-
         title: const Text(
           'Reports & Analytics',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -46,11 +92,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton.icon(
               onPressed: _onExportPressed,
-              icon: const Icon(Icons.upload_file),
-              label: const Text('Export'),
+              icon: const Icon(Icons.upload_file, size: 18),
+              label: const Text('Export PDF'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.blue[600],
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -59,43 +106,73 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TimeframeSelector(
-                selectedTimeframe: _selectedTimeframe,
-                onTimeframeSelected: _onTimeframeSelected,
+      body: BlocBuilder<AnalyticsCubit, AnalyticsState>(
+        builder: (context, state) {
+          if (state is AnalyticsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is AnalyticsError) {
+            return Center(child: Text("Error: ${state.message}"));
+          } else if (state is AnalyticsLoaded) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. Timeframe Selector
+                    TimeframeSelector(
+                      selectedTimeframe: _selectedTimeframe,
+                      onTimeframeSelected: _onTimeframeSelected,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 2. Revenue Chart Card (Line Chart)
+                    // We pass the specific chart data list here
+                    RevenueCard(
+                      revenue: state.totalRevenue,
+                      chartData: state.revenueChartData,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 3. Key Metrics Cards
+                    MetricCard(
+                      icon: Icons.account_balance_wallet_outlined,
+                      title: 'Total Revenue',
+                      value: '\$${state.totalRevenue.toStringAsFixed(0)}',
+                    ),
+                    const SizedBox(height: 15),
+                    MetricCard(
+                      icon: Icons.directions_car_outlined,
+                      title: 'Total Rentals',
+                      value: '${state.totalRentals}',
+                    ),
+                    const SizedBox(height: 15),
+                    MetricCard(
+                      icon: Icons.access_time,
+                      title: 'Avg. Duration',
+                      value: '${state.avgDurationDays} days',
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 4. Top Cars List
+                    TopRentedCarsCard(cars: state.topCars),
+                    const SizedBox(height: 20),
+
+                    // 5. Client Statistics (Donut Chart)
+                    ClientStatisticsCard(
+                      totalClients: state.totalClients,
+                      activeClients: state.activeClients,
+                    ),
+
+                    // Bottom padding
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              const RevenueCard(),
-              const SizedBox(height: 20),
-              const MetricCard(
-                icon: Icons.account_balance_wallet_outlined,
-                title: 'Total Revenue',
-                value: '\$12,500',
-              ),
-              const SizedBox(height: 15),
-              const MetricCard(
-                icon: Icons.directions_car_outlined,
-                title: 'Total Rentals',
-                value: '120',
-              ),
-              const SizedBox(height: 15),
-              const MetricCard(
-                icon: Icons.access_time,
-                title: 'Avg. Duration',
-                value: '5 days',
-              ),
-              const SizedBox(height: 20),
-              const TopRentedCarsCard(),
-              const SizedBox(height: 20),
-              const ClientStatisticsCard(),
-            ],
-          ),
-        ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
       bottomNavigationBar: const NavBar(),
     );

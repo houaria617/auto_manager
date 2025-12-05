@@ -1,23 +1,28 @@
+import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
+import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Widgets
 import 'package:auto_manager/features/rentals/presentation/widgets/action_buttons.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/info_card.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/rental_period_card.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/rental_summary_card.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../domain/rental_details_viewmodel.dart';
 
 class RentalDetailsScreen extends StatelessWidget {
-  const RentalDetailsScreen({super.key});
+  // We pass the initial rental data from the list screen
+  final Map<String, dynamic> rental;
+
+  const RentalDetailsScreen({super.key, required this.rental});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => RentalDetailsViewModel()..fetchRentalDetails(),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: _buildAppBar(context),
-        body: const _RentalDetailsBody(),
-      ),
+    // We assume RentalCubit is provided by the parent (RentalsScreen or Global)
+    // If not, wrap this in BlocProvider, but usually Detail screens share the List's cubit.
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _buildAppBar(context),
+      body: _RentalDetailsBody(initialRental: rental),
     );
   }
 
@@ -29,24 +34,45 @@ class RentalDetailsScreen extends StatelessWidget {
       ),
       title: const Text('Rental Details'),
       centerTitle: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
     );
   }
 }
 
 class _RentalDetailsBody extends StatelessWidget {
-  const _RentalDetailsBody();
+  final Map<String, dynamic> initialRental;
+
+  const _RentalDetailsBody({required this.initialRental});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<RentalDetailsViewModel>(
-      builder: (context, viewModel, _) {
-        if (viewModel.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+    return BlocBuilder<RentalCubit, RentalState>(
+      builder: (context, state) {
+        // 1. Start with the initial data passed from the list
+        Map<String, dynamic> currentData = initialRental;
+
+        // 2. If the Cubit has fresh data, try to find the updated version
+        if (state is RentalLoaded) {
+          try {
+            // FIND the rental in the list
+            final rawRental = state.rentals.firstWhere(
+              (element) => element['id'] == initialRental['id'],
+            );
+
+            // CAST it to Map<String, dynamic> to fix the error
+            currentData = Map<String, dynamic>.from(rawRental);
+          } catch (e) {
+            // If firstWhere fails (item deleted), show a message
+            return const Center(child: Text("This rental no longer exists."));
+          }
         }
 
-        if (viewModel.error != null) {
-          return Center(child: Text('Error: ${viewModel.error}'));
-        }
+        // 3. Extract IDs safely (handling potential nulls with defaults if necessary)
+        final int clientId = currentData['client_id'] ?? 0;
+        final int carId = currentData['car_id'] ?? 0;
+        final int rentalId = currentData['id'] ?? 0;
 
         return Column(
           children: [
@@ -56,18 +82,18 @@ class _RentalDetailsBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RentalSummaryCard(viewModel: viewModel),
+                    RentalSummaryCard(rentalData: currentData),
                     const SizedBox(height: 16),
-                    RentalPeriodCard(viewModel: viewModel),
+                    RentalPeriodCard(rentalData: currentData),
                     const SizedBox(height: 16),
-                    ClientInfoCard(viewModel: viewModel),
+                    ClientInfoCard(clientId: clientId),
                     const SizedBox(height: 16),
-                    CarInfoCard(viewModel: viewModel),
+                    CarInfoCard(carId: carId),
                   ],
                 ),
               ),
             ),
-            ActionButtons(viewModel: viewModel),
+            ActionButtons(rentalId: rentalId, rentalData: currentData),
           ],
         );
       },

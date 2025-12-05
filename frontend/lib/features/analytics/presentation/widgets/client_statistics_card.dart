@@ -1,21 +1,29 @@
-// ============================================================================
-// FILE: lib/features/reports/presentation/widgets/client_statistics_card.dart
-// ============================================================================
+// lib/features/analytics/presentation/widgets/client_statistics_card.dart
+
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class ClientStatisticsCard extends StatelessWidget {
-  const ClientStatisticsCard({super.key});
+  final int totalClients;
+  final int activeClients; // We'll treat this as "New Clients" for the UI demo
+
+  const ClientStatisticsCard({
+    super.key,
+    required this.totalClients,
+    required this.activeClients,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Mock data - replace with actual data when backend is ready
-    const totalClients = 45;
-    const newClients = 11;
-    const repeatClients = 34;
+    // Calculate logic (Mock logic for the visual)
+    // Assuming activeClients = New Clients, remaining = Repeat Clients
+    final int newClients = activeClients;
+    final int repeatClients = totalClients - newClients;
 
     return Card(
       elevation: 0.5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -25,67 +33,88 @@ class ClientStatisticsCard extends StatelessWidget {
               'Client Statistics',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 20),
+
             Row(
               children: [
+                // DONUT CHART
                 SizedBox(
-                  width: 100,
-                  height: 100,
+                  width: 120,
+                  height: 120,
                   child: Stack(
-                    alignment: Alignment.center,
                     children: [
-                      SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: CircularProgressIndicator(
-                          value: newClients / totalClients,
-                          strokeWidth: 10,
-                          backgroundColor: Colors.green[100],
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.green,
-                          ),
+                      PieChart(
+                        PieChartData(
+                          sectionsSpace: 0,
+                          centerSpaceRadius: 45, // Creates the hole
+                          startDegreeOffset: -90,
+                          sections: [
+                            // New Clients Section (Blue)
+                            PieChartSectionData(
+                              color: Colors.blue,
+                              value: newClients.toDouble(),
+                              title: '',
+                              radius: 12,
+                            ),
+                            // Repeat Clients Section (Green)
+                            PieChartSectionData(
+                              color: Colors.green,
+                              value: repeatClients.toDouble(),
+                              title: '',
+                              radius: 12,
+                            ),
+                          ],
                         ),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            '$totalClients',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                      // Center Text
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '$totalClients',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Total Clients',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
+                            const Text(
+                              'Total Clients',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ClientStatItem(
-                      color: Colors.green,
-                      label: 'New Clients',
-                      value:
-                          '$newClients (${(newClients / totalClients * 100).round()}%)',
-                    ),
-                    const SizedBox(height: 10),
-                    _ClientStatItem(
-                      color: Colors.green[300]!,
-                      label: 'Repeat Clients',
-                      value:
-                          '$repeatClients (${(repeatClients / totalClients * 100).round()}%)',
-                    ),
-                  ],
+
+                const SizedBox(width: 30),
+
+                // LEGEND
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLegendItem(
+                        color: Colors.blue,
+                        label: 'New Clients',
+                        count: newClients,
+                        total: totalClients,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLegendItem(
+                        color: Colors.green,
+                        label: 'Repeat Clients',
+                        count: repeatClients,
+                        total: totalClients,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -94,41 +123,42 @@ class ClientStatisticsCard extends StatelessWidget {
       ),
     );
   }
-}
 
-class _ClientStatItem extends StatelessWidget {
-  final Color color;
-  final String label;
-  final String value;
+  Widget _buildLegendItem({
+    required Color color,
+    required String label,
+    required int count,
+    required int total,
+  }) {
+    final percentage = total == 0 ? 0 : ((count / total) * 100).round();
 
-  const _ClientStatItem({
-    required this.color,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          width: 10,
-          height: 10,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-          ],
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$count ($percentage%)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

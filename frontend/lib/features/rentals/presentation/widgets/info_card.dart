@@ -1,54 +1,55 @@
-import 'package:auto_manager/features/Clients/clients_history.dart';
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
+// import 'package:auto_manager/features/Clients/clients_history.dart'; // Uncomment when needed
 
-// ============================================================================
-// Widget Components: info_card.dart
-// ============================================================================
 class ClientInfoCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final int clientId;
+  final String? clientName; // Optional, in case you join tables later
+  final String? phone;
 
-  const ClientInfoCard({super.key, required this.viewModel});
+  const ClientInfoCard({
+    super.key,
+    required this.clientId,
+    this.clientName,
+    this.phone,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> client = {
-      'first_name': 'John',
-      'last_name': 'Doe',
-      'phone': '+1-202-555-0125',
-      'picture_path': 'assets/clients_pictures/john_doe.png',
-      'state': 'active',
-    };
     return InfoCard(
       icon: Icons.person,
-      title: viewModel.clientName,
-      subtitle: viewModel.clientPhone,
+      title: clientName ?? 'Client #$clientId',
+      subtitle: phone ?? 'No phone info',
       actionLabel: 'View Client',
       onActionPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ClientProfile(client: client),
-          ),
-        );
+        // Navigation logic to Client Profile
+        // Navigator.push(...);
       },
     );
   }
 }
 
 class CarInfoCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final int carId;
+  final String? carModel;
+  final String? plate;
 
-  const CarInfoCard({super.key, required this.viewModel});
+  const CarInfoCard({
+    super.key,
+    required this.carId,
+    this.carModel,
+    this.plate,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InfoCard(
       icon: Icons.directions_car,
-      title: viewModel.carModel,
-      subtitle: viewModel.carPlate,
+      title: carModel ?? 'Car #$carId',
+      subtitle: plate ?? 'Unknown Plate',
       actionLabel: 'View Car',
-      onActionPressed: () => viewModel.viewCar(context),
+      onActionPressed: () {
+        // Navigation logic to Car Details
+      },
     );
   }
 }
