@@ -1,15 +1,21 @@
-// lib/databases/repo/Client/client_db.dart
+// lib/features/Clients/data/client_db.dart
 
 import 'package:sqflite/sqflite.dart';
 import 'client_abstract.dart';
-import '../../dbhelper.dart'; // Ensure this path is correct
+import '../../../../databases/dbhelper.dart'; // Adjust path if needed
 
 class ClientDB extends AbstractClientRepo {
   @override
   Future<List<Map>> getData() async {
     final database = await DBHelper.getDatabase();
-    // FIXED: Select specific columns or * from client
-    return database.rawQuery('SELECT * FROM client');
+    // CHANGED: Fetch 'phone' instead of 'email'
+    return database.rawQuery('''SELECT
+          id,
+          first_name,
+          last_name,
+          phone
+        FROM client
+        ''');
   }
 
   @override
@@ -22,7 +28,6 @@ class ClientDB extends AbstractClientRepo {
   @override
   Future<bool> insertClient(Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
-    // The map keys passed here must be 'first_name', 'last_name', 'email'
     await database.insert(
       "client",
       client,

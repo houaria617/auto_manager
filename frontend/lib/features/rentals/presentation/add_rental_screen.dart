@@ -67,7 +67,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   Future<void> _showAddClientDialog() async {
     final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
-    final emailController = TextEditingController();
+    final phoneController =
+        TextEditingController(); // CHANGED: Was emailController
     final formKeyClient = GlobalKey<FormState>();
 
     await showDialog(
@@ -89,10 +90,11 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 decoration: const InputDecoration(labelText: 'Last Name'),
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
+              // CHANGED: Email Input -> Phone Input
               TextFormField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
             ],
@@ -106,16 +108,20 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           ElevatedButton(
             onPressed: () async {
               if (formKeyClient.currentState!.validate()) {
+                // CHANGED: Map key is now 'phone'
                 final newClient = {
                   'first_name': firstNameController.text,
                   'last_name': lastNameController.text,
-                  'email': emailController.text,
+                  'phone': phoneController.text,
                 };
 
+                // 1. Insert into DB
                 await _clientRepo.insertClient(newClient);
-                await _loadData(); // Reloads _clients with the new data
 
-                // FIXED: Type-safe reduce
+                // 2. Reload Data
+                await _loadData();
+
+                // 3. Auto-select (Find highest ID)
                 if (_clients.isNotEmpty) {
                   final newest = _clients.reduce((curr, next) {
                     final currId = curr['id'] as int;
