@@ -2,10 +2,12 @@
 // CLASS FOR ENTITY `Car`, FOLLOWING THE
 // ABSTRACT REPOSITORY DESIGN PATTERN.
 
+import '../../../features/vehicles/data/models/vehicle_model.dart';
 import 'car_db.dart';
 
 abstract class AbstractCarRepo {
-  Future<List<Map>> getData();
+Future<List<Vehicle>> getData(); 
+  
   Future<bool> insertCar(Map<String, dynamic> car);
   Future<bool> deleteCar(int index);
   Future<bool> updateCar(int index, Map<String, dynamic> car);
