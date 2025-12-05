@@ -17,13 +17,24 @@ class DBHelper {
     }
     database = openDatabase(
       join(await getDatabasesPath(), _database_name),
-      onCreate: (database, version) {
-        database.execute('''
+      onCreate: (database, version) async {
+        await database.execute('''
            CREATE TABLE  client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                first_name TEXT,
                last_name TEXT,
                email TEXT
+               )
+         ''');
+         await database.execute('''
+           CREATE TABLE  cars (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               name TEXT,
+               plate TEXT,
+               price REAL,
+               state TEXT,
+               maintenance DATE,
+               return_from_maintenance DATE
                )
          ''');
       },
