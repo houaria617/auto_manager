@@ -9,7 +9,7 @@ class CarDB extends AbstractCarRepo {
   // CHANGE 1: Return type is now List<Vehicle>
   Future<List<Vehicle>> getData() async {
     final database = await DBHelper.getDatabase();
-    
+
     // FIX 1: Corrected SELECT alias from 'car' to 'cars' (or removed alias)
     final List<Map<String, dynamic>> rawMaps = await database.rawQuery('''SELECT
           id,
@@ -29,7 +29,7 @@ class CarDB extends AbstractCarRepo {
         name: map['name'] as String,
         plate: map['plate'] as String,
         // MAPPING: Database 'state' column maps to Vehicle 'status' field
-        status: map['state'] as String, 
+        status: map['state'] as String,
         nextMaintenanceDate: map['maintenance'] as String,
         availableFrom: map['return_from_maintenance'] as String?, // Can be null
         // Note: Model also has 'returnDate' (for Rented status) which isn't in DB schema.
@@ -42,7 +42,7 @@ class CarDB extends AbstractCarRepo {
   Future<bool> deleteCar(int index) async {
     final database = await DBHelper.getDatabase();
     // FIX 2: Table name is 'cars', not 'car'
-    await database.rawQuery("""delete from cars where id=?""", [index]); 
+    await database.rawQuery("""delete from cars where id=?""", [index]);
     return true;
   }
 
@@ -51,7 +51,7 @@ class CarDB extends AbstractCarRepo {
     final database = await DBHelper.getDatabase();
     // FIX 3: Table name is 'cars', not 'car'
     await database.insert(
-      "cars", 
+      "cars",
       car,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -62,7 +62,12 @@ class CarDB extends AbstractCarRepo {
   @override
   Future<bool> updateCar(int index, Map<String, dynamic> car) async {
     final database = await DBHelper.getDatabase();
-    await database.update("cars", car, where: "id = ?", whereArgs: [index]); // FIX 4: Changed 'car' to 'cars'
+    await database.update(
+      "cars",
+      car,
+      where: "id = ?",
+      whereArgs: [index],
+    ); // FIX 4: Changed 'car' to 'cars'
     return true;
   }
 }
