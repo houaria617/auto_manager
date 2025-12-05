@@ -10,12 +10,10 @@ class AnalyticsLoaded extends AnalyticsState {
   final double totalRevenue;
   final int totalRentals;
   final int avgDurationDays;
-  final List<Map<String, dynamic>> topCars;
+  final List<Map<String, dynamic>> topCars; // {name, rentals, rank}
   final int totalClients;
   final int activeClients;
-
-  // NEW: List of values for the 7-day chart (Mon-Sun)
-  final List<double> revenueChartData;
+  final List<double> revenueChartData; // 7 values for Mon-Sun
 
   AnalyticsLoaded({
     required this.totalRevenue,

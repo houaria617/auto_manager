@@ -8,14 +8,14 @@ class CarDB extends AbstractCarRepo {
   @override
   Future<List<Map>> getData() async {
     final database = await DBHelper.getDatabase();
-    // FIXED: Table name is 'cars'
+
     return database.rawQuery('SELECT * FROM cars');
   }
 
   @override
   Future<bool> deleteCar(int index) async {
     final database = await DBHelper.getDatabase();
-    // FIXED: Table name is 'cars'
+
     await database.rawQuery("delete from cars where id=?", [index]);
     return true;
   }
@@ -23,7 +23,7 @@ class CarDB extends AbstractCarRepo {
   @override
   Future<bool> insertCar(Map<String, dynamic> car) async {
     final database = await DBHelper.getDatabase();
-    // FIXED: Table name is 'cars'
+
     await database.insert(
       "cars",
       car,
@@ -35,7 +35,7 @@ class CarDB extends AbstractCarRepo {
   @override
   Future<bool> updateCar(int index, Map<String, dynamic> car) async {
     final database = await DBHelper.getDatabase();
-    // FIXED: Table name is 'cars'
+
     await database.update("cars", car, where: "id = ?", whereArgs: [index]);
     return true;
   }

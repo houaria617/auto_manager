@@ -1,4 +1,4 @@
-// lib/dbhelper.dart
+// lib/databases/dbhelper.dart
 
 import 'dart:async';
 import 'package:path/path.dart';
@@ -6,38 +6,32 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 4;
+  static const _database_version = 4; // You can keep this or increment it
 
-  // Singleton database instance
   static Database? _database;
 
   static Future<Database> getDatabase() async {
-    if (_database != null) {
-      return _database!;
-    }
+    if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
   static Future<Database> _initDatabase() async {
-    // We don't need Platform checks here because you did it in main.dart
-
     return openDatabase(
       join(await getDatabasesPath(), _database_name),
       version: _database_version,
       onCreate: (db, version) async {
-        // 1. Create Client Table
+        // 1. Create Client Table (CHANGED: email -> phone)
         await db.execute('''
            CREATE TABLE client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                first_name TEXT,
                last_name TEXT,
-               email TEXT
+               phone TEXT
            )
          ''');
 
         // 2. Create Cars Table
-        // Note: Changed DATE to TEXT for better compatibility with Flutter Strings
         await db.execute('''
            CREATE TABLE cars (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +59,6 @@ class DBHelper {
             FOREIGN KEY (car_id) REFERENCES cars (id) 
           )
         ''');
-        // ^^^ FIXED: References 'cars' (plural) correctly
 
         // 4. Create Payment Table
         await db.execute('''
@@ -77,9 +70,6 @@ class DBHelper {
             FOREIGN KEY (rental_id) REFERENCES rental (id)
           )
         ''');
-      },
-      onUpgrade: (db, oldVersion, newVersion) {
-        // Handle future upgrades here
       },
     );
   }
