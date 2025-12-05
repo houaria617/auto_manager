@@ -4,7 +4,7 @@
 
 import 'package:sqflite/sqflite.dart';
 import 'car_abstract.dart';
-import '../../rental/dbhelper.dart';
+import '../../dbhelper.dart';
 
 class CarDB extends AbstractCarRepo {
   @override
@@ -12,13 +12,13 @@ class CarDB extends AbstractCarRepo {
     final database = await DBHelper.getDatabase();
     return database.rawQuery('''SELECT
           car.id,
-          car.name_model,
-          car.plate_matricule,
-          car.rent_price,
+          car.name,
+          car.plate,
+          car.price,
           car.state,
-          car.maintenance_date,
+          car.maintenance,
           car.return_from_maintenance
-        FROM car
+        FROM cars
         ''');
   }
 
