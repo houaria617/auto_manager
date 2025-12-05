@@ -1,16 +1,31 @@
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
 
 // ============================================================================
 // Widget Components: rental_summary_card.dart
 // ============================================================================
 class RentalSummaryCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  // Now accepts the Map directly from the database/cubit
+  final Map<String, dynamic> rentalData;
 
-  const RentalSummaryCard({super.key, required this.viewModel});
+  const RentalSummaryCard({super.key, required this.rentalData});
 
   @override
   Widget build(BuildContext context) {
+    // Extract data for cleaner usage in the widget tree
+    final int rentalId = rentalData['id'];
+    final double amount = (rentalData['total_amount'] is int)
+        ? (rentalData['total_amount'] as int).toDouble()
+        : (rentalData['total_amount'] ?? 0.0);
+
+    final String paymentStatus = rentalData['payment_state'] ?? 'Pending';
+
+    // Calculate total days
+    final DateTime start =
+        DateTime.tryParse(rentalData['date_from'] ?? '') ?? DateTime.now();
+    final DateTime end =
+        DateTime.tryParse(rentalData['date_to'] ?? '') ?? DateTime.now();
+    final int totalRentalDays = end.difference(start).inDays;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -19,18 +34,18 @@ class RentalSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(paymentStatus),
             const SizedBox(height: 8),
-            _buildRentalInfo(),
+            _buildRentalInfo(rentalId, totalRentalDays),
             const SizedBox(height: 8),
-            _buildAmountInfo(),
+            _buildAmountInfo(amount, paymentStatus),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(String status) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -38,36 +53,33 @@ class RentalSummaryCard extends StatelessWidget {
           'Rental Summary',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        _StatusBadge(status: viewModel.paymentStatus),
+        _StatusBadge(status: status),
       ],
     );
   }
 
-  Widget _buildRentalInfo() {
+  Widget _buildRentalInfo(int id, int days) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Rental ID: ${viewModel.rentalId}'),
+        Text('Rental ID: $id'),
         const SizedBox(height: 4),
-        Text('${viewModel.totalRentalDays} days'),
+        Text('$days days'),
       ],
     );
   }
 
-  Widget _buildAmountInfo() {
+  Widget _buildAmountInfo(double amount, String status) {
     return Align(
       alignment: Alignment.centerRight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            '\$${viewModel.rentalAmount.toStringAsFixed(2)}',
+            '\$${amount.toStringAsFixed(2)}',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          Text(
-            viewModel.paymentStatus,
-            style: TextStyle(color: Colors.grey.shade600),
-          ),
+          Text(status, style: TextStyle(color: Colors.grey.shade600)),
         ],
       ),
     );
@@ -81,20 +93,34 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Simple logic to determine color based on status string
     final isPaid = status.toLowerCase() == 'paid';
+    final isUnpaid = status.toLowerCase() == 'unpaid';
+
+    Color bgColor = Colors.grey.shade100;
+    Color textColor = Colors.grey.shade800;
+
+    if (isPaid) {
+      bgColor = Colors.green.shade100;
+      textColor = Colors.green.shade800;
+    } else if (isUnpaid) {
+      bgColor = Colors.red.shade100;
+      textColor = Colors.red.shade800;
+    } else {
+      // For pending or other states
+      bgColor = Colors.orange.shade100;
+      textColor = Colors.orange.shade800;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isPaid ? Colors.green.shade100 : Colors.orange.shade100,
+        color: bgColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         status,
-        style: TextStyle(
-          color: isPaid ? Colors.green.shade800 : Colors.orange.shade800,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
       ),
     );
   }

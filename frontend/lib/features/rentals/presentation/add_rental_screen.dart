@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Logic
+import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 
 class AddRentalScreen extends StatefulWidget {
   const AddRentalScreen({super.key});
@@ -9,41 +13,206 @@ class AddRentalScreen extends StatefulWidget {
 
 class _AddRentalScreenState extends State<AddRentalScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _clientNameController = TextEditingController();
-  final _carModelController = TextEditingController();
+
+  // Controllers
   final _priceController = TextEditingController();
+
+  // State Variables
   DateTime? _startDate;
   DateTime? _endDate;
   String? _dateError;
 
+  // --- MOCK DATA LISTS ---
+  // We initialize these with some dummy data so the dropdowns aren't empty.
+  List<Map<String, dynamic>> _clients = [
+    {'id': 101, 'full_name': 'John Doe', 'phone': '123-456-7890'},
+    {'id': 102, 'full_name': 'Jane Smith', 'phone': '987-654-3210'},
+    {'id': 103, 'full_name': 'Alice Johnson', 'phone': '555-555-5555'},
+  ];
+
+  List<Map<String, dynamic>> _cars = [
+    {
+      'id': 201,
+      'name_model': 'Toyota Camry',
+      'plate_matricule': '123-ABC',
+      'rent_price': 50.0,
+    },
+    {
+      'id': 202,
+      'name_model': 'Honda Civic',
+      'plate_matricule': '456-DEF',
+      'rent_price': 40.0,
+    },
+    {
+      'id': 203,
+      'name_model': 'Ford Mustang',
+      'plate_matricule': '789-GHI',
+      'rent_price': 85.0,
+    },
+  ];
+
+  // Selections
+  int? _selectedClientId;
+  int? _selectedCarId;
+
   @override
   void dispose() {
-    _clientNameController.dispose();
-    _carModelController.dispose();
     _priceController.dispose();
     super.dispose();
   }
 
+  // --- Add New Client (Local Mock) ---
+  Future<void> _showAddClientDialog() async {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    final formKeyClient = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Mock Client'),
+        content: Form(
+          key: formKeyClient,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Full Name'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Phone'),
+                keyboardType: TextInputType.phone,
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKeyClient.currentState!.validate()) {
+                // Generate a random-ish ID
+                final newId = _clients.last['id'] + 1;
+
+                final newClient = {
+                  'id': newId,
+                  'full_name': nameController.text,
+                  'phone': phoneController.text,
+                };
+
+                setState(() {
+                  _clients.add(newClient);
+                  _selectedClientId = newId; // Auto-select
+                });
+
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add Local'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Add New Car (Local Mock) ---
+  Future<void> _showAddCarDialog() async {
+    final modelController = TextEditingController();
+    final plateController = TextEditingController();
+    final priceController = TextEditingController();
+    final formKeyCar = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Mock Car'),
+        content: Form(
+          key: formKeyCar,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: modelController,
+                decoration: const InputDecoration(labelText: 'Model Name'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: plateController,
+                decoration: const InputDecoration(labelText: 'Plate Number'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: priceController,
+                decoration: const InputDecoration(
+                  labelText: 'Daily Rent Price',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKeyCar.currentState!.validate()) {
+                final newId = _cars.last['id'] + 1;
+
+                final newCar = {
+                  'id': newId,
+                  'name_model': modelController.text,
+                  'plate_matricule': plateController.text,
+                  'rent_price': double.tryParse(priceController.text) ?? 0.0,
+                };
+
+                setState(() {
+                  _cars.add(newCar);
+                  _selectedCarId = newId; // Auto-select
+                  _calculateTotalPrice(); // Auto-calculate
+                });
+
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add Local'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Date Logic ---
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2026),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
     );
     if (picked != null && mounted) {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
-          // Clear end date if it's before the new start date
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
             _endDate = null;
           }
         } else {
           _endDate = picked;
         }
-        _dateError = null; // Clear error when dates are selected
+        _dateError = null;
         _validateDates();
+        _calculateTotalPrice();
       });
     }
   }
@@ -62,6 +231,28 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     }
   }
 
+  void _calculateTotalPrice() {
+    if (_selectedCarId != null &&
+        _startDate != null &&
+        _endDate != null &&
+        _dateError == null) {
+      final car = _cars.firstWhere(
+        (element) => element['id'] == _selectedCarId,
+        orElse: () => {},
+      );
+      if (car.isNotEmpty && car['rent_price'] != null) {
+        final days = _endDate!.difference(_startDate!).inDays;
+        final billableDays = days == 0 ? 1 : days;
+        final dailyPrice = (car['rent_price'] is int)
+            ? (car['rent_price'] as int).toDouble()
+            : car['rent_price'];
+        final total = dailyPrice * billableDays;
+        _priceController.text = total.toStringAsFixed(2);
+      }
+    }
+  }
+
+  // --- Save Rental (This still saves to Real Rental DB) ---
   void _saveRental() {
     if (_formKey.currentState!.validate()) {
       if (_startDate == null || _endDate == null) {
@@ -70,14 +261,21 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         );
         return;
       }
+      if (_dateError != null) return;
 
-      if (_dateError != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_dateError!)));
-        return;
-      }
+      // NOTE: We are saving the Mock IDs (101, 201, etc.) into the real Rental Database.
+      // This is fine for testing Rental CRUD.
+      final newRental = {
+        'client_id': _selectedClientId,
+        'car_id': _selectedCarId,
+        'date_from': _startDate!.toIso8601String(),
+        'date_to': _endDate!.toIso8601String(),
+        'total_amount': double.parse(_priceController.text),
+        'payment_state': 'Unpaid',
+        'state': 'Ongoing',
+      };
 
+      context.read<RentalCubit>().addRental(newRental);
       Navigator.pop(context);
     }
   }
@@ -95,11 +293,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         ),
         title: const Text(
           'New Rental',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -110,54 +304,76 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildLabel('Client Name'),
-                TextFormField(
-                  controller: _clientNameController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter client name',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                // --- CLIENT DROPDOWN ---
+                _buildLabel('Client'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        value: _selectedClientId,
+                        hint: const Text("Select Client"),
+                        decoration: _inputDecoration(Icons.person_outline),
+                        items: _clients.map((client) {
+                          return DropdownMenuItem<int>(
+                            value: client['id'],
+                            child: Text(
+                              client['full_name'],
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedClientId = value),
+                        validator: (value) =>
+                            value == null ? 'Please select a client' : null,
+                      ),
                     ),
-                    prefixIcon: const Icon(Icons.person_outline),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter client name';
-                    }
-                    if (value.trim().length < 2) {
-                      return 'Client name must be at least 2 characters';
-                    }
-                    return null;
-                  },
+                    const SizedBox(width: 10),
+                    _buildAddButton(_showAddClientDialog),
+                  ],
                 ),
+
                 const SizedBox(height: 20),
-                _buildLabel('Car Model'),
-                TextFormField(
-                  controller: _carModelController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter car model',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+
+                // --- CAR DROPDOWN ---
+                _buildLabel('Car'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        value: _selectedCarId,
+                        hint: const Text("Select Car"),
+                        decoration: _inputDecoration(Icons.directions_car),
+                        items: _cars.map((car) {
+                          final model = car['name_model'];
+                          final plate = car['plate_matricule'];
+                          final price = car['rent_price'];
+                          return DropdownMenuItem<int>(
+                            value: car['id'],
+                            child: Text(
+                              "$model ($plate) - \$$price/day",
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCarId = value;
+                            _calculateTotalPrice();
+                          });
+                        },
+                        validator: (value) =>
+                            value == null ? 'Please select a car' : null,
+                      ),
                     ),
-                    prefixIcon: const Icon(Icons.directions_car),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter car model';
-                    }
-                    if (value.trim().length < 2) {
-                      return 'Car model must be at least 2 characters';
-                    }
-                    return null;
-                  },
+                    const SizedBox(width: 10),
+                    _buildAddButton(_showAddCarDialog),
+                  ],
                 ),
+
                 const SizedBox(height: 20),
+
+                // --- DATES ---
                 Row(
                   children: [
                     Expanded(
@@ -165,40 +381,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLabel('Start Date'),
-                          GestureDetector(
-                            onTap: () => _selectDate(context, true),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color:
-                                      _dateError != null && _startDate == null
-                                      ? Colors.red
-                                      : Colors.transparent,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _startDate == null
-                                        ? 'Select Date'
-                                        : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
-                                    style: TextStyle(
-                                      color: _startDate == null
-                                          ? Colors.grey[600]
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                  const Icon(Icons.calendar_today, size: 20),
-                                ],
-                              ),
-                            ),
-                          ),
+                          _buildDateSelector(true),
                         ],
                       ),
                     ),
@@ -208,39 +391,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildLabel('End Date'),
-                          GestureDetector(
-                            onTap: () => _selectDate(context, false),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: _dateError != null
-                                      ? Colors.red
-                                      : Colors.transparent,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _endDate == null
-                                        ? 'Select Date'
-                                        : '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
-                                    style: TextStyle(
-                                      color: _endDate == null
-                                          ? Colors.grey[600]
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                  const Icon(Icons.calendar_today, size: 20),
-                                ],
-                              ),
-                            ),
-                          ),
+                          _buildDateSelector(false),
                         ],
                       ),
                     ),
@@ -254,19 +405,15 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       style: const TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),
+
                 const SizedBox(height: 20),
+
+                // --- PRICE ---
                 _buildLabel('Total Price'),
                 TextFormField(
                   controller: _priceController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Enter amount',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                  decoration: _inputDecoration(null).copyWith(
                     prefixIcon: const Padding(
                       padding: EdgeInsets.all(16),
                       child: Text(
@@ -279,23 +426,16 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null || value.isEmpty)
                       return 'Please enter price';
-                    }
-                    final price = double.tryParse(value);
-                    if (price == null) {
-                      return 'Please enter a valid number';
-                    }
-                    if (price <= 0) {
-                      return 'Price must be greater than 0';
-                    }
-                    if (price > 1000000) {
-                      return 'Price must be reasonable';
-                    }
+                    if (double.tryParse(value) == null) return 'Invalid number';
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 40),
+
+                // --- BUTTONS ---
                 Row(
                   children: [
                     Expanded(
@@ -350,12 +490,72 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     );
   }
 
+  // Helper Widgets
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(IconData? icon) {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.grey[100],
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      prefixIcon: icon != null ? Icon(icon) : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
+  Widget _buildAddButton(VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildDateSelector(bool isStart) {
+    final date = isStart ? _startDate : _endDate;
+    final isError = _dateError != null && isStart && _startDate == null;
+
+    return GestureDetector(
+      onTap: () => _selectDate(context, isStart),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: (isError || (_dateError != null && !isStart))
+                ? Colors.red
+                : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              date == null
+                  ? 'Select Date'
+                  : '${date.day}/${date.month}/${date.year}',
+            ),
+            const Icon(Icons.calendar_today, size: 20),
+          ],
+        ),
       ),
     );
   }
