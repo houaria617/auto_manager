@@ -1,5 +1,10 @@
 // vehicles_screen.dart
 import 'package:flutter/material.dart';
+// NEW IMPORTS FOR BLoC/Cubit
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../logic/cubits/cars/cars_cubit.dart';
+import '../../../../logic/cubits/cars/cars_state.dart';
+
 import '../../data/models/vehicle_model.dart';
 import 'vehicle_details_screen.dart';
 import '../widgets/vehicle_card.dart';
@@ -24,32 +29,22 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
   String selectedFilter = 'All';
 
-  final List<Vehicle> _vehicles = [
-    Vehicle(
-      name: 'Toyota Camry',
-      plate: 'XYZ 123',
-      status: 'Available',
-      nextMaintenanceDate: '05/20/2024',
-    ),
-    Vehicle(
-      name: 'Ford Mustang',
-      plate: 'ABC 456',
-      status: 'Rented',
-      nextMaintenanceDate: '04/15/2024',
-      returnDate: '04/20/2024',
-    ),
-    Vehicle(
-      name: 'Honda CR-V',
-      plate: 'LMN 789',
-      status: 'Maintenance',
-      nextMaintenanceDate: '06/01/2024',
-      availableFrom: '06/15/2024',
-    ),
-  ];
+  // LOGIC: DELETE the hardcoded list and local filter logic.
+  // The state will handle data.
 
-  List<Vehicle> get _filteredVehicles {
-    if (selectedFilter == 'All') return _vehicles;
-    return _vehicles.where((v) => v.status == selectedFilter).toList();
+  // NEW LOGIC: Trigger initial data fetch
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CarsCubit>().loadVehicles();
+    });
+  }
+
+  // LOGIC: Helper function to perform client-side filtering
+  List<Vehicle> _getFilteredVehicles(List<Vehicle> allVehicles) {
+    if (selectedFilter == 'All') return allVehicles;
+    return allVehicles.where((v) => v.status == selectedFilter).toList();
   }
 
   @override
@@ -78,7 +73,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
       // BODY
       body: Column(
         children: [
-          // Search bar
+          // Search bar (Unchanged)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Container(
@@ -92,32 +87,32 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                   ),
                 ],
               ),
-              child: TextField(
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 14,
-                  color: textDark,
-                ),
+              child: const TextField(
+                // ... TextField details ...
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search, color: textGray),
-                  hintText: 'Search by model or plate...',
-                  hintStyle: const TextStyle(
-                    color: textGray,
+                  hintText: 'Search for a car or plate...',
+                  hintStyle: TextStyle(
                     fontFamily: 'Manrope',
+                    color: Color(0xFF9CA3AF),
                   ),
+                  prefixIcon: Icon(Icons.search, color: Color(0xFF9CA3AF)),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  border: InputBorder.none,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: primary, width: 2),
                   ),
                 ),
               ),
             ),
           ),
 
-          // Chips for Filtering
+          // Chips for Filtering (setState triggers BlocBuilder to re-run filtering)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: SingleChildScrollView(
@@ -135,43 +130,85 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
           const SizedBox(height: 8),
 
-          // Cards grid
+          // Cards grid - REPLACED WITH BlocBuilder
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth >= 768 ? 2 : 1;
-                return Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: GridView.builder(
-                    itemCount: _filteredVehicles.length + 1,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.8,
-                    ),
-                    itemBuilder: (context, index) {
-                      if (_vehicles.isEmpty) return _EmptyStateCard();
+            child: BlocBuilder<CarsCubit, CarsState>(
+              builder: (context, state) {
+                // 1. Loading/Initial State
+                if (state is CarsLoading || state is CarsInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                      if (index < _filteredVehicles.length) {
-                        final vehicle = _filteredVehicles[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    VehicleDetailsScreen(vehicle: vehicle),
-                              ),
+                // 2. Error State
+                if (state is CarsError) {
+                  return Center(
+                      child: Text('Failed to load data: ${state.message}'));
+                }
+
+                // 3. Loaded State
+                if (state is CarsLoaded) {
+                  final allVehicles = state.vehicles;
+                  final filteredVehicles = _getFilteredVehicles(allVehicles);
+
+                  // 4. Empty State (No vehicles in the database yet)
+                  if (allVehicles.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: _EmptyStateCard(),
+                    );
+                  }
+                  
+                  // 5. Filtered Empty State (No vehicles matching the filter)
+                  if (filteredVehicles.isEmpty) {
+                      return Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Text(
+                                "No vehicles match the filter \"${state.vehicles.firstWhere((v) => v.status == selectedFilter, orElse: () => Vehicle(name: '', plate: '', status: selectedFilter, nextMaintenanceDate: '')).status}\".",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: textGray, fontSize: 16),
+                            ),
+                          ),
+                      );
+                  }
+
+                  // 6. Actual Grid UI
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisCount = constraints.maxWidth >= 768 ? 2 : 1;
+                      
+                      // Using filteredVehicles.length for the item count
+                      return Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: GridView.builder(
+                          itemCount: filteredVehicles.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.8,
+                          ),
+                          itemBuilder: (context, index) {
+                            final vehicle = filteredVehicles[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        VehicleDetailsScreen(vehicle: vehicle),
+                                  ),
+                                );
+                              },
+                              child: VehicleCard(vehicle: vehicle),
                             );
                           },
-                          child: VehicleCard(vehicle: vehicle),
-                        );
-                      }
-
-                      return _EmptyStateCard();
+                        ),
+                      );
                     },
-                  ),
-                );
+                  );
+                }
+
+                return const SizedBox.shrink();
               },
             ),
           ),
@@ -180,7 +217,14 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
       // Floating Action Button
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showVehicleDialog(context),
+        // NEW LOGIC: Make async and call cubit to add data
+        onPressed: () async {
+          final newVehicle = await showVehicleDialog(context);
+          if (newVehicle != null) {
+            // Call cubit to insert data and refresh the list
+            context.read<CarsCubit>().addVehicle(newVehicle);
+          }
+        },
         backgroundColor: primary,
         elevation: 6,
         shape: const CircleBorder(),
@@ -196,34 +240,42 @@ class _EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        alignment: Alignment.center,
+    return Container(
+      decoration: BoxDecoration(
+        color: _VehiclesScreenState.cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: _VehiclesScreenState.primary.withOpacity(0.3),
+          style: BorderStyle.solid,
+          width: 2,
+        ),
+      ),
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.directions_car, size: 56, color: Color(0xFF9CA3AF)),
-            SizedBox(height: 12),
-            Text(
-              'Add a vehicle',
+          children: [
+            Icon(
+              Icons.directions_car_outlined,
+              size: 40,
+              color: _VehiclesScreenState.primary.withOpacity(0.6),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add Your First Vehicle',
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
                 fontFamily: 'Manrope',
-                color: _VehiclesScreenState.textDark,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: _VehiclesScreenState.textGray,
               ),
             ),
-            SizedBox(height: 6),
-            Text(
-              'Tap the + to add your first car.',
+            const SizedBox(height: 4),
+            const Text(
+              'Tap the "+" button to begin.',
               style: TextStyle(
                 fontFamily: 'Manrope',
+                fontSize: 13,
                 color: _VehiclesScreenState.textGray,
-                fontSize: 14,
               ),
             ),
           ],

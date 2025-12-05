@@ -1,7 +1,9 @@
+// vehicle_dialog.dart (MODIFIED)
 import 'package:flutter/material.dart';
 import '../../data/models/vehicle_model.dart';
 
-Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
+// MODIFICATION 1: Change function signature to return Future<Vehicle?>
+Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
   final TextEditingController nameController = TextEditingController(
     text: vehicle?.name ?? '',
   );
@@ -19,7 +21,8 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
 
   String status = vehicle?.status ?? 'Available';
 
-  await showModalBottomSheet(
+  // MODIFICATION 2: Capture the result from the modal bottom sheet
+  final result = await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.white,
@@ -100,7 +103,8 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                   ),
                   const SizedBox(height: 12),
 
-                  // Next Maintenance Date (optional)
+                  // Next Maintenance Date
+                  // Note: Label says optional, but model requires it. Handling empty as 'N/A'
                   TextField(
                     controller: nextMaintenanceController,
                     decoration: InputDecoration(
@@ -189,7 +193,8 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        // MODIFICATION 3: Pop with null on Cancel
+                        onPressed: () => Navigator.pop(context, null),
                         child: const Text(
                           'Cancel',
                           style: TextStyle(
@@ -211,8 +216,22 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                           ),
                         ),
                         onPressed: () {
-                          // Normally save or update logic goes here
-                          Navigator.pop(context);
+                          // MODIFICATION 4: Create Vehicle object and pop with it
+                          final newVehicle = Vehicle(
+                            name: nameController.text.trim(),
+                            plate: plateController.text.trim(),
+                            status: status,
+                            // Ensure required field is handled (defaulting to 'N/A' if empty)
+                            nextMaintenanceDate: nextMaintenanceController.text.trim().isNotEmpty 
+                                ? nextMaintenanceController.text.trim() : 'N/A', 
+                            returnDate: returnDateController.text.trim().isNotEmpty 
+                                ? returnDateController.text.trim() : null,
+                            availableFrom: availabilityDateController.text.trim().isNotEmpty
+                                ? availabilityDateController.text.trim() : null,
+                            description: vehicle?.description, // Retain existing description if editing
+                          );
+                          
+                          Navigator.pop(context, newVehicle);
                         },
                         child: const Text(
                           'Save',
@@ -232,4 +251,7 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
       );
     },
   );
+  
+  // MODIFICATION 5: Return the captured result
+  return result as Vehicle?;
 }
