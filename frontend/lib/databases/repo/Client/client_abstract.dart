@@ -2,7 +2,7 @@
 // CLASS FOR ENTITY `Client`, FOLLOWING THE
 // ABSTRACT REPOSITORY DESIGN PATTERN.
 
-import 'client_dummy.dart';
+import 'client_db.dart';
 
 abstract class AbstractClientRepo {
   Future<List<Map>> getData();
@@ -14,7 +14,7 @@ abstract class AbstractClientRepo {
 
   static AbstractClientRepo getInstance() {
     // later, ClientDB will replace ClientDummy here:
-    _clientInstance ??= ClientDummy();
+    _clientInstance ??= ClientDB();
     return _clientInstance!;
   }
 }

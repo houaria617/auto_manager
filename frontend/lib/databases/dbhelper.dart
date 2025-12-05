@@ -1,6 +1,4 @@
-// THIS FILE IS USED TO GET AN INSTANCE
-// OF THE DATABASE USING THE SINGELETON
-// DESIGN PATTERN.
+// lib/dbhelper.dart
 
 import 'dart:async';
 import 'package:path/path.dart';
@@ -9,38 +7,80 @@ import 'package:sqflite/sqflite.dart';
 class DBHelper {
   static const _database_name = "auto_manager.db";
   static const _database_version = 4;
-  static var database;
 
-  static Future getDatabase() async {
-    if (database != null) {
-      return database;
+  // Singleton database instance
+  static Database? _database;
+
+  static Future<Database> getDatabase() async {
+    if (_database != null) {
+      return _database!;
     }
-    database = openDatabase(
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  static Future<Database> _initDatabase() async {
+    // We don't need Platform checks here because you did it in main.dart
+
+    return openDatabase(
       join(await getDatabasesPath(), _database_name),
-      onCreate: (database, version) async {
-        await database.execute('''
-           CREATE TABLE  client (
+      version: _database_version,
+      onCreate: (db, version) async {
+        // 1. Create Client Table
+        await db.execute('''
+           CREATE TABLE client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                first_name TEXT,
                last_name TEXT,
                email TEXT
-               )
+           )
          ''');
-         await database.execute('''
-           CREATE TABLE  cars (
+
+        // 2. Create Cars Table
+        // Note: Changed DATE to TEXT for better compatibility with Flutter Strings
+        await db.execute('''
+           CREATE TABLE cars (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                name TEXT,
                plate TEXT,
                price REAL,
                state TEXT,
-               maintenance DATE,
-               return_from_maintenance DATE
-               )
+               maintenance TEXT,
+               return_from_maintenance TEXT
+           )
          ''');
+
+        // 3. Create Rental Table
+        await db.execute('''
+          CREATE TABLE rental (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER,
+            car_id INTEGER,
+            date_from TEXT,
+            date_to TEXT,
+            total_amount REAL,
+            payment_state TEXT,
+            state TEXT,
+            FOREIGN KEY (client_id) REFERENCES client (id),
+            FOREIGN KEY (car_id) REFERENCES cars (id) 
+          )
+        ''');
+        // ^^^ FIXED: References 'cars' (plural) correctly
+
+        // 4. Create Payment Table
+        await db.execute('''
+          CREATE TABLE payment (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rental_id INTEGER,
+            date TEXT,
+            paid_amount REAL,
+            FOREIGN KEY (rental_id) REFERENCES rental (id)
+          )
+        ''');
       },
-      version: _database_version,
-      onUpgrade: (db, oldVersion, newVersion) {},
+      onUpgrade: (db, oldVersion, newVersion) {
+        // Handle future upgrades here
+      },
     );
-    return database;
   }
 }
