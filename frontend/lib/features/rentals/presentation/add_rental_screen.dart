@@ -4,6 +4,9 @@ import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// 1. IMPORT LOCALIZATION
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class AddRentalScreen extends StatefulWidget {
   const AddRentalScreen({super.key});
 
@@ -23,7 +26,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   DateTime? _endDate;
   String? _dateError;
 
-  // FIXED: Explicitly typed lists
   List<Map<String, dynamic>> _clients = [];
   List<Map<String, dynamic>> _cars = [];
 
@@ -52,7 +54,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
 
       if (mounted) {
         setState(() {
-          // FIXED: Safely cast the database results
           _clients = List<Map<String, dynamic>>.from(rawClients);
           _cars = List<Map<String, dynamic>>.from(rawCars);
           _isLoading = false;
@@ -65,16 +66,20 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   }
 
   Future<void> _showAddClientDialog() async {
+    // We get l10n here to localize the dialog buttons
+    final l10n = AppLocalizations.of(context)!;
+
     final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
-    final phoneController =
-        TextEditingController(); // CHANGED: Was emailController
+    final phoneController = TextEditingController();
     final formKeyClient = GlobalKey<FormState>();
 
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Client'),
+        title: const Text(
+          'Add New Client',
+        ), // You can add specific key for this later
         content: Form(
           key: formKeyClient,
           child: Column(
@@ -83,19 +88,18 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
               TextFormField(
                 controller: firstNameController,
                 decoration: const InputDecoration(labelText: 'First Name'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? l10n.required : null,
               ),
               TextFormField(
                 controller: lastNameController,
                 decoration: const InputDecoration(labelText: 'Last Name'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? l10n.required : null,
               ),
-              // CHANGED: Email Input -> Phone Input
               TextFormField(
                 controller: phoneController,
                 decoration: const InputDecoration(labelText: 'Phone Number'),
                 keyboardType: TextInputType.phone,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? l10n.required : null,
               ),
             ],
           ),
@@ -103,25 +107,20 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel), // Localized
           ),
           ElevatedButton(
             onPressed: () async {
               if (formKeyClient.currentState!.validate()) {
-                // CHANGED: Map key is now 'phone'
                 final newClient = {
                   'first_name': firstNameController.text,
                   'last_name': lastNameController.text,
                   'phone': phoneController.text,
                 };
 
-                // 1. Insert into DB
                 await _clientRepo.insertClient(newClient);
-
-                // 2. Reload Data
                 await _loadData();
 
-                // 3. Auto-select (Find highest ID)
                 if (_clients.isNotEmpty) {
                   final newest = _clients.reduce((curr, next) {
                     final currId = curr['id'] as int;
@@ -137,7 +136,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 if (mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            child: Text(l10n.add), // Localized
           ),
         ],
       ),
@@ -145,6 +144,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   }
 
   Future<void> _showAddCarDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+
     final nameController = TextEditingController();
     final plateController = TextEditingController();
     final priceController = TextEditingController();
@@ -164,12 +165,12 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Car Name (Model)',
                 ),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? l10n.required : null,
               ),
               TextFormField(
                 controller: plateController,
                 decoration: const InputDecoration(labelText: 'Plate Number'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? l10n.required : null,
               ),
               TextFormField(
                 controller: priceController,
@@ -177,7 +178,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                   labelText: 'Daily Rent Price',
                 ),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? l10n.required : null,
               ),
             ],
           ),
@@ -185,7 +186,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel), // Localized
           ),
           ElevatedButton(
             onPressed: () async {
@@ -202,7 +203,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 await _carRepo.insertCar(newCar);
                 await _loadData();
 
-                // FIXED: Type-safe reduce
                 if (_cars.isNotEmpty) {
                   final newest = _cars.reduce((curr, next) {
                     final currId = curr['id'] as int;
@@ -219,7 +219,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 if (mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            child: Text(l10n.add), // Localized
           ),
         ],
       ),
@@ -289,6 +289,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   }
 
   void _saveRental() {
+    // 3. DEFINE l10n HERE FOR VALIDATION MESSAGES
+    final l10n = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate()) {
       if (_startDate == null || _endDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -315,6 +318,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 2. DEFINE VARIABLE
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -324,9 +330,12 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'New Rental',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.addRentalTitle, // Localized
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: _isLoading
@@ -340,18 +349,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // CLIENT DROPDOWN
-                      _buildLabel('Client'),
+                      _buildLabel(l10n.selectClient), // Localized
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _selectedClientId,
-                              hint: const Text("Select Client"),
+                              hint: Text(l10n.selectClient), // Localized
                               decoration: _inputDecoration(
                                 Icons.person_outline,
                               ),
                               items: _clients.map((client) {
-                                // Matches new schema: first_name, last_name
                                 final name =
                                     "${client['first_name']} ${client['last_name']}";
                                 return DropdownMenuItem<int>(
@@ -365,7 +373,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                               onChanged: (value) =>
                                   setState(() => _selectedClientId = value),
                               validator: (value) => value == null
-                                  ? 'Please select a client'
+                                  ? l10n
+                                        .required // Localized
                                   : null,
                             ),
                           ),
@@ -377,18 +386,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       const SizedBox(height: 20),
 
                       // CAR DROPDOWN
-                      _buildLabel('Car'),
+                      _buildLabel(l10n.selectCar), // Localized
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _selectedCarId,
-                              hint: const Text("Select Car"),
+                              hint: Text(l10n.selectCar), // Localized
                               decoration: _inputDecoration(
                                 Icons.directions_car,
                               ),
                               items: _cars.map((car) {
-                                // Matches new schema: name, plate, price
                                 final name = car['name'] ?? 'Unknown';
                                 final plate = car['plate'] ?? '';
                                 final price = car['price'] ?? 0;
@@ -406,8 +414,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                   _calculateTotalPrice();
                                 });
                               },
-                              validator: (value) =>
-                                  value == null ? 'Please select a car' : null,
+                              validator: (value) => value == null
+                                  ? l10n.required
+                                  : null, // Localized
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -424,7 +433,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel('Start Date'),
+                                _buildLabel(l10n.startDate), // Localized
                                 _buildDateSelector(true),
                               ],
                             ),
@@ -434,7 +443,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel('End Date'),
+                                _buildLabel(l10n.endDate), // Localized
                                 _buildDateSelector(false),
                               ],
                             ),
@@ -456,7 +465,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       const SizedBox(height: 20),
 
                       // PRICE
-                      _buildLabel('Total Price'),
+                      _buildLabel(l10n.totalPrice), // Localized
                       TextFormField(
                         controller: _priceController,
                         keyboardType: TextInputType.number,
@@ -474,7 +483,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty)
-                            return 'Please enter price';
+                            return l10n.required; // Localized
                           if (double.tryParse(value) == null)
                             return 'Invalid number';
                           return null;
@@ -498,9 +507,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                 ),
                                 side: BorderSide(color: Colors.grey[300]!),
                               ),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.cancel, // Localized
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -522,9 +531,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
-                                'Save Rental',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.saveRental, // Localized
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
