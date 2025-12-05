@@ -1,5 +1,7 @@
 import 'dart:io'; // Import this for Platform check
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
+import 'package:auto_manager/logic/cubits/cars/cars_cubit.dart';
+import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,6 +29,10 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider<RentalCubit>(
           create: (context) => RentalCubit()..loadRentals(),
+        ),
+        BlocProvider<CarsCubit>(
+          create: (context) =>
+              CarsCubit(AbstractCarRepo.getInstance())..loadVehicles(),
         ),
       ],
       child: const MaterialApp(
