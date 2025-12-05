@@ -1,9 +1,5 @@
-import 'package:auto_manager/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
-
 import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
+import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -15,60 +11,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // New function to show language picker
-  void _showLanguageSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Select Language",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              ListTile(
-                leading: const Text("🇺🇸", style: TextStyle(fontSize: 24)),
-                title: const Text("English"),
-                onTap: () {
-                  context.read<LocaleCubit>().changeLanguage('en');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Text("🇫🇷", style: TextStyle(fontSize: 24)),
-                title: const Text("Français"),
-                onTap: () {
-                  context.read<LocaleCubit>().changeLanguage('fr');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Text("🇩🇿", style: TextStyle(fontSize: 24)),
-                title: const Text("العربية"),
-                onTap: () {
-                  context.read<LocaleCubit>().changeLanguage('ar');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Access translations easily using this variable
-    final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -79,12 +23,9 @@ class SettingsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          l10n.settingsTitle, // Uses translation
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+        title: const Text(
+          "Settings",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: Padding(
@@ -94,21 +35,22 @@ class SettingsScreen extends StatelessWidget {
             _buildTile(
               context,
               icon: Icons.business_center,
-              title: l10n.agencyInfo, // Uses translation
-              subtitle: l10n.agencyInfoSubtitle, // Uses translation
-              onTap: () => _navigateToComingSoon(context, l10n.agencyInfo),
+              title: "Agency Information",
+              subtitle:
+                  "Update your agency name, address, and contact details.",
+              onTap: () => _navigateToComingSoon(context, "Agency Information"),
             ),
             _buildTile(
               context,
               icon: Icons.language,
-              title: l10n.appLanguage, // Uses translation
-              subtitle: l10n.appLanguageSubtitle, // Uses translation
-              onTap: () => _showLanguageSheet(context), // Opens picker
+              title: "App Language",
+              subtitle: "Select your preferred language for the app.",
+              onTap: () => _navigateToComingSoon(context, "App Language"),
             ),
             const SizedBox(height: 12),
-            _buildSubscriptionCard(context, l10n),
+            _buildSubscriptionCard(context),
             const Spacer(),
-            _buildLogoutButton(context, l10n),
+            _buildLogoutButton(context),
           ],
         ),
       ),
@@ -162,7 +104,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSubscriptionCard(BuildContext context, AppLocalizations l10n) {
+  Widget _buildSubscriptionCard(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
@@ -200,20 +142,20 @@ class SettingsScreen extends StatelessWidget {
               child: const Icon(Icons.workspace_premium, color: Colors.white),
             ),
             const SizedBox(width: 16),
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.subscription, // Translated
-                    style: const TextStyle(
+                    "Subscription",
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "You are on the Free Plan.", // You should add this to ARB too
+                  SizedBox(height: 4),
+                  Text(
+                    "You are on the Free Plan.",
                     style: TextStyle(color: Colors.white70),
                   ),
                 ],
@@ -226,7 +168,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context, AppLocalizations l10n) {
+  Widget _buildLogoutButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: ElevatedButton.icon(
@@ -236,7 +178,7 @@ class SettingsScreen extends StatelessWidget {
           );
         },
         icon: const Icon(Icons.logout),
-        label: Text(l10n.logout), // Translated
+        label: const Text("Logout"),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.redAccent,
           foregroundColor: Colors.white,
@@ -264,10 +206,10 @@ class ComingSoonScreen extends StatelessWidget {
         title: Text(title, style: const TextStyle(color: Colors.black)),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Center(
+      body: const Center(
         child: Text(
-          AppLocalizations.of(context)!.comingSoon, // Translated
-          style: const TextStyle(
+          "Coming Soon",
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.black54,
