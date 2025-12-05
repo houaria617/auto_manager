@@ -1,13 +1,11 @@
-import 'package:auto_manager/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+// lib/features/rentals/presentation/screens/rentals_screen.dart
 
-// 1. STANDARD LOCALIZATION IMPORT
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-// Logic
+// Business Logic
+// Note: Ensure these paths match your actual project structure
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Widgets & Screens
 import '../../Dashboard/navigation_bar.dart';
@@ -21,6 +19,8 @@ class RentalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FIX 1: Removed BlocProvider(create:...).
+    // We now use the Global instance provided in main.dart.
     return const _RentalsScreenContent();
   }
 }
@@ -33,6 +33,7 @@ class _RentalsScreenContent extends StatefulWidget {
 }
 
 class _RentalsScreenContentState extends State<_RentalsScreenContent> {
+  // Local state for the View Toggle (Ongoing vs Completed)
   bool _showCompleted = false;
 
   void _toggleView(bool showCompleted) {
@@ -43,29 +44,22 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    // 2. DEFINE LOCALIZATION VARIABLE
-    // This triggers a rebuild whenever the language changes in Settings
-    final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: SafeArea(
         child: Column(
           children: [
-            // Pass l10n to the header
-            _buildHeader(context, l10n),
+            _buildHeader(context),
+            // The list is wrapped in BlocBuilder to react to Global Database changes
             Expanded(
               child: BlocBuilder<RentalCubit, RentalState>(
                 builder: (context, state) {
                   if (state is RentalLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is RentalError) {
-                    return Center(
-                      child: Text('${l10n.error}: ${state.message}'),
-                    );
+                    return Center(child: Text('Error: ${state.message}'));
                   } else if (state is RentalLoaded) {
-                    // Pass l10n to the list builder
-                    return _buildRentalsList(state.rentals, l10n);
+                    return _buildRentalsList(state.rentals);
                   }
                   return const SizedBox.shrink();
                 },
@@ -78,13 +72,12 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _handleAddRental(context),
         backgroundColor: const Color(0xFF2563EB),
-        tooltip: l10n.newRental, // Localized Tooltip
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -100,9 +93,9 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.rentalsTitle, // Localized Title
-            style: const TextStyle(
+          const Text(
+            'AutoManager Rentals',
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1a1a1a),
@@ -112,13 +105,13 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
           Row(
             children: [
               TabButton(
-                label: l10n.tabOngoing, // Localized Tab
+                label: 'Ongoing',
                 isSelected: !_showCompleted,
                 onTap: () => _toggleView(false),
               ),
               const SizedBox(width: 8),
               TabButton(
-                label: l10n.tabCompleted, // Localized Tab
+                label: 'Completed',
                 isSelected: _showCompleted,
                 onTap: () => _toggleView(true),
               ),
@@ -129,18 +122,19 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
     );
   }
 
-  Widget _buildRentalsList(List<Map> allRentals, AppLocalizations l10n) {
+  Widget _buildRentalsList(List<Map> allRentals) {
+    // Filter the data locally based on the toggle state
     final filteredList = allRentals.where((rental) {
       final state = (rental['state'] ?? '').toString().toLowerCase();
       final isCompletedState = state == 'completed' || state == 'returned';
+
       return _showCompleted ? isCompletedState : !isCompletedState;
     }).toList();
 
     if (filteredList.isEmpty) {
       return Center(
         child: Text(
-          // Localized Empty State
-          _showCompleted ? l10n.noRentalsCompleted : l10n.noRentalsOngoing,
+          _showCompleted ? 'No completed rentals' : 'No ongoing rentals',
           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
         ),
       );
@@ -151,18 +145,24 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
       itemCount: filteredList.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
+        // Explicitly cast the map to Map<String, dynamic> to prevent type errors
         final rentalItem = Map<String, dynamic>.from(filteredList[index]);
 
         return RentalCard(
           rental: rentalItem,
           isOngoingView: !_showCompleted,
-          onTap: () => _handleRentalTap(context, rentalItem),
+          onTap: () {
+            _handleRentalTap(context, rentalItem);
+          },
         );
       },
     );
   }
 
   void _handleRentalTap(BuildContext context, Map<String, dynamic> rental) {
+    // FIX 2: Simplified navigation.
+    // We don't need BlocProvider.value because the details screen
+    // will find the global Cubit in main.dart automatically.
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => RentalDetailsScreen(rental: rental)),
@@ -170,6 +170,7 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
   }
 
   void _handleAddRental(BuildContext context) {
+    // FIX 3: Simplified navigation.
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddRentalScreen()),

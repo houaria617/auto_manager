@@ -1,10 +1,7 @@
-import 'package:auto_manager/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Logic
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Widgets
 import 'package:auto_manager/features/rentals/presentation/widgets/action_buttons.dart';
@@ -20,6 +17,8 @@ class RentalDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // We assume RentalCubit is provided by the parent (RentalsScreen or Global)
+    // If not, wrap this in BlocProvider, but usually Detail screens share the List's cubit.
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
@@ -28,15 +27,12 @@ class RentalDetailsScreen extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context) {
-    // 2. DEFINE VARIABLE
-    final l10n = AppLocalizations.of(context)!;
-
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: Text(l10n.rentalDetails), // 3. USE LOCALIZED TITLE
+      title: const Text('Rental Details'),
       centerTitle: true,
       elevation: 0,
       backgroundColor: Colors.white,
@@ -69,12 +65,11 @@ class _RentalDetailsBody extends StatelessWidget {
             currentData = Map<String, dynamic>.from(rawRental);
           } catch (e) {
             // If firstWhere fails (item deleted), show a message
-            // You can add "rentalNotFound" to your ARB file later if needed
             return const Center(child: Text("This rental no longer exists."));
           }
         }
 
-        // 3. Extract IDs safely
+        // 3. Extract IDs safely (handling potential nulls with defaults if necessary)
         final int clientId = currentData['client_id'] ?? 0;
         final int carId = currentData['car_id'] ?? 0;
         final int rentalId = currentData['id'] ?? 0;
