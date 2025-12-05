@@ -1,11 +1,7 @@
-// lib/features/rentals/presentation/widgets/action_buttons.dart
-
-import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:auto_manager/features/payment/presentation/payment_screen.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 class ActionButtons extends StatelessWidget {
   final int rentalId;
@@ -27,6 +23,7 @@ class ActionButtons extends StatelessWidget {
     final isCompleted = state == 'completed' || state == 'returned';
     final isPaid = paymentState == 'paid';
 
+    // Safely get total amount
     double totalAmount = (rentalData['total_amount'] is int)
         ? (rentalData['total_amount'] as int).toDouble()
         : (rentalData['total_amount'] ?? 0.0);
@@ -35,7 +32,7 @@ class ActionButtons extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // 1. PAYMENT BUTTON (Purple/Green)
+          // 1. PAYMENT BUTTON
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -49,6 +46,7 @@ class ActionButtons extends StatelessWidget {
                     ),
                   ),
                 ).then((_) {
+                  // Refresh data when returning
                   context.read<RentalCubit>().loadRentals();
                 });
               },
@@ -69,13 +67,13 @@ class ActionButtons extends StatelessWidget {
           const SizedBox(height: 12),
 
           if (!isCompleted) ...[
-            // 2. RETURN BUTTON (Black)
+            // 2. RETURN BUTTON
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => _handleReturn(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 150, 125, 243),
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -90,6 +88,7 @@ class ActionButtons extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            // 3. RENEW BUTTON
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -97,7 +96,7 @@ class ActionButtons extends StatelessWidget {
                 icon: const Icon(Icons.update),
                 label: const Text('Renew Rental'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange.shade800, // Distinct color
+                  backgroundColor: Colors.orange.shade800,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -121,47 +120,36 @@ class ActionButtons extends StatelessWidget {
     final Map<String, dynamic> updatedRental = Map.from(rentalData);
     updatedRental['state'] = 'Completed';
     context.read<RentalCubit>().updateRental(rentalId, updatedRental);
-    Navigator.pop(context); // Optional: close details screen
+    Navigator.pop(context);
   }
 
-  // --- NEW RENEW LOGIC ---
-  Future<void> _showRenewDialog(BuildContext context) async {
+  // --- FIXED RENEW LOGIC ---
+  void _showRenewDialog(BuildContext context) {
     final daysController = TextEditingController(text: "1");
-    bool isLoading = true;
+
+    // 1. Calculate Daily Price AUTOMATICALLY (Total / Days)
+    // This avoids database errors
     double dailyPrice = 0.0;
-    String? errorMsg;
-
-    // 1. Fetch Car Price First
     try {
-      final carRepo = AbstractCarRepo.getInstance();
-      final cars = await carRepo.getData();
-      final car = cars.firstWhere(
-        (c) => c['id'] == rentalData['car_id'],
-        orElse: () => {},
-      );
+      final start = DateTime.parse(rentalData['date_from']);
+      final end = DateTime.parse(rentalData['date_to']);
+      int totalDays = end.difference(start).inDays;
+      if (totalDays <= 0) totalDays = 1; // Prevent division by zero
 
-      if (car.isNotEmpty && car['rent_price'] != null) {
-        dailyPrice = (car['rent_price'] is int)
-            ? (car['rent_price'] as int).toDouble()
-            : (car['rent_price'] as double);
-      } else {
-        errorMsg = "Could not find car price. Using \$0.00";
-      }
+      double currentTotal = (rentalData['total_amount'] is int)
+          ? (rentalData['total_amount'] as int).toDouble()
+          : (rentalData['total_amount'] ?? 0.0);
+
+      dailyPrice = currentTotal / totalDays;
     } catch (e) {
-      errorMsg = "Error loading car details.";
+      dailyPrice = 0.0;
     }
-    isLoading = false;
 
-    if (!context.mounted) return;
-
-    // 2. Show Dialog
     showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
-          // Use StatefulBuilder to update cost preview inside dialog
           builder: (context, setStateDialog) {
-            // Calculate preview
             int days = int.tryParse(daysController.text) ?? 0;
             double extraCost = days * dailyPrice;
 
@@ -170,29 +158,23 @@ class ActionButtons extends StatelessWidget {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (errorMsg != null)
-                    Text(
-                      errorMsg!,
-                      style: const TextStyle(color: Colors.red, fontSize: 12),
-                    ),
-
-                  const Text("How many days do you want to extend?"),
+                  const Text("Extend the rental duration."),
                   const SizedBox(height: 10),
 
                   TextField(
                     controller: daysController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: "Number of Days",
+                      labelText: "Additional Days",
                       border: OutlineInputBorder(),
                       suffixText: "days",
                     ),
-                    onChanged: (val) =>
-                        setStateDialog(() {}), // Refresh preview
+                    onChanged: (val) => setStateDialog(() {}),
                   ),
 
                   const SizedBox(height: 20),
-                  // Price Preview
+
+                  // Price Preview Container
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -205,7 +187,7 @@ class ActionButtons extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("Daily Price:"),
+                            const Text("Estimated Daily Rate:"),
                             Text("\$${dailyPrice.toStringAsFixed(2)}"),
                           ],
                         ),
@@ -262,11 +244,9 @@ class ActionButtons extends StatelessWidget {
 
   void _processRenew(BuildContext context, int days, double dailyPrice) {
     try {
-      // 1. Calculate New Date
       final currentEnd = DateTime.parse(rentalData['date_to']);
       final newEnd = currentEnd.add(Duration(days: days));
 
-      // 2. Calculate New Total Amount
       double currentTotal = (rentalData['total_amount'] is int)
           ? (rentalData['total_amount'] as int).toDouble()
           : (rentalData['total_amount'] ?? 0.0);
@@ -274,19 +254,15 @@ class ActionButtons extends StatelessWidget {
       double extraCost = days * dailyPrice;
       double newTotal = currentTotal + extraCost;
 
-      // 3. Update Map
       final Map<String, dynamic> updatedRental = Map.from(rentalData);
       updatedRental['date_to'] = newEnd.toIso8601String();
       updatedRental['total_amount'] = newTotal;
 
-      // 4. Update Payment State
-      // Since we increased the price, the rental is no longer "Paid" (unless extra cost is 0).
+      // If we add cost, it's not fully paid anymore
       if (extraCost > 0) {
         updatedRental['payment_state'] = 'Unpaid';
-        // Or 'Partial' depending on your logic preference, but 'Unpaid' forces attention.
       }
 
-      // 5. Save
       context.read<RentalCubit>().updateRental(rentalId, updatedRental);
 
       ScaffoldMessenger.of(context).showSnackBar(

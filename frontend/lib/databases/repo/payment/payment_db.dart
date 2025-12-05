@@ -1,7 +1,7 @@
 // lib/features/payments/data/payment_db.dart
 
 import 'package:sqflite/sqflite.dart';
-import '../../rental/dbhelper.dart';
+import '../../dbhelper.dart';
 import 'payment_abstract.dart';
 
 class PaymentDB extends AbstractPaymentRepo {

@@ -1,32 +1,21 @@
-// THIS FILE IS USED TO OVERRIDE ABSTRACT
-// METHODS DEFINED IN `AbstractRentalRepo`
-// TO DO CRUD ON LOCAL DATABASE.
+// lib/databases/repo/rentals/rental_repository_impl.dart
 
-import 'package:auto_manager/databases/rental/dbhelper.dart';
-import 'package:auto_manager/databases/repo/rentals/rental_repository.dart';
 import 'package:sqflite/sqflite.dart';
+import 'rental_repository.dart'; // or rental_abstract.dart depending on your naming
+import '../../dbhelper.dart'; // <--- ADD THIS IMPORT
 
 class RentalDB extends AbstractRentalRepo {
   @override
   Future<List<Map>> getData() async {
-    final database = await DBHelper.getDatabase();
-    return database.rawQuery('''SELECT
-          rental.id,
-          rental.client_id,
-          rental.car_id,
-          rental.date_from,
-          rental.date_to,
-          rental.total_amount,
-          rental.payment_state,
-          rental.state
-        FROM rental
-        ''');
+    final database =
+        await DBHelper.getDatabase(); // This needs the import above
+    return database.rawQuery('SELECT * FROM rental');
   }
 
   @override
   Future<bool> deleteRental(int index) async {
     final database = await DBHelper.getDatabase();
-    await database.rawQuery("""delete from rental where id=?""", [index]);
+    await database.rawQuery("delete from rental where id=?", [index]);
     return true;
   }
 
