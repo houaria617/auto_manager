@@ -10,7 +10,7 @@ class Vehicle {
   final String? description; // Optional vehicle notes or comments
 
   Vehicle({
-    this.id, 
+    this.id,
     required this.name,
     required this.plate,
     required this.status,
@@ -24,22 +24,22 @@ class Vehicle {
   factory Vehicle.fromMap(Map<String, dynamic> map) {
     return Vehicle(
       id: map['id'] as int?,
-      name: map['name'] as String,
-      plate: map['plate'] as String,
+      name: map['name']?.toString() ?? 'Unknown',
+      plate: map['plate']?.toString() ?? '',
       // Mapping DB field 'state' to Model field 'status'
-      status: map['state'] as String, 
+      status: map['state']?.toString() ?? 'available',
       // Mapping DB field 'maintenance' to Model field 'nextMaintenanceDate'
-      nextMaintenanceDate: map['maintenance'] as String,
+      nextMaintenanceDate: map['maintenance']?.toString() ?? '',
       // Mapping DB field 'return_from_maintenance' to Model field 'availableFrom'
-      availableFrom: map['return_from_maintenance'] as String?,
-      
-      // These model fields are not stored in the cars table in your schema, 
+      availableFrom: map['return_from_maintenance']?.toString(),
+
+      // These model fields are not stored in the cars table in your schema,
       // so they are set to null if not present in the map.
-      returnDate: map['returnDate'] as String?, 
-      description: map['description'] as String?,
+      returnDate: map['returnDate']?.toString(),
+      description: map['description']?.toString(),
     );
   }
-  
+
   //NEW: Method to convert Vehicle Model back to DB format (Map<String, dynamic>)
   Map<String, dynamic> toMap() {
     return {

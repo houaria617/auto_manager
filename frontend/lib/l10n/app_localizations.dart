@@ -577,8 +577,8 @@ abstract class AppLocalizations {
   /// No description provided for @pricePerDay.
   ///
   /// In en, this message translates to:
-  /// **'{price}/day'**
-  String pricePerDay(String price);
+  /// **'Price {value}'**
+  String pricePerDay(String price, Object value);
 
   /// No description provided for @rentalId.
   ///
@@ -703,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @days.
   ///
   /// In en, this message translates to:
-  /// **'days'**
+  /// **'Days'**
   String get days;
 
   /// No description provided for @estimatedDailyRate.
@@ -739,13 +739,13 @@ abstract class AppLocalizations {
   /// No description provided for @statusOngoing.
   ///
   /// In en, this message translates to:
-  /// **'ONGOING'**
+  /// **'Ongoing'**
   String get statusOngoing;
 
   /// No description provided for @statusCompleted.
   ///
   /// In en, this message translates to:
-  /// **'COMPLETED'**
+  /// **'Completed'**
   String get statusCompleted;
 
   /// No description provided for @statusOverdue.
@@ -915,6 +915,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please wait for data to load.'**
   String get pleaseWaitForData;
+
+  /// No description provided for @clientsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clients'**
+  String get clientsTitle;
+
+  /// No description provided for @noClientFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Client Found'**
+  String get noClientFound;
+
+  /// No description provided for @searchClientHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or phone number'**
+  String get searchClientHint;
+
+  /// No description provided for @clientProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Profile'**
+  String get clientProfileTitle;
+
+  /// No description provided for @noRecentActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent activities'**
+  String get noRecentActivities;
+
+  /// No description provided for @ninLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NIN'**
+  String get ninLabel;
+
+  /// No description provided for @statusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE'**
+  String get statusActive;
+
+  /// No description provided for @statusIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'IDLE'**
+  String get statusIdle;
+
+  /// No description provided for @totalRents.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL RENTS'**
+  String get totalRents;
+
+  /// No description provided for @rentHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent History'**
+  String get rentHistory;
+
+  /// No description provided for @from.
+  ///
+  /// In en, this message translates to:
+  /// **'from'**
+  String get from;
+
+  /// No description provided for @to.
+  ///
+  /// In en, this message translates to:
+  /// **'to'**
+  String get to;
+
+  /// No description provided for @totalIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Total is'**
+  String get totalIs;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @noPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'No phone'**
+  String get noPhone;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @dashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboardTitle;
+
+  /// No description provided for @atTime.
+  ///
+  /// In en, this message translates to:
+  /// **'at'**
+  String get atTime;
+
+  /// No description provided for @myVehicles.
+  ///
+  /// In en, this message translates to:
+  /// **'My Vehicles'**
+  String get myVehicles;
+
+  /// No description provided for @searchCarPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a car or plate...'**
+  String get searchCarPlaceholder;
+
+  /// No description provided for @failedToLoadData.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load data'**
+  String get failedToLoadData;
+
+  /// No description provided for @noVehiclesMatchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicles match the filter'**
+  String get noVehiclesMatchFilter;
+
+  /// No description provided for @addFirstVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Your First Vehicle'**
+  String get addFirstVehicle;
+
+  /// No description provided for @tapPlusToBegin.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the \"+\" button to begin.'**
+  String get tapPlusToBegin;
+
+  /// No description provided for @vehicleDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Details'**
+  String get vehicleDetails;
+
+  /// No description provided for @unknownName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Name'**
+  String get unknownName;
+
+  /// No description provided for @returnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Return Date'**
+  String get returnDate;
+
+  /// No description provided for @availableOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Available On'**
+  String get availableOn;
+
+  /// No description provided for @nextMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Maintenance'**
+  String get nextMaintenance;
+
+  /// No description provided for @deleteVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete vehicle'**
+  String get deleteVehicleTitle;
+
+  /// No description provided for @deleteVehicleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? This action cannot be undone.'**
+  String deleteVehicleConfirm(String name);
+
+  /// No description provided for @editVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Vehicle'**
+  String get editVehicle;
+
+  /// No description provided for @carName.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Name'**
+  String get carName;
+
+  /// No description provided for @nextMaintenanceOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Maintenance Date (optional)'**
+  String get nextMaintenanceOptional;
+
+  /// No description provided for @rentPricePerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent Price (per Day)'**
+  String get rentPricePerDay;
+
+  /// No description provided for @availabilityDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability Date'**
+  String get availabilityDate;
+
+  /// No description provided for @deletedVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{name}\"'**
+  String deletedVehicle(String name);
+
+  /// No description provided for @statusAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get statusAvailable;
+
+  /// No description provided for @statusRented.
+  ///
+  /// In en, this message translates to:
+  /// **'Rented'**
+  String get statusRented;
+
+  /// No description provided for @statusMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get statusMaintenance;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @labelClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get labelClient;
+
+  /// No description provided for @labelCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get labelCar;
+
+  /// No description provided for @labelStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get labelStartDate;
+
+  /// No description provided for @labelEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get labelEndDate;
+
+  /// No description provided for @labelTotalPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Price'**
+  String get labelTotalPrice;
 }
 
 class _AppLocalizationsDelegate

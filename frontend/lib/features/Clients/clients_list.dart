@@ -1,8 +1,15 @@
-import 'package:auto_manager/cubit/client_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'client_profile.dart';
+
+// Cubits
+import 'package:auto_manager/cubit/client_cubit.dart';
+
+// Localization
+import 'package:auto_manager/l10n/app_localizations.dart';
+
+// UI Components
+import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
+import 'client_profile.dart'; // Ensure this points to the file below
 
 class ClientsList extends StatefulWidget {
   const ClientsList({super.key});
@@ -18,16 +25,30 @@ class _ClientsListState extends State<ClientsList> {
     context.read<ClientCubit>().getClients();
   }
 
+  // Helper to localize status strings coming from DB
+  String _getLocalizedStatus(BuildContext context, String? status) {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return AppLocalizations.of(context)!.statusActive;
+      case 'idle':
+        return AppLocalizations.of(context)!.statusIdle;
+      default:
+        return status ?? AppLocalizations.of(context)!.unknown;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: const Text(
-          "Clients",
-          style: TextStyle(
+        title: Text(
+          l10n.clientsTitle,
+          style: const TextStyle(
             fontFamily: 'ManropeExtraBold',
             color: Color(0xFF2D3748),
             fontSize: 24,
@@ -38,7 +59,7 @@ class _ClientsListState extends State<ClientsList> {
       body: BlocBuilder<ClientCubit, List<Map<String, dynamic>>>(
         builder: (context, state) {
           if (state.isEmpty) {
-            return const Center(child: Text('No Client Found'));
+            return Center(child: Text(l10n.noClientFound));
           }
           return Center(
             child: Container(
@@ -46,6 +67,7 @@ class _ClientsListState extends State<ClientsList> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
+                  // Search Bar
                   Expanded(
                     child: Column(
                       children: [
@@ -94,7 +116,7 @@ class _ClientsListState extends State<ClientsList> {
                                 color: Color(0xFF94A3B8),
                                 size: 24,
                               ),
-                              hintText: "Search by name or phone number",
+                              hintText: l10n.searchClientHint,
                               hintStyle: const TextStyle(
                                 fontWeight: FontWeight.w400,
                                 color: Color(0xFF94A3B8),
@@ -112,10 +134,13 @@ class _ClientsListState extends State<ClientsList> {
                           ),
                         ),
                         const SizedBox(height: 20),
+                        // List View
                         Expanded(
                           child: ListView.builder(
                             itemCount: state.length,
                             itemBuilder: (context, i) {
+                              final status =
+                                  state[i]['state']?.toString() ?? 'idle';
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 decoration: BoxDecoration(
@@ -195,7 +220,9 @@ class _ClientsListState extends State<ClientsList> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  state[i]['full_name'],
+                                                  state[i]['full_name']
+                                                          ?.toString() ??
+                                                      l10n.unknown,
                                                   style: const TextStyle(
                                                     fontSize: 17,
                                                     fontWeight: FontWeight.w600,
@@ -204,7 +231,9 @@ class _ClientsListState extends State<ClientsList> {
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  state[i]['phone'],
+                                                  state[i]['phone']
+                                                          ?.toString() ??
+                                                      l10n.noPhone,
                                                   style: const TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w400,
@@ -220,8 +249,7 @@ class _ClientsListState extends State<ClientsList> {
                                               vertical: 6,
                                             ),
                                             decoration: BoxDecoration(
-                                              color:
-                                                  state[i]['state'] == 'active'
+                                              color: status == 'active'
                                                   ? const Color(0xFFDCFCE7)
                                                   : const Color(0xFFF1F5F9),
                                               borderRadius:
@@ -233,8 +261,7 @@ class _ClientsListState extends State<ClientsList> {
                                                 CircleAvatar(
                                                   radius: 4,
                                                   backgroundColor:
-                                                      state[i]['state'] ==
-                                                          'active'
+                                                      status == 'active'
                                                       ? const Color(0xFF16A34A)
                                                       : const Color(0xFF64748B),
                                                 ),
@@ -278,8 +305,7 @@ class _ClientsListState extends State<ClientsList> {
           );
         },
       ),
-
-      bottomNavigationBar: NavBar(),
+      bottomNavigationBar: const NavBar(),
     );
   }
 }

@@ -15,13 +15,13 @@ class CarsCubit extends Cubit<CarsState> {
     try {
       emit(CarsLoading());
 
-      // 1. Get List<Vehicle> directly from the repository
-      // The return type is changed from List<Map> to List<Vehicle> to fix the error.
-      final List<Vehicle> vehicles =
-          await _carRepo.getAllCars() as List<Vehicle>;
-
-      // The mapping logic (rawVehicles.map(...)) is no longer needed here
-      // as it is now assumed to be handled within the repository implementation.
+      // Get List<Map<String, dynamic>> from repository and convert to List<Vehicle>
+      final List<Map<String, dynamic>> rawVehicles = await _carRepo.getAllCars();
+      
+      // Map the database results to Vehicle objects
+      final List<Vehicle> vehicles = rawVehicles.map((map) {
+        return Vehicle.fromMap(map);
+      }).toList();
 
       emit(CarsLoaded(vehicles));
     } catch (e) {
@@ -36,20 +36,18 @@ class CarsCubit extends Cubit<CarsState> {
 
     try {
       await _carRepo.insertCar({
-        'id': 1,
-        'car_model': vehicle['carModel'],
-        'plate_number': vehicle['plateNumber'],
-        'price': vehicle['rentPrice'],
-        'next_maintenance_date': vehicle['nextMaintenanceDate'],
-        'return_from_maintenance'
-                'state':
-            vehicle['status'],
+        'name': vehicle['name'] ?? vehicle['carModel'] ?? '',
+        'plate': vehicle['plate'] ?? vehicle['plateNumber'] ?? '',
+        'price': vehicle['price'] ?? vehicle['rentPrice'] ?? 0.0,
+        'state': vehicle['status'] ?? 'available',
+        'maintenance': vehicle['nextMaintenanceDate'] ?? vehicle['next_maintenance_date'] ?? '',
+        'return_from_maintenance': vehicle['return_from_maintenance'] ?? vehicle['returnFromMaintenance'] ?? '',
       });
       print('added car successfully');
 
       dashboardCubit.countAvailableCars();
       dashboardCubit.addActivity({
-        'description': 'New Car ${vehicle['carModel']} Added',
+        'description': 'New Car ${vehicle['name'] ?? vehicle['carModel'] ?? 'Unknown'} Added',
         'date': DateTime.now(),
       });
 

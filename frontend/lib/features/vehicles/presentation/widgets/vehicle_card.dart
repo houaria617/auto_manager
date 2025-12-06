@@ -1,5 +1,5 @@
-// vehicle_card.dart
 import 'package:flutter/material.dart';
+import 'package:auto_manager/l10n/app_localizations.dart'; // Localization
 import '../screens/vehicle_details_screen.dart';
 import '../../data/models/vehicle_model.dart';
 
@@ -11,25 +11,42 @@ class VehicleCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'available':
-        return const Color(0xFF28A745); // green
+        return const Color(0xFF28A745);
       case 'rented':
-        return const Color(0xFF007BFF); // primary blue
+        return const Color(0xFF007BFF);
       case 'maintenance':
-        return const Color(0xFFFFA500); // orange
+        return const Color(0xFFFFA500);
       default:
-        return const Color(0xFF6B7280); // gray
+        return const Color(0xFF6B7280);
+    }
+  }
+
+  // Helper to translate status
+  String _getLocalizedStatus(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status.toLowerCase()) {
+      case 'available':
+        return l10n.statusAvailable;
+      case 'rented':
+        return l10n.statusRented;
+      case 'maintenance':
+        return l10n.statusMaintenance;
+      default:
+        return status;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                VehicleDetailsScreen(vehicle: vehicle as Map<String, dynamic>),
+                VehicleDetailsScreen(vehicle: vehicle.toMap()),
           ),
         );
       },
@@ -55,7 +72,7 @@ class VehicleCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    vehicle.status,
+                    _getLocalizedStatus(context, vehicle.status), // Localized
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       color: _getStatusColor(vehicle.status),
@@ -69,7 +86,6 @@ class VehicleCard extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // Vehicle name
               Text(
                 vehicle.name,
                 style: const TextStyle(
@@ -83,9 +99,8 @@ class VehicleCard extends StatelessWidget {
 
               const SizedBox(height: 4),
 
-              // Plate number
               Text(
-                "Plate: ${vehicle.plate}",
+                "${l10n.plateNumber}: ${vehicle.plate}", // Localized
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 14,
@@ -95,16 +110,15 @@ class VehicleCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // Conditional info rows
               if (vehicle.status.toLowerCase() == 'rented' &&
                   vehicle.returnDate != null)
-                _infoRow("Return Date", vehicle.returnDate!),
+                _infoRow(l10n.returnDate, vehicle.returnDate!),
 
               if (vehicle.status.toLowerCase() == 'maintenance' &&
                   vehicle.availableFrom != null)
-                _infoRow("Available on", vehicle.availableFrom!),
+                _infoRow(l10n.availableOn, vehicle.availableFrom!),
 
-              _infoRow("Next Maintenance", vehicle.nextMaintenanceDate),
+              _infoRow(l10n.nextMaintenance, vehicle.nextMaintenanceDate),
             ],
           ),
         ),
@@ -112,7 +126,6 @@ class VehicleCard extends StatelessWidget {
     );
   }
 
-  /// helper for clean info rows
   Widget _infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),

@@ -132,10 +132,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addRentalTitle => 'إضافة تأجير';
 
   @override
-  String get selectClient => 'اختر عميل';
+  String get selectClient => 'اختر العميل';
 
   @override
-  String get selectCar => 'اختر سيارة';
+  String get selectCar => 'اختر السيارة';
 
   @override
   String get startDate => 'تاريخ البدء';
@@ -246,8 +246,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dateError => 'يجب أن يكون تاريخ النهاية بعد أو يساوي تاريخ البدء';
 
   @override
-  String pricePerDay(String price) {
-    return '$price/يوم';
+  String pricePerDay(String price, Object value) {
+    return 'السعر $value';
   }
 
   @override
@@ -387,16 +387,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get end => 'النهاية';
 
   @override
-  String get ongoingRentals => 'التأجيرات الجارية';
+  String get ongoingRentals => 'تأجيرات جارية';
 
   @override
-  String get availableCars => 'السيارات المتاحة';
+  String get availableCars => 'سيارات متاحة';
 
   @override
-  String get dueToday => 'المستحقة اليوم';
+  String get dueToday => 'مستحق اليوم';
 
   @override
-  String get recentActivities => 'الأنشطة الأخيرة';
+  String get recentActivities => 'النشاطات الأخيرة';
 
   @override
   String carRentedBy(String plate, String client) {
@@ -437,4 +437,146 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pleaseWaitForData => 'يرجى الانتظار حتى يتم تحميل البيانات.';
+
+  @override
+  String get clientsTitle => 'العملاء';
+
+  @override
+  String get noClientFound => 'لم يتم العثور على عملاء';
+
+  @override
+  String get searchClientHint => 'البحث بالاسم أو رقم الهاتف';
+
+  @override
+  String get clientProfileTitle => 'ملف العميل';
+
+  @override
+  String get noRecentActivities => 'لا توجد نشاطات حديثة';
+
+  @override
+  String get ninLabel => 'رقم الهوية';
+
+  @override
+  String get statusActive => 'نشط';
+
+  @override
+  String get statusIdle => 'غير نشط';
+
+  @override
+  String get totalRents => 'إجمالي التأجير';
+
+  @override
+  String get rentHistory => 'سجل التأجير';
+
+  @override
+  String get from => 'من';
+
+  @override
+  String get to => 'إلى';
+
+  @override
+  String get totalIs => 'المجموع';
+
+  @override
+  String get unknown => 'مجهول';
+
+  @override
+  String get noPhone => 'لا يوجد هاتف';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get dashboardTitle => 'لوحة التحكم';
+
+  @override
+  String get atTime => 'في';
+
+  @override
+  String get myVehicles => 'سياراتي';
+
+  @override
+  String get searchCarPlaceholder => 'ابحث عن سيارة أو لوحة...';
+
+  @override
+  String get failedToLoadData => 'فشل تحميل البيانات';
+
+  @override
+  String get noVehiclesMatchFilter => 'لا توجد سيارات تطابق الفلتر';
+
+  @override
+  String get addFirstVehicle => 'أضف سيارتك الأولى';
+
+  @override
+  String get tapPlusToBegin => 'اضغط على زر \"+\" للبدء.';
+
+  @override
+  String get vehicleDetails => 'تفاصيل السيارة';
+
+  @override
+  String get unknownName => 'اسم مجهول';
+
+  @override
+  String get returnDate => 'تاريخ العودة';
+
+  @override
+  String get availableOn => 'متاح في';
+
+  @override
+  String get nextMaintenance => 'الصيانة القادمة';
+
+  @override
+  String get deleteVehicleTitle => 'حذف السيارة';
+
+  @override
+  String deleteVehicleConfirm(String name) {
+    return 'هل أنت متأكد أنك تريد حذف \"$name\"؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get editVehicle => 'تعديل السيارة';
+
+  @override
+  String get carName => 'اسم السيارة';
+
+  @override
+  String get nextMaintenanceOptional => 'تاريخ الصيانة القادمة (اختياري)';
+
+  @override
+  String get rentPricePerDay => 'سعر التأجير (يومياً)';
+
+  @override
+  String get availabilityDate => 'تاريخ الإتاحة';
+
+  @override
+  String deletedVehicle(String name) {
+    return 'تم حذف \"$name\"';
+  }
+
+  @override
+  String get statusAvailable => 'متاح';
+
+  @override
+  String get statusRented => 'مؤجر';
+
+  @override
+  String get statusMaintenance => 'صيانة';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get labelClient => 'العميل';
+
+  @override
+  String get labelCar => 'السيارة';
+
+  @override
+  String get labelStartDate => 'تاريخ البدء';
+
+  @override
+  String get labelEndDate => 'تاريخ الانتهاء';
+
+  @override
+  String get labelTotalPrice => 'السعر الإجمالي';
 }

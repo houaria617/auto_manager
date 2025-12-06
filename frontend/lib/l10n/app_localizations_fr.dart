@@ -99,7 +99,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noRentalsCompleted => 'Aucune location terminée';
 
   @override
-  String get newRental => 'Nouvelle Location';
+  String get newRental => 'Nouvelle location';
 
   @override
   String get rentalDetails => 'Détails';
@@ -132,10 +132,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addRentalTitle => 'Nouvelle Location';
 
   @override
-  String get selectClient => 'Sélectionner Client';
+  String get selectClient => 'Choisir le client';
 
   @override
-  String get selectCar => 'Sélectionner Voiture';
+  String get selectCar => 'Choisir la voiture';
 
   @override
   String get startDate => 'Date début';
@@ -147,7 +147,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get totalPrice => 'Prix Total';
 
   @override
-  String get saveRental => 'Enregistrer';
+  String get saveRental => 'Enregistrer la location';
 
   @override
   String get paymentsTitle => 'Paiements';
@@ -201,7 +201,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get car => 'Voiture';
 
   @override
-  String get selectDate => 'Sélectionner la date';
+  String get selectDate => 'Choisir une date';
 
   @override
   String get pleaseSelectDates =>
@@ -248,8 +248,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'La date de fin doit être après ou égale à la date de début';
 
   @override
-  String pricePerDay(String price) {
-    return '$price/jour';
+  String pricePerDay(String price, Object value) {
+    return 'Prix $value';
   }
 
   @override
@@ -315,7 +315,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get additionalDays => 'Jours supplémentaires';
 
   @override
-  String get days => 'jours';
+  String get days => 'Jours';
 
   @override
   String get estimatedDailyRate => 'Tarif journalier estimé:';
@@ -337,10 +337,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get statusOngoing => 'EN COURS';
+  String get statusOngoing => 'En cours';
 
   @override
-  String get statusCompleted => 'TERMINÉ';
+  String get statusCompleted => 'Terminé';
 
   @override
   String get statusOverdue => 'EN RETARD';
@@ -395,7 +395,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get availableCars => 'Voitures disponibles';
 
   @override
-  String get dueToday => 'Échéance aujourd\'hui';
+  String get dueToday => 'Dû aujourd\'hui';
 
   @override
   String get recentActivities => 'Activités récentes';
@@ -440,4 +440,147 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pleaseWaitForData =>
       'Veuillez attendre le chargement des données.';
+
+  @override
+  String get clientsTitle => 'Clients';
+
+  @override
+  String get noClientFound => 'Aucun client trouvé';
+
+  @override
+  String get searchClientHint => 'Rechercher par nom ou numéro';
+
+  @override
+  String get clientProfileTitle => 'Profil Client';
+
+  @override
+  String get noRecentActivities => 'Aucune activité récente';
+
+  @override
+  String get ninLabel => 'NIN';
+
+  @override
+  String get statusActive => 'ACTIF';
+
+  @override
+  String get statusIdle => 'INACTIF';
+
+  @override
+  String get totalRents => 'TOTAL LOCATIONS';
+
+  @override
+  String get rentHistory => 'Historique des locations';
+
+  @override
+  String get from => 'de';
+
+  @override
+  String get to => 'à';
+
+  @override
+  String get totalIs => 'Total est';
+
+  @override
+  String get unknown => 'Inconnu';
+
+  @override
+  String get noPhone => 'Pas de numéro';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get dashboardTitle => 'Tableau de bord';
+
+  @override
+  String get atTime => 'à';
+
+  @override
+  String get myVehicles => 'Mes Véhicules';
+
+  @override
+  String get searchCarPlaceholder => 'Rechercher voiture ou plaque...';
+
+  @override
+  String get failedToLoadData => 'Échec du chargement des données';
+
+  @override
+  String get noVehiclesMatchFilter => 'Aucun véhicule ne correspond au filtre';
+
+  @override
+  String get addFirstVehicle => 'Ajoutez votre premier véhicule';
+
+  @override
+  String get tapPlusToBegin => 'Appuyez sur le bouton \"+\" pour commencer.';
+
+  @override
+  String get vehicleDetails => 'Détails du véhicule';
+
+  @override
+  String get unknownName => 'Nom inconnu';
+
+  @override
+  String get returnDate => 'Date de retour';
+
+  @override
+  String get availableOn => 'Disponible le';
+
+  @override
+  String get nextMaintenance => 'Prochaine maintenance';
+
+  @override
+  String get deleteVehicleTitle => 'Supprimer le véhicule';
+
+  @override
+  String deleteVehicleConfirm(String name) {
+    return 'Êtes-vous sûr de vouloir supprimer \"$name\" ? Cette action est irréversible.';
+  }
+
+  @override
+  String get editVehicle => 'Modifier le véhicule';
+
+  @override
+  String get carName => 'Nom de la voiture';
+
+  @override
+  String get nextMaintenanceOptional =>
+      'Date prochaine maintenance (optionnel)';
+
+  @override
+  String get rentPricePerDay => 'Prix location (par jour)';
+
+  @override
+  String get availabilityDate => 'Date de disponibilité';
+
+  @override
+  String deletedVehicle(String name) {
+    return '\"$name\" supprimé';
+  }
+
+  @override
+  String get statusAvailable => 'Disponible';
+
+  @override
+  String get statusRented => 'Loué';
+
+  @override
+  String get statusMaintenance => 'Maintenance';
+
+  @override
+  String get filterAll => 'Tout';
+
+  @override
+  String get labelClient => 'Client';
+
+  @override
+  String get labelCar => 'Voiture';
+
+  @override
+  String get labelStartDate => 'Date de début';
+
+  @override
+  String get labelEndDate => 'Date de fin';
+
+  @override
+  String get labelTotalPrice => 'Prix Total';
 }
