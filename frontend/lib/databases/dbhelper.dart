@@ -8,7 +8,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 4;
+  static const _database_version = 1;
   static var database;
 
   static Future getDatabase() async {
@@ -17,15 +17,57 @@ class DBHelper {
     }
     database = openDatabase(
       join(await getDatabasesPath(), _database_name),
-      onCreate: (database, version) {
-        database.execute('''
+      onCreate: (database, version) async {
+        await database.execute('''
            CREATE TABLE  client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
-               first_name TEXT,
-               last_name TEXT,
-               email TEXT
+               full_name TEXT,
+               phone TEXT,
+               state TEXT DEFAULT 'idle'
                )
          ''');
+        await database.execute('''
+           CREATE TABLE cars (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               name TEXT,
+               plate TEXT,
+               price REAL,
+               state TEXT,
+               maintenance TEXT,
+               return_from_maintenance TEXT
+           )
+         ''');
+        await database.execute('''
+           CREATE TABLE activity (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+               description TEXT,
+               date TEXT
+           )
+         ''');
+        await database.execute('''
+          CREATE TABLE rental (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_id INTEGER,
+            car_id INTEGER,
+            date_from TEXT,
+            date_to TEXT,
+            total_amount REAL,
+            payment_state TEXT,
+            state TEXT,
+            FOREIGN KEY (client_id) REFERENCES client (id),
+            FOREIGN KEY (car_id) REFERENCES cars (id) 
+          )
+        ''');
+        await database.execute('''
+          CREATE TABLE payment (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rental_id INTEGER,
+            date TEXT,
+            paid_amount REAL,
+            FOREIGN KEY (rental_id) REFERENCES rental (id)
+          )
+        ''');
+        // Add create statements for other tables.
       },
       version: _database_version,
       onUpgrade: (db, oldVersion, newVersion) {},

@@ -1,5 +1,8 @@
+import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/vehicle_model.dart';
+//import '../../../../cubit/vehicle_cubit.dart';
 
 Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
   final TextEditingController nameController = TextEditingController(
@@ -17,7 +20,7 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
   final TextEditingController availabilityDateController =
       TextEditingController(text: vehicle?.availableFrom ?? '');
 
-  String status = vehicle?.status ?? 'Available';
+  String status = vehicle?.status ?? 'available';
 
   await showModalBottomSheet(
     context: context,
@@ -123,13 +126,13 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                     initialValue: status,
                     items: const [
                       DropdownMenuItem(
-                        value: 'Available',
-                        child: Text('Available'),
+                        value: 'available',
+                        child: Text('available'),
                       ),
-                      DropdownMenuItem(value: 'Rented', child: Text('Rented')),
+                      DropdownMenuItem(value: 'rented', child: Text('rented')),
                       DropdownMenuItem(
-                        value: 'Maintenance',
-                        child: Text('Maintenance'),
+                        value: 'maintenance',
+                        child: Text('maintenance'),
                       ),
                     ],
                     onChanged: (val) => setState(() => status = val!),
@@ -212,6 +215,12 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                         ),
                         onPressed: () {
                           // Normally save or update logic goes here
+                          context.read<VehicleCubit>().addVehicle(
+                            nameController.text,
+                            plateController.text,
+                            nextMaintenanceController.text,
+                            status,
+                          );
                           Navigator.pop(context);
                         },
                         child: const Text(

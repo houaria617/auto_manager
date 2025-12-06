@@ -1,5 +1,11 @@
+import 'package:auto_manager/cubit/client_cubit.dart';
+import 'package:auto_manager/cubit/dashboard_cubit.dart';
+import 'package:auto_manager/cubit/profile_cubit.dart';
+import 'package:auto_manager/cubit/rental_cubit.dart';
+import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:auto_manager/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(const MainApp());
@@ -10,9 +16,26 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<DashboardCubit>(create: (_) => DashboardCubit()),
+        BlocProvider<ProfileCubit>(create: (context) => ProfileCubit()),
+        BlocProvider<ClientCubit>(create: (context) => ClientCubit()),
+        BlocProvider<RentalCubit>(
+          create: (context) => RentalCubit(
+            dashboardCubit: context.read<DashboardCubit>(),
+            clientCubit: context.read<ClientCubit>(),
+          ),
+        ),
+        BlocProvider<VehicleCubit>(
+          create: (context) =>
+              VehicleCubit(dashboardCubit: context.read<DashboardCubit>()),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: LoginScreen(),
+      ),
     );
   }
 }

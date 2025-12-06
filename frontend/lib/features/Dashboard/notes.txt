@@ -1,0 +1,12 @@
+- Bloc provider for each number in the dashboard (3 ones). (DONE)
+- For the `Ongoing Rentals`, emit need to be called when we 
+add a new rental (onPressed of the `save rental` button) (DONE), and
+when each time the user opens the app, it fetches the number of
+rentals whose `state` is ongoing and update the number of
+ongoing rentals based on that. (DONE)
+- For the 'Available Cars', same thing, emit is called when we
+add a car, delete a car, when a rental is added (USING DB), and when
+a rental `state` becomes `done`.(DONE)
+- For `Due Today`, emit is called every time the user opens
+the app to count the number of rentals whose `date_to` is
+one day before Today.(DONE)
