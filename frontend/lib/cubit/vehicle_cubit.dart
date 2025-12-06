@@ -30,7 +30,6 @@ class VehicleCubit extends Cubit<List<Map<String, dynamic>>> {
 
     try {
       await _carRepo.insertCar({
-        'id': 1,
         'name': carModel,
         'plate': plateNumber,
         'price': rentPrice,
@@ -61,17 +60,12 @@ class VehicleCubit extends Cubit<List<Map<String, dynamic>>> {
   }
 
   void updateVehicle(int id, Map<String, dynamic> updates) async {
+    print('1. inside update vehicle');
     try {
       await _carRepo.updateCar(id, updates);
+      print('2. updated vehicle');
 
-      final updatedVehicles = state.map((vehicle) {
-        if (vehicle['id'] == id) {
-          return {...vehicle, ...updates};
-        }
-        return vehicle;
-      }).toList();
-
-      emit(updatedVehicles);
+      getVehicles();
     } catch (e) {
       print('Error updating vehicle: $e');
     }

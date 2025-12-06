@@ -59,4 +59,10 @@ class RentalDB extends AbstractRentalRepo {
       whereArgs: [clientID],
     );
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getAllRentals() async {
+    final database = await DBHelper.getDatabase();
+    return await database.query('rental');
+  }
 }

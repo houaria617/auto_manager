@@ -1,11 +1,8 @@
-// lib/features/rentals/presentation/widgets/rental_card.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../data/models/rental.dart';
 
 class RentalCard extends StatelessWidget {
-  final Rental rental;
+  final Map<String, dynamic> rental;
   final bool isOngoingView;
   final VoidCallback? onTap;
 
@@ -19,11 +16,8 @@ class RentalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      // Wrap with InkWell
-      onTap: onTap, // Assign the onTap callback
-      borderRadius: BorderRadius.circular(
-        12,
-      ), // Match container's border radius
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -53,59 +47,58 @@ class RentalCard extends StatelessWidget {
     );
   }
 
-  // ... rest of your _build methods remain the same ...
   Widget _buildHeader() {
+    final status = rental['state'] ?? 'unknown';
+    Color bgColor;
+    Color textColor;
+
+    switch (status) {
+      case 'ongoing':
+        bgColor = const Color(0xFFDBEAFE);
+        textColor = const Color(0xFF2563EB);
+        break;
+      case 'overdue':
+        bgColor = const Color(0xFFFEE2E2);
+        textColor = const Color(0xFFDC2626);
+        break;
+      case 'returned':
+        bgColor = const Color(0xFFD1FAE5);
+        textColor = const Color(0xFF059669);
+        break;
+      default:
+        bgColor = Colors.grey[300]!;
+        textColor = Colors.grey[700]!;
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Rental ID: ${rental.id}',
+          'Rental ID: ${rental['id'] ?? 'N/A'}',
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
-        _buildStatusBadge(),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge() {
-    Color bgColor;
-    Color textColor;
-
-    switch (rental.status) {
-      case RentalStatus.active:
-        bgColor = const Color(0xFFDBEAFE);
-        textColor = const Color(0xFF2563EB);
-        break;
-      case RentalStatus.unpaid:
-        bgColor = const Color(0xFFFEE2E2);
-        textColor = const Color(0xFFDC2626);
-        break;
-      case RentalStatus.returned:
-        bgColor = const Color(0xFFD1FAE5);
-        textColor = const Color(0xFF059669);
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        rental.status.displayName,
-        style: TextStyle(
-          fontSize: 12,
-          color: textColor,
-          fontWeight: FontWeight.w500,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            status.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              color: textColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildCustomerName() {
     return Text(
-      rental.customerName,
+      rental['customer_name'] ?? 'Unknown Customer',
       style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
@@ -120,7 +113,7 @@ class RentalCard extends StatelessWidget {
         const Icon(Icons.directions_car, size: 18, color: Color(0xFF2563EB)),
         const SizedBox(width: 8),
         Text(
-          rental.vehicleModel,
+          rental['car_name'] ?? 'Unknown Car',
           style: const TextStyle(
             fontSize: 15,
             color: Color(0xFF2563EB),
@@ -133,8 +126,17 @@ class RentalCard extends StatelessWidget {
 
   Widget _buildFooter() {
     final dateFormat = DateFormat('MMM dd, yyyy');
+
+    DateTime startDate =
+        DateTime.tryParse(rental['date_from'] ?? '') ?? DateTime.now();
+    DateTime endDate =
+        DateTime.tryParse(rental['date_to'] ?? '') ?? DateTime.now();
+
     final dateRange =
-        '${dateFormat.format(rental.startDate)} - ${dateFormat.format(rental.endDate)}';
+        '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}';
+
+    final totalAmount = (rental['total_amount'] ?? 0).toDouble();
+    final daysLeft = endDate.difference(DateTime.now()).inDays;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -146,10 +148,10 @@ class RentalCard extends StatelessWidget {
               dateRange,
               style: TextStyle(fontSize: 13, color: Colors.grey[600]),
             ),
-            if (isOngoingView) ...[
+            if (isOngoingView && daysLeft >= 0) ...[
               const SizedBox(height: 4),
               Text(
-                '${rental.daysLeft} days left',
+                '$daysLeft days left',
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF1a1a1a),
@@ -160,7 +162,7 @@ class RentalCard extends StatelessWidget {
           ],
         ),
         Text(
-          '\$${rental.price.toStringAsFixed(2)}',
+          '\$${totalAmount.toStringAsFixed(2)}',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

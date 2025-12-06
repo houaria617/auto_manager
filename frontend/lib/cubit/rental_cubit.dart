@@ -89,4 +89,24 @@ class RentalCubit extends Cubit<RentalState> {
       //emit(RentalState(error: e.toString())); // Error
     }
   }
+
+  Future<List<Map<String, dynamic>>> getAllRentalsWithDetails() async {
+    final rentals = await _rentalRepo.getAllRentals();
+
+    List<Map<String, dynamic>> enrichedRentals = [];
+
+    for (var rental in rentals) {
+      final car = await _carRepo.getCar(rental['car_id']);
+      final client = await _clientRepo.getClient(rental['client_id']);
+
+      enrichedRentals.add({
+        ...rental,
+        'car_name': car?['name'] ?? 'Unknown Car',
+        'car_model': car?['model'] ?? 'Unknown Model',
+        'customer_name': client?['full_name'] ?? 'Unknown Customer',
+      });
+    }
+
+    return enrichedRentals;
+  }
 }

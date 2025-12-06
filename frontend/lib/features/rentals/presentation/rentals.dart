@@ -1,5 +1,7 @@
 // lib/features/rentals/presentation/screens/rentals_screen.dart
 
+import 'package:auto_manager/cubit/rental_cubit.dart';
+
 import '../../Dashboard/navigation_bar.dart';
 import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
 import 'package:auto_manager/features/rentals/presentation/providers/rentals_provider.dart';
@@ -15,8 +17,8 @@ class RentalsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => RentalsProvider(),
-      child: const _RentalsScreenContent(),
+      create: (_) => RentalsProvider(context.read<RentalCubit>()),
+      child: _RentalsScreenContent(), // not const
     );
   }
 }
@@ -115,10 +117,9 @@ class _RentalsScreenContent extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           return RentalCard(
-            rental: rentals[index],
+            rental: rentals[index], // Map<String, dynamic> now works
             isOngoingView: !provider.showCompleted,
             onTap: () {
-              // Navigate to the details screen when the card is tapped
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => RentalDetailsScreen()),

@@ -7,12 +7,21 @@ Future<Map<String, dynamic>?> showVehicleDialog(
   BuildContext context,
   Map<String, dynamic> vehicle,
 ) async {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController plateController = TextEditingController();
-  final TextEditingController nextMaintenanceController =
-      TextEditingController();
-  final TextEditingController returnDateController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
+  final TextEditingController nameController = TextEditingController(
+    text: vehicle['name'] ?? '',
+  );
+  final TextEditingController plateController = TextEditingController(
+    text: vehicle['plate'] ?? '',
+  );
+  final TextEditingController nextMaintenanceController = TextEditingController(
+    text: vehicle['maintenance'] ?? '',
+  );
+  final TextEditingController returnDateController = TextEditingController(
+    text: vehicle['return_from_maintenance'] ?? '',
+  );
+  final TextEditingController priceController = TextEditingController(
+    text: (vehicle['price'] ?? '').toString(),
+  );
 
   String status = 'available';
 
@@ -163,7 +172,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(
                   const SizedBox(height: 12),
 
                   // Conditional Fields
-                  if (status == 'Rented')
+                  if (status == 'rented')
                     TextField(
                       controller: returnDateController,
                       decoration: InputDecoration(
@@ -209,21 +218,41 @@ Future<Map<String, dynamic>?> showVehicleDialog(
                           ),
                         ),
                         onPressed: () {
-                          // Normally save or update logic goes here
-                          print('calling addVehicle inside vehicle dialoge');
-                          context.read<VehicleCubit>().addVehicle(
-                            nameController.text,
-                            plateController.text,
-                            double.parse(priceController.text),
-                            nextMaintenanceController.text,
-                            returnDateController.text,
-                            status,
-                          );
-                          print(
-                            'addVehicle successfully executed inside vehicle dialog',
-                          );
-                          Navigator.pop(context);
+                          final isEditing = vehicle['id'] != null;
+
+                          final updatedVehicle = {
+                            'id': vehicle['id'],
+                            'name': nameController.text,
+                            'plate': plateController.text,
+                            'price':
+                                double.tryParse(priceController.text) ?? 0.0,
+                            'maintenance': nextMaintenanceController.text,
+                            'return_from_maintenance':
+                                returnDateController.text,
+                            'state': status,
+                          };
+
+                          if (isEditing) {
+                            // UPDATE VEHICLE
+                            context.read<VehicleCubit>().updateVehicle(
+                              updatedVehicle['id'],
+                              updatedVehicle,
+                            );
+                          } else {
+                            // CREATE NEW VEHICLE
+                            context.read<VehicleCubit>().addVehicle(
+                              nameController.text,
+                              plateController.text,
+                              double.tryParse(priceController.text) ?? 0.0,
+                              nextMaintenanceController.text,
+                              returnDateController.text,
+                              status,
+                            );
+                          }
+
+                          Navigator.pop(context, updatedVehicle);
                         },
+
                         child: const Text(
                           'Save',
                           style: TextStyle(
@@ -242,4 +271,5 @@ Future<Map<String, dynamic>?> showVehicleDialog(
       );
     },
   );
+  return null;
 }

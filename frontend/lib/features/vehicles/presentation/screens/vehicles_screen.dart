@@ -54,11 +54,28 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
+        onPressed: () async {
+          await showVehicleDialog(context, {}); // open vehicle dialog
+          context.read<VehicleCubit>().getVehicles(); // refresh list
+        },
+      ),
 
       // BODY
       body: BlocBuilder<VehicleCubit, List<Map<String, dynamic>>>(
         builder: (context, state) {
           if (state.isEmpty) return Center(child: Text('No Car Found.'));
+
+          // ✅ Filtering logic (keeps Search + Filter chips intact)
+          final filteredVehicles = selectedFilter == 'All'
+              ? state
+              : state
+                    .where((v) => v['state'] == selectedFilter.toLowerCase())
+                    .toList();
+
           return Column(
             children: [
               // Search bar
@@ -79,13 +96,16 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 14,
-                      color: textDark,
+                      color: Color(0xFF1A1A1A),
                     ),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search, color: textGray),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF6B7280),
+                      ),
                       hintText: 'Search by model or plate...',
                       hintStyle: const TextStyle(
-                        color: textGray,
+                        color: Color(0xFF6B7280),
                         fontFamily: 'Manrope',
                       ),
                       filled: true,
@@ -100,7 +120,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                 ),
               ),
 
-              // Chips for Filtering
+              // 🎯 FILTER BAR (NOT REMOVED)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: SingleChildScrollView(
@@ -118,15 +138,16 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
               const SizedBox(height: 8),
 
-              // Cards grid
+              // VEHICLE GRID (uses filteredVehicles)
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final crossAxisCount = constraints.maxWidth >= 768 ? 2 : 1;
+
                     return Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: GridView.builder(
-                        itemCount: state.length,
+                        itemCount: filteredVehicles.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 12,
@@ -134,26 +155,19 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                           childAspectRatio: 1.8,
                         ),
                         itemBuilder: (context, index) {
-                          if (state.isEmpty)
-                            return Center(child: Text('No Car Found.'));
+                          final vehicle = filteredVehicles[index];
 
-                          if (index < state.length) {
-                            final vehicle = state[index];
-                            print(
-                              'IMPORTANT: vehicle in vehicles screen to be passed to vehicle details screen: $vehicle',
-                            );
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        VehicleDetailsScreen(vehicle: vehicle),
-                                  ),
-                                );
-                              },
-                              child: VehicleCard(vehicle: vehicle),
-                            );
-                          }
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      VehicleDetailsScreen(vehicle: vehicle),
+                                ),
+                              );
+                            },
+                            child: VehicleCard(vehicle: vehicle),
+                          );
                         },
                       ),
                     );

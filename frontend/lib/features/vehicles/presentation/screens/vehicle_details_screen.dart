@@ -1,9 +1,9 @@
+import 'package:auto_manager/cubit/dashboard_cubit.dart';
 import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../dialogs/vehicle_dialog.dart';
-import '';
 
 // Type alias for clarity
 typedef VehicleMap = Map<String, dynamic>;
@@ -63,6 +63,8 @@ class VehicleDetailsScreen extends StatelessWidget {
                   updatedVehicle,
                 );
 
+                context.read<VehicleCubit>().getVehicles();
+
                 // Pop the detail screen to show the updated list
                 print('vehicle Added');
                 Navigator.of(context).pop();
@@ -79,79 +81,78 @@ class VehicleDetailsScreen extends StatelessWidget {
         ],
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                vehicle['name'],
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D3748),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Status Row
-            Row(
-              children: [
-                Icon(
-                  // Use 'state' key for status color
-                  Icons.circle,
-                  color: _getStatusColor(vehicle['state']),
-                  size: 14,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  // 🛠️ FIX: Use 'state' key for status text
-                  vehicle['state'],
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 16,
-                    color: _getStatusColor(vehicle['state']),
-                    fontWeight: FontWeight.w600,
-                  ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- Car Name Header ---
+                Text(
+                  vehicle['name'],
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D3748),
+                  ),
+                ),
+                const SizedBox(height: 12),
 
-            // Basic Info
-            _buildDetail("Plate Number", vehicle['plate']),
-            const Divider(color: Color(0xFFE2E8F0)),
+                // --- Status Row ---
+                Row(
+                  children: [
+                    Icon(
+                      Icons.circle,
+                      color: _getStatusColor(vehicle['state']),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      vehicle['state'],
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _getStatusColor(vehicle['state']),
+                      ),
+                    ),
+                  ],
+                ),
 
-            // ❌ REMOVED: Return date for rented vehicles (no corresponding DB column)
+                const SizedBox(height: 12),
 
-            // Available-from date for maintenance vehicles
-            // 🛠️ FIX: Use 'state' and corrected DB key 'return_from_maintenance'
-            if (vehicle['state'].toLowerCase() == 'maintenance' &&
-                vehicle['return_from_maintenance'] != null)
-              _buildDetail("Available On", vehicle['return_from_maintenance']),
+                // --- Plate Number ---
+                _buildDetail("Plate Number", vehicle['plate']),
+                const Divider(color: Color(0xFFE2E8F0)),
 
-            // Next maintenance (show for all vehicles)
-            // 🛠️ FIX: Use DB key 'maintenance'
-            _buildDetail("Next Maintenance", vehicle['maintenance']),
-            const Divider(color: Color(0xFFE2E8F0)),
-          ],
-        ),
+                // --- Available on (Maintenance Case Only) ---
+                if (vehicle['state'].toLowerCase() == 'maintenance' &&
+                    vehicle['return_from_maintenance'] != null)
+                  _buildDetail(
+                    "Available On",
+                    vehicle['return_from_maintenance'],
+                  ),
+
+                // --- Next Maintenance ---
+                _buildDetail("Next Maintenance", vehicle['maintenance']),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

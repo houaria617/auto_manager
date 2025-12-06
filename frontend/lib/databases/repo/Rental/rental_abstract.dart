@@ -6,6 +6,7 @@
 import 'rental_db.dart';
 
 abstract class AbstractRentalRepo {
+  Future<List<Map<String, dynamic>>> getAllRentals();
   Future<int> countOngoingRentals();
   Future<bool> insertRental(Map<String, dynamic> rental);
   Future<bool> deleteRental(int index);
