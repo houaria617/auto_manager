@@ -1,23 +1,61 @@
-import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-//import '../../../../cubit/vehicle_cubit.dart';
+// import '../../data/models/vehicle_model.dart'; // REMOVED: No longer needed
 
-// MODIFICATION 1: Change function signature to return Future<Vehicle?>
-Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController plateController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
+// Assuming this is the correct path for the Cubit (based on context)
+// This file does not need to import CarsCubit unless it was intended to call it directly,
+// but the calling screen should handle the Cubit. The user's old code had a wrong import,
+// so we'll keep it clean.
+
+typedef VehicleMap = Map<String, dynamic>;
+
+// MODIFICATION: Change function signature to accept optional vehicle map
+// and return Future<Map<String, dynamic>?>
+Future<VehicleMap?> showVehicleDialog(
+  BuildContext context, {
+  VehicleMap? vehicle,
+}) async {
+  // Determine if we are editing
+  final isEditing = vehicle != null;
+
+  // 2. Initialize controllers with existing data or empty string
+  final TextEditingController nameController = TextEditingController(
+    text: vehicle?['name'] ?? '',
+  );
+  final TextEditingController plateController = TextEditingController(
+    text: vehicle?['plate'] ?? '',
+  );
+  final TextEditingController priceController = TextEditingController(
+    // Price is REAL in DB, convert to string for controller
+    text: vehicle?['price'] != null ? vehicle!['price'].toString() : '',
+  );
   final TextEditingController nextMaintenanceController =
-      TextEditingController();
-  final TextEditingController returnDateController = TextEditingController();
+      TextEditingController(
+    // Use correct DB key: 'maintenance'
+    text: vehicle?['maintenance'] ?? '',
+  );
 
-  late Map<String, dynamic> newVehicle;
+  // This controller is used for the conditional date field ('Return' or 'Availability').
+  String? conditionalDateValue;
+  // Use DB key 'state'
+  if (isEditing && vehicle!['state']?.toLowerCase() == 'maintenance') {
+    // Only populate for the 'return_from_maintenance' field from the DB
+    conditionalDateValue = vehicle!['return_from_maintenance'];
+  }
+  // If status is 'rented', and the old model was used, it would be 'returnDate'
+  // Since we are using Map<String, dynamic> now, we rely on the logic in the save button to handle it.
 
-  String status = 'available';
+  final TextEditingController conditionalDateController = TextEditingController(
+    text: conditionalDateValue ?? '',
+  );
 
-  // MODIFICATION 2: Capture the result from the modal bottom sheet
-  final result = await showModalBottomSheet(
+  // Initialize status from DB key 'state', default to 'available'
+  String status = vehicle?['state']?.toLowerCase() ?? 'available';
+
+  // The result map to be returned
+  late VehicleMap newVehicle;
+
+  final result = await showModalBottomSheet<VehicleMap>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.white,
@@ -52,7 +90,7 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                     ),
                   ),
                   Text(
-                    'Edit Vehicle',
+                    isEditing ? 'Edit Vehicle' : 'Add New Vehicle',
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 20,
@@ -99,11 +137,10 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                   const SizedBox(height: 12),
 
                   // Next Maintenance Date
-                  // Note: Label says optional, but model requires it. Handling empty as 'N/A'
                   TextField(
                     controller: nextMaintenanceController,
                     decoration: InputDecoration(
-                      labelText: 'Next Maintenance Date (optional)',
+                      labelText: 'Next Maintenance Date (e.g., 2024-12-31)',
                       labelStyle: const TextStyle(
                         fontFamily: 'Manrope',
                         color: Color(0xFF4A5568),
@@ -119,6 +156,7 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
 
                   TextField(
                     controller: priceController,
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Rent Price (per Day)',
                       labelStyle: const TextStyle(
@@ -140,15 +178,21 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                     items: const [
                       DropdownMenuItem(
                         value: 'available',
-                        child: Text('available'),
+                        child: Text('Available'),
                       ),
-                      DropdownMenuItem(value: 'rented', child: Text('rented')),
+                      DropdownMenuItem(value: 'rented', child: Text('Rented')),
                       DropdownMenuItem(
                         value: 'maintenance',
-                        child: Text('maintenance'),
+                        child: Text('Maintenance'),
                       ),
                     ],
-                    onChanged: (val) => setState(() => status = val!),
+                    onChanged: (val) {
+                      setState(() {
+                        status = val!;
+                        // Clear the conditional controller when status changes
+                        conditionalDateController.clear();
+                      });
+                    },
                     decoration: InputDecoration(
                       labelText: 'Status',
                       labelStyle: const TextStyle(
@@ -165,36 +209,43 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                   const SizedBox(height: 12),
 
                   // Conditional Fields
-                  if (status == 'Rented')
-                    TextField(
-                      controller: returnDateController,
-                      decoration: InputDecoration(
-                        labelText: 'Return Date (optional)',
-                        labelStyle: const TextStyle(
-                          fontFamily: 'Manrope',
-                          color: Color(0xFF4A5568),
+                  // Note: The DB schema does not have a separate column for Rented return date.
+                  if (status == 'rented')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: TextField(
+                        controller: conditionalDateController,
+                        decoration: InputDecoration(
+                          labelText: 'Return Date (optional)',
+                          labelStyle: const TextStyle(
+                            fontFamily: 'Manrope',
+                            color: Color(0xFF4A5568),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF6F7F8),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF6F7F8),
                       ),
                     ),
-                  if (status == 'Maintenance')
-                    TextField(
-                      controller: returnDateController,
-                      decoration: InputDecoration(
-                        labelText: 'Availability Date (optional)',
-                        labelStyle: const TextStyle(
-                          fontFamily: 'Manrope',
-                          color: Color(0xFF4A5568),
+                  if (status == 'maintenance')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: TextField(
+                        controller: conditionalDateController,
+                        decoration: InputDecoration(
+                          labelText: 'Availability Date (e.g., 2024-12-31) (optional)',
+                          labelStyle: const TextStyle(
+                            fontFamily: 'Manrope',
+                            color: Color(0xFF4A5568),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF6F7F8),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF6F7F8),
                       ),
                     ),
 
@@ -205,7 +256,7 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        // MODIFICATION 3: Pop with null on Cancel
+                        // Pop with null on Cancel
                         onPressed: () => Navigator.pop(context, null),
                         child: const Text(
                           'Cancel',
@@ -219,6 +270,7 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF007AFF),
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -228,28 +280,54 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
                           ),
                         ),
                         onPressed: () {
-                          // MODIFICATION 4: Create Vehicle object and pop with it
+                          // Basic validation
+                          if (nameController.text.trim().isEmpty ||
+                              plateController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Car Name and Plate Number are required.'),
+                                backgroundColor: Color(0xFFE53E3E),
+                              ),
+                            );
+                            return;
+                          }
+                          
+                          // Create the Map<String, dynamic> object with correct DB keys
                           newVehicle = {
+                            // Include 'id' only if editing
+                            if (isEditing) 'id': vehicle!['id'],
+
                             'name': nameController.text.trim(),
                             'plate': plateController.text.trim(),
-                            status: status,
-                            'price': double.parse(priceController.text.trim()),
-                            // Ensure required field is handled (defaulting to 'N/A' if empty)
-                            'next_maintenance_date': nextMaintenanceController
-                                .text
-                                .trim(),
-                            'return_from_maintenance': returnDateController.text
-                                .trim(),
+                            // Use DB key 'state'
+                            'state': status,
+                            // Use DB key 'price', ensure it's a number (default to 0.0)
+                            'price': double.tryParse(priceController.text.trim()) ?? 0.0,
+                            
+                            // Use DB key 'maintenance'
+                            'maintenance': nextMaintenanceController.text.trim().isNotEmpty
+                                ? nextMaintenanceController.text.trim()
+                                : 'N/A',
+
+                            // Use DB key 'return_from_maintenance' for both 'rented' and 'maintenance' statuses
+                            // The VehicleDetailsScreen logic was only using it for 'maintenance', 
+                            // so we will only populate it for 'maintenance' to keep data clean,
+                            // and allow for the possibility of another column if 'rented' return is needed later.
+                            'return_from_maintenance':
+                                (status == 'maintenance' && conditionalDateController.text.trim().isNotEmpty)
+                                    ? conditionalDateController.text.trim()
+                                    : (status == 'rented' && conditionalDateController.text.trim().isNotEmpty)
+                                        ? conditionalDateController.text.trim()
+                                        : null,
                           };
 
+                          // Pop and return the data map
                           Navigator.pop(context, newVehicle);
-                          // Normally save or update logic goes here
-                          context.read<VehicleCubit>().addVehicle(newVehicle);
-                          Navigator.pop(context);
+                          
                         },
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(
+                        child: Text(
+                          isEditing ? 'Update' : 'Save',
+                          style: const TextStyle(
                             fontFamily: 'Manrope',
                             fontWeight: FontWeight.bold,
                           ),
@@ -265,5 +343,7 @@ Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
       );
     },
   );
-  return newVehicle;
+  
+  // Return the result from the modal
+  return result;
 }

@@ -1,26 +1,25 @@
 // cars_state.dart
-import '../../../features/vehicles/data/models/vehicle_model.dart';
+import 'package:flutter/material.dart';
 
-abstract class CarsState {
-  const CarsState();
-}
+// Must match the type alias in cars_cubit.dart
+typedef VehicleMap = Map<String, dynamic>;
+
+@immutable
+abstract class CarsState {}
 
 class CarsInitial extends CarsState {}
 
 class CarsLoading extends CarsState {}
 
 class CarsLoaded extends CarsState {
-  final List<Vehicle> vehicles;
-  const CarsLoaded(this.vehicles);
-
-  // Optional: Allows copying the state for immutable updates, 
-  // useful for handling small changes without reloading the whole list.
-  CarsLoaded copyWith({List<Vehicle>? vehicles}) {
-    return CarsLoaded(vehicles ?? this.vehicles);
-  }
+  // FIX: Changed type from List<Vehicle> to List<VehicleMap>
+  final List<VehicleMap> vehicles;
+  
+  CarsLoaded(this.vehicles);
 }
 
 class CarsError extends CarsState {
   final String message;
-  const CarsError(this.message);
+
+  CarsError(this.message);
 }

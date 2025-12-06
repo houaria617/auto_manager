@@ -5,12 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../logic/cubits/cars/cars_cubit.dart';
 import '../../../../logic/cubits/cars/cars_state.dart';
 
-import '../../data/models/vehicle_model.dart';
+// ❌ REMOVED: import '../../data/models/vehicle_model.dart';
 import 'vehicle_details_screen.dart';
 import '../widgets/vehicle_card.dart';
 import '../widgets/filter_chip_row.dart';
 import '../dialogs/vehicle_dialog.dart';
 import '../../../Dashboard/navigation_bar.dart';
+
+// Type alias for clarity, matching the Cubit's state data type
+typedef VehicleMap = Map<String, dynamic>;
 
 class VehiclesScreen extends StatefulWidget {
   const VehiclesScreen({super.key});
@@ -29,10 +32,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
   String selectedFilter = 'All';
 
-  late Map<String, dynamic> vehicle;
-
-  // LOGIC: DELETE the hardcoded list and local filter logic.
-  // The state will handle data.
+  // ❌ REMOVED: The unused 'vehicle' state variable
 
   // NEW LOGIC: Trigger initial data fetch
   @override
@@ -44,9 +44,11 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   }
 
   // LOGIC: Helper function to perform client-side filtering
-  List<Vehicle> _getFilteredVehicles(List<Vehicle> allVehicles) {
+  // 🛠️ FIX: Changed signature to use List<VehicleMap>
+  List<VehicleMap> _getFilteredVehicles(List<VehicleMap> allVehicles) {
     if (selectedFilter == 'All') return allVehicles;
-    return allVehicles.where((v) => v.status == selectedFilter).toList();
+    // 🛠️ FIX: Accessing status via DB column 'state'
+    return allVehicles.where((v) => v['state'] == selectedFilter).toList();
   }
 
   @override
@@ -165,14 +167,12 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                   if (filteredVehicles.isEmpty) {
                     return Center(
                       child: Padding(
-                        padding: EdgeInsets.all(24.0),
+                        padding: const EdgeInsets.all(24.0),
                         child: Text(
-                          "No vehicles match the filter \"${state.vehicles.firstWhere(
-                            (v) => v.status == selectedFilter,
-                            orElse: () => Vehicle(name: '', plate: '', status: selectedFilter, nextMaintenanceDate: ''),
-                          ).status}\".",
+                          // 🛠️ FIX: Simplified error message to avoid model construction
+                          "No vehicles match the filter \"$selectedFilter\".",
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: textGray, fontSize: 16),
+                          style: const TextStyle(color: textGray, fontSize: 16),
                         ),
                       ),
                     );
@@ -204,7 +204,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => VehicleDetailsScreen(
-                                      vehicle: vehicle as Map<String, dynamic>,
+                                      // vehicle is already Map<String, dynamic>
+                                      vehicle: vehicle, 
                                     ),
                                   ),
                                 );
@@ -227,9 +228,12 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
       // Floating Action Button
       floatingActionButton: FloatingActionButton(
-        // NEW LOGIC: Make async and call cubit to add data
+        // 🛠️ FIX: Added async/await and cubit call
         onPressed: () async {
-          vehicle = await showVehicleDialog(context);
+          final VehicleMap? newVehicle = await showVehicleDialog(context);
+          if (newVehicle != null) {
+            context.read<CarsCubit>().addVehicle(newVehicle);
+          }
         },
         backgroundColor: primary,
         elevation: 6,

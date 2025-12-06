@@ -4,8 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../dialogs/vehicle_dialog.dart';
 import '../../../../logic/cubits/cars/cars_cubit.dart';
 
+// Type alias for clarity
+typedef VehicleMap = Map<String, dynamic>;
+
 class VehicleDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> vehicle;
+  final VehicleMap vehicle;
 
   const VehicleDetailsScreen({super.key, required this.vehicle});
 
@@ -43,14 +46,19 @@ class VehicleDetailsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit, color: Color(0xFF007BFF)),
             onPressed: () async {
-              // Show the dialog, pre-populating with current vehicle data
-              final updatedVehicle = await showVehicleDialog(context);
+              // 🛠️ FIX: Pass the current vehicle to prepopulate the dialog.
+              final VehicleMap? updatedVehicle = await showVehicleDialog(
+                context,
+                vehicle: vehicle,
+              );
 
-              context.read<CarsCubit>().updateVehicle(updatedVehicle);
+              if (updatedVehicle != null) {
+                // Call Cubit update with the returned map
+                context.read<CarsCubit>().updateVehicle(updatedVehicle);
 
-              // 2. Pop the detail screen to show the updated list
-              // (The VehiclesScreen will automatically rebuild)
-              Navigator.of(context).pop();
+                // Pop the detail screen to show the updated list
+                Navigator.of(context).pop();
+              }
             },
           ),
           // 🗑️ DELETE LOGIC: Trigger confirmation
@@ -98,17 +106,19 @@ class VehicleDetailsScreen extends StatelessWidget {
             Row(
               children: [
                 Icon(
+                  // Use 'state' key for status color
                   Icons.circle,
                   color: _getStatusColor(vehicle['state']),
                   size: 14,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  vehicle['status'],
+                  // 🛠️ FIX: Use 'state' key for status text
+                  vehicle['state'],
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
-                    color: _getStatusColor(vehicle['status']),
+                    color: _getStatusColor(vehicle['state']),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -120,18 +130,17 @@ class VehicleDetailsScreen extends StatelessWidget {
             _buildDetail("Plate Number", vehicle['plate']),
             const Divider(color: Color(0xFFE2E8F0)),
 
-            // Return date for rented vehicles
-            if (vehicle['status'].toLowerCase() == 'rented' &&
-                vehicle['returnDate'] != null)
-              _buildDetail("Return Date", vehicle['returnDate']),
-
+            // ❌ REMOVED: Return date for rented vehicles (no corresponding DB column)
+            
             // Available-from date for maintenance vehicles
-            if (vehicle['status'].toLowerCase() == 'maintenance' &&
-                vehicle['return_from_maintenace'] != null)
-              _buildDetail("Available On", vehicle['return_from_maintenace']),
+            // 🛠️ FIX: Use 'state' and corrected DB key 'return_from_maintenance'
+            if (vehicle['state'].toLowerCase() == 'maintenance' &&
+                vehicle['return_from_maintenance'] != null)
+              _buildDetail("Available On", vehicle['return_from_maintenance']),
 
             // Next maintenance (show for all vehicles)
-            _buildDetail("Next Maintenance", vehicle['next_maintenance']),
+            // 🛠️ FIX: Use DB key 'maintenance'
+            _buildDetail("Next Maintenance", vehicle['maintenance']),
             const Divider(color: Color(0xFFE2E8F0)),
           ],
         ),
@@ -227,7 +236,7 @@ class VehicleDetailsScreen extends StatelessWidget {
 
     // If confirmed is true, perform deletion
     if (confirmed == true) {
-      // 1. Call the Cubit's delete method
+      // 1. Call the Cubit's delete method. Assumes 'vehicle' map contains 'id'.
       context.read<CarsCubit>().deleteVehicle(vehicle);
 
       // 2. Show Snackbar confirmation
