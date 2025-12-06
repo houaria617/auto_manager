@@ -1,11 +1,21 @@
+<<<<<<< HEAD
 import 'package:auto_manager/cubit/dashboard_cubit.dart';
 import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
+=======
+import 'package:auto_manager/features/rentals/presentation/screens/add_rental_screen.dart';
+>>>>>>> feat/auth-local
 import 'package:auto_manager/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
+<<<<<<< HEAD
 import 'package:flutter_bloc/flutter_bloc.dart';
 // ✅ Import AppLocalizations
 import 'package:auto_manager/l10n/app_localizations.dart';
+=======
+import 'package:auto_manager/logic/cubits/auth_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth_state.dart';
+>>>>>>> feat/auth-local
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -51,7 +61,7 @@ class _DashboardState extends State<Dashboard> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SettingsScreen()),
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
                   );
                 },
                 icon: const Icon(
@@ -79,6 +89,7 @@ class _DashboardState extends State<Dashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
+<<<<<<< HEAD
                 Center(
                   child: Text(
                     l10n.appName, // 🌍 Localized
@@ -87,7 +98,48 @@ class _DashboardState extends State<Dashboard> {
                       fontFamily: 'ManropeExtraBold',
                     ),
                   ),
+=======
+                
+                // Display Welcome Message with Username
+                BlocBuilder<AuthCubit, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthAuthenticated) {
+                      return Center(
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Auto Manager",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontFamily: 'ManropeExtraBold',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Welcome, ${state.user.username}!",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF3B82F6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return const Center(
+                      child: Text(
+                        "Auto Manager",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontFamily: 'ManropeExtraBold',
+                        ),
+                      ),
+                    );
+                  },
+>>>>>>> feat/auth-local
                 ),
+                
                 const SizedBox(height: 24),
 
                 // --- CARD 1: Ongoing Rentals ---
@@ -454,7 +506,7 @@ class _DashboardState extends State<Dashboard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AddRentalScreen(),
+                        builder: (context) => const RentalsScreen(),
                       ),
                     );
                   },
@@ -492,4 +544,61 @@ class _DashboardState extends State<Dashboard> {
       bottomNavigationBar: const NavBar(),
     );
   }
+<<<<<<< HEAD
 }
+=======
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Gradient gradient,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 22, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+>>>>>>> feat/auth-local

@@ -3,6 +3,12 @@ import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+<<<<<<< HEAD
+=======
+import 'package:auto_manager/logic/cubits/auth_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth_state.dart';
+import '../../../auth/presentation/login_screen.dart';
+>>>>>>> feat/auth-local
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -14,6 +20,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+<<<<<<< HEAD
   void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -56,6 +63,33 @@ class SettingsScreen extends StatelessWidget {
           },
         );
       },
+=======
+  void _handleLogout(BuildContext context) {
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // Close dialog
+              // Call logout from AuthCubit
+              context.read<AuthCubit>().logout();
+            },
+            child: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+>>>>>>> feat/auth-local
     );
   }
 
@@ -76,12 +110,13 @@ class SettingsScreen extends StatelessWidget {
           style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildTile(
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthUnauthenticated) {
+            // Navigate to Login screen after logout
+            Navigator.pushAndRemoveUntil(
               context,
+<<<<<<< HEAD
               icon: Icons.business_center,
               title: AppLocalizations.of(context)!.agencyInfo,
               subtitle: AppLocalizations.of(context)!.agencyInfoSubtitle,
@@ -99,6 +134,37 @@ class SettingsScreen extends StatelessWidget {
             const Spacer(),
             _buildLogoutButton(context),
           ],
+=======
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false, // Remove all previous routes
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildTile(
+                context,
+                icon: Icons.business_center,
+                title: "Agency Information",
+                subtitle: "Update your agency name, address, and contact details.",
+                onTap: () => _navigateToComingSoon(context, "Agency Information"),
+              ),
+              _buildTile(
+                context,
+                icon: Icons.language,
+                title: "App Language",
+                subtitle: "Select your preferred language for the app.",
+                onTap: () => _navigateToComingSoon(context, "App Language"),
+              ),
+              const SizedBox(height: 12),
+              _buildSubscriptionCard(context),
+              const Spacer(),
+              _buildLogoutButton(context),
+            ],
+          ),
+>>>>>>> feat/auth-local
         ),
       ),
     );
@@ -219,11 +285,15 @@ class SettingsScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: ElevatedButton.icon(
+<<<<<<< HEAD
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(AppLocalizations.of(context)!.logout)),
           );
         },
+=======
+        onPressed: () => _handleLogout(context),
+>>>>>>> feat/auth-local
         icon: const Icon(Icons.logout),
         label: Text(AppLocalizations.of(context)!.logout),
         style: ElevatedButton.styleFrom(
