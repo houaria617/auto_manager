@@ -8,39 +8,54 @@ import '../../dbhelper.dart';
 
 class ClientDB extends AbstractClientRepo {
   @override
-  Future<List<Map>> getData() async {
+  Future<List<Map<String, dynamic>>> getAllClients() async {
     final database = await DBHelper.getDatabase();
-    return database.rawQuery('''SELECT
-          client.id,
-          client.first_name,
-          client.last_name,
-          client.email
-        FROM client
+    return await database.rawQuery('''SELECT * FROM client
         ''');
   }
 
   @override
   Future<bool> deleteClient(int index) async {
     final database = await DBHelper.getDatabase();
-    database.rawQuery("""delete from  client where id=?""", [index]);
-    return true;
+    final count = await database.rawDelete(
+      """DELETE FROM  client WHERE id=?""",
+      [index],
+    );
+    return count > 0;
   }
 
   @override
-  Future<bool> insertClient(Map<String, dynamic> client) async {
+  Future<int> insertClient(Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
-    database.insert(
+    final clientID = await database.insert(
       "client",
       client,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    return true;
+    return clientID;
   }
 
   @override
-  Future<bool> updateClient(int index, Map<String, dynamic> client) async {
+  Future<bool> updateClient(int id, Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
-    database.update(index, client);
-    return true;
+    final count = await database.update(
+      'client',
+      client,
+      where: 'id=?',
+      whereArgs: [id],
+    );
+    return count > 0;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getClient(int index) async {
+    final database = await DBHelper.getDatabase();
+    final results = await database.rawQuery(
+      '''
+      SELECT * FROM client WHERE id == ?
+''',
+      [index],
+    );
+    return results.isEmpty ? null : results.first;
   }
 }

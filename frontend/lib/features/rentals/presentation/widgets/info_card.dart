@@ -1,4 +1,4 @@
-import 'package:auto_manager/features/Clients/clients_history.dart';
+import 'package:auto_manager/features/Clients/client_profile.dart';
 import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
 
