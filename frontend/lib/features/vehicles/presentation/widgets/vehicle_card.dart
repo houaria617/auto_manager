@@ -1,10 +1,14 @@
 // vehicle_card.dart
 import 'package:flutter/material.dart';
 import '../screens/vehicle_details_screen.dart';
-import '../../data/models/vehicle_model.dart';
+// import '../../data/models/vehicle_model.dart'; // REMOVED: No longer needed
+
+// Assuming the type definition is used for clarity
+typedef VehicleMap = Map<String, dynamic>;
 
 class VehicleCard extends StatelessWidget {
-  final Vehicle vehicle;
+  // 🛠️ FIX: Changed type from Vehicle to Map<String, dynamic>
+  final VehicleMap vehicle;
 
   const VehicleCard({super.key, required this.vehicle});
 
@@ -28,6 +32,7 @@ class VehicleCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
+            // 🛠️ FIX: vehicle object is already a Map, passing it directly
             builder: (context) => VehicleDetailsScreen(vehicle: vehicle),
           ),
         );
@@ -39,52 +44,64 @@ class VehicleCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Status Row
+              // Status Indicator and Name
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.circle,
-                    color: _getStatusColor(vehicle.status),
-                    size: 10,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    vehicle.status,
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      color: _getStatusColor(vehicle.status),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                      letterSpacing: -0.2,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
                     ),
+                    decoration: BoxDecoration(
+                      // 🛠️ FIX: Use DB key 'state'
+                      color: _getStatusColor(vehicle['state']).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      // 🛠️ FIX: Use DB key 'state'
+                      vehicle['state'],
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        // 🛠️ FIX: Use DB key 'state'
+                        color: _getStatusColor(vehicle['state']),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Color(0xFFD1D5DB),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
-              // Vehicle name
+              // Car Name
               Text(
-                vehicle.name,
+                // 🛠️ FIX: Use map access 'name'
+                vehicle['name'],
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                  letterSpacing: -0.3,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
                 ),
               ),
-
               const SizedBox(height: 4),
 
               // Plate number
               Text(
-                "Plate: ${vehicle.plate}",
+                // 🛠️ FIX: Use map access 'plate'
+                "Plate: ${vehicle['plate']}",
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 14,
@@ -95,15 +112,18 @@ class VehicleCard extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Conditional info rows
-              if (vehicle.status.toLowerCase() == 'rented' &&
-                  vehicle.returnDate != null)
-                _infoRow("Return Date", vehicle.returnDate!),
+              // Note: The DB schema does not have a specific 'returnDate' column for rented cars.
+              // We only display 'return_from_maintenance' for maintenance status.
+              // The logic below has been simplified based on the DB schema.
 
-              if (vehicle.status.toLowerCase() == 'maintenance' &&
-                  vehicle.availableFrom != null)
-                _infoRow("Available on", vehicle.availableFrom!),
+              // Available-from date for maintenance vehicles
+              if (vehicle['state'].toLowerCase() == 'maintenance' &&
+                  vehicle['return_from_maintenance'] != null)
+                _infoRow("Available on", vehicle['return_from_maintenance']),
 
-              _infoRow("Next Maintenance", vehicle.nextMaintenanceDate),
+              // Next maintenance (show for all vehicles)
+              // 🛠️ FIX: Use DB key 'maintenance'
+              _infoRow("Next Maintenance", vehicle['maintenance']),
             ],
           ),
         ),
@@ -128,7 +148,10 @@ class VehicleCard extends StatelessWidget {
               text: "$label: ",
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
-            TextSpan(text: value),
+            TextSpan(
+              text: value,
+              style: const TextStyle(color: Color(0xFF1F2937)),
+            ),
           ],
         ),
       ),

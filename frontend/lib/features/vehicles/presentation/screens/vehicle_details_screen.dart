@@ -1,22 +1,28 @@
+import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
-import '../../data/models/vehicle_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../dialogs/vehicle_dialog.dart';
+import '';
+
+// Type alias for clarity
+typedef VehicleMap = Map<String, dynamic>;
 
 class VehicleDetailsScreen extends StatelessWidget {
-  final Vehicle vehicle;
+  final VehicleMap vehicle;
 
   const VehicleDetailsScreen({super.key, required this.vehicle});
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'available':
-        return const Color(0xFF28A745); // green
+        return const Color(0xFF28A745);
       case 'rented':
-        return const Color(0xFF007BFF); // blue
+        return const Color(0xFF007BFF);
       case 'maintenance':
-        return const Color(0xFFFFA500); // orange
+        return const Color(0xFFFFA500);
       default:
-        return const Color(0xFF718096); // gray
+        return const Color(0xFF718096);
     }
   }
 
@@ -29,7 +35,7 @@ class VehicleDetailsScreen extends StatelessWidget {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          vehicle.name,
+          vehicle['name'],
           style: const TextStyle(
             fontFamily: 'Manrope',
             color: Color(0xFF2D3748),
@@ -37,12 +43,33 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          // 🛠️ EDIT LOGIC: Await result and call Cubit update
           IconButton(
             icon: const Icon(Icons.edit, color: Color(0xFF007BFF)),
-            onPressed: () {
-              showVehicleDialog(context, vehicle: vehicle);
+            onPressed: () async {
+              // 🛠️ FIX: Pass the current vehicle to prepopulate the dialog.
+              final VehicleMap? updatedVehicle = await showVehicleDialog(
+                context,
+                vehicle,
+              );
+
+              if (updatedVehicle != null) {
+                // Call Cubit update with the returned map
+                print(
+                  'calling add vehicle inside vehicle details screen, $updatedVehicle',
+                );
+                context.read<VehicleCubit>().updateVehicle(
+                  updatedVehicle['id'],
+                  updatedVehicle,
+                );
+
+                // Pop the detail screen to show the updated list
+                print('vehicle Added');
+                Navigator.of(context).pop();
+              }
             },
           ),
+          // 🗑️ DELETE LOGIC: Trigger confirmation
           IconButton(
             icon: const Icon(Icons.delete, color: Color(0xFFE53E3E)),
             onPressed: () {
@@ -72,7 +99,7 @@ class VehicleDetailsScreen extends StatelessWidget {
                 ],
               ),
               child: Text(
-                vehicle.name,
+                vehicle['name'],
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 20,
@@ -87,17 +114,19 @@ class VehicleDetailsScreen extends StatelessWidget {
             Row(
               children: [
                 Icon(
+                  // Use 'state' key for status color
                   Icons.circle,
-                  color: _getStatusColor(vehicle.status),
+                  color: _getStatusColor(vehicle['state']),
                   size: 14,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  vehicle.status,
+                  // 🛠️ FIX: Use 'state' key for status text
+                  vehicle['state'],
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
-                    color: _getStatusColor(vehicle.status),
+                    color: _getStatusColor(vehicle['state']),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -106,21 +135,20 @@ class VehicleDetailsScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Basic Info
-            _buildDetail("Plate Number", vehicle.plate),
+            _buildDetail("Plate Number", vehicle['plate']),
             const Divider(color: Color(0xFFE2E8F0)),
 
-            // Return date for rented vehicles
-            if (vehicle.status.toLowerCase() == 'rented' &&
-                vehicle.returnDate != null)
-              _buildDetail("Return Date", vehicle.returnDate),
+            // ❌ REMOVED: Return date for rented vehicles (no corresponding DB column)
 
             // Available-from date for maintenance vehicles
-            if (vehicle.status.toLowerCase() == 'maintenance' &&
-                vehicle.availableFrom != null)
-              _buildDetail("Available On", vehicle.availableFrom),
+            // 🛠️ FIX: Use 'state' and corrected DB key 'return_from_maintenance'
+            if (vehicle['state'].toLowerCase() == 'maintenance' &&
+                vehicle['return_from_maintenance'] != null)
+              _buildDetail("Available On", vehicle['return_from_maintenance']),
 
             // Next maintenance (show for all vehicles)
-            _buildDetail("Next Maintenance", vehicle.nextMaintenanceDate),
+            // 🛠️ FIX: Use DB key 'maintenance'
+            _buildDetail("Next Maintenance", vehicle['maintenance']),
             const Divider(color: Color(0xFFE2E8F0)),
           ],
         ),
@@ -161,8 +189,10 @@ class VehicleDetailsScreen extends StatelessWidget {
     );
   }
 
+  // 🗑️ DELETE LOGIC: Refactor to await confirmation and then call Cubit
   Future<void> _showDeleteConfirmation(BuildContext context) async {
-    await showDialog<bool>(
+    // Await the result from the dialog
+    final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
@@ -177,7 +207,7 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Are you sure you want to delete "${vehicle.name}"? This action cannot be undone.',
+          'Are you sure you want to delete "${vehicle['name']}"? This action cannot be undone.',
           style: const TextStyle(
             fontFamily: 'Manrope',
             fontSize: 14,
@@ -186,6 +216,7 @@ class VehicleDetailsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
+            // Pop the dialog and return false (canceled)
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text(
               'Cancel',
@@ -202,21 +233,30 @@ class VehicleDetailsScreen extends StatelessWidget {
               ),
             ),
             onPressed: () {
+              // Pop the dialog and return true (confirmed)
               Navigator.of(dialogContext).pop(true);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Deleted "${vehicle.name}"'),
-                  backgroundColor: const Color(0xFFE53E3E),
-                ),
-              );
-
-              Navigator.of(context).pop();
             },
             child: const Text('Delete'),
           ),
         ],
       ),
     );
+
+    // If confirmed is true, perform deletion
+    if (confirmed == true) {
+      // 1. Call the Cubit's delete method. Assumes 'vehicle' map contains 'id'.
+      context.read<VehicleCubit>().deleteVehicle(vehicle['id']);
+
+      // 2. Show Snackbar confirmation
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Deleted "${vehicle['name']}"'),
+          backgroundColor: const Color(0xFFE53E3E),
+        ),
+      );
+
+      // 3. Navigate back to the list screen
+      Navigator.of(context).pop();
+    }
   }
 }

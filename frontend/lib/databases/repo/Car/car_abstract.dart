@@ -6,11 +6,12 @@
 import 'car_db.dart';
 
 abstract class AbstractCarRepo {
-  Future<List<Map<String, dynamic>>> getData();
   Future<int> countAvailableCars();
   Future<bool> insertCar(Map<String, dynamic> car);
   Future<List<Map<String, dynamic>>> getAllCars();
   Future<Map<String, dynamic>?> getCar(int id);
+  Future<bool> deleteCar(int id);
+  Future<bool> updateCar(int id, Map<String, dynamic> car);
 
   static AbstractCarRepo? _carInstance;
 

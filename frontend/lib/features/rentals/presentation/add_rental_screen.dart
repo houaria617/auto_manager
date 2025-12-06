@@ -48,7 +48,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     setState(() => _isLoading = true);
     try {
       final rawClients = await _clientRepo.getAllClients();
-      final rawCars = await _carRepo.getData();
+      final rawCars = await _carRepo.getAllCars();
 
       if (mounted) {
         setState(() {

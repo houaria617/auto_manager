@@ -9,12 +9,6 @@ import '../../dbhelper.dart';
 @override
 class CarDB extends AbstractCarRepo {
   @override
-  // CHANGE 1: Return type is now List<Map<String, dynamic>>
-  Future<List<Map<String, dynamic>>> getData() async {
-    final database = await DBHelper.getDatabase();
-    return await database.rawQuery('''SELECT * FROM cars''');
-  }
-
   @override
   Future<int> countAvailableCars() async {
     final database = await DBHelper.getDatabase();
@@ -51,5 +45,27 @@ class CarDB extends AbstractCarRepo {
       [id],
     );
     return result.isNotEmpty ? result.first : null;
+  }
+
+  @override
+  Future<bool> deleteCar(int id) async {
+    final database = await DBHelper.getDatabase();
+    final count = await database.rawDelete(
+      """DELETE FROM  cars WHERE id=?""",
+      [id],
+    );
+    return count > 0;
+  }
+
+  @override
+  Future<bool> updateCar(int id, Map<String, dynamic> car) async {
+    final database = await DBHelper.getDatabase();
+    final count = await database.update(
+      'cars',
+      car,
+      where: 'id=?',
+      whereArgs: [id],
+    );
+    return count > 0;
   }
 }

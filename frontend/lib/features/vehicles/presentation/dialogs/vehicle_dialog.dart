@@ -1,26 +1,20 @@
 import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/vehicle_model.dart';
 //import '../../../../cubit/vehicle_cubit.dart';
 
-Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
-  final TextEditingController nameController = TextEditingController(
-    text: vehicle?.name ?? '',
-  );
-  final TextEditingController plateController = TextEditingController(
-    text: vehicle?.plate ?? '',
-  );
-  final TextEditingController nextMaintenanceController = TextEditingController(
-    text: vehicle?.nextMaintenanceDate ?? '',
-  );
-  final TextEditingController returnDateController = TextEditingController(
-    text: vehicle?.returnDate ?? '',
-  );
-  final TextEditingController availabilityDateController =
-      TextEditingController(text: vehicle?.availableFrom ?? '');
+Future<Map<String, dynamic>?> showVehicleDialog(
+  BuildContext context,
+  Map<String, dynamic> vehicle,
+) async {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController plateController = TextEditingController();
+  final TextEditingController nextMaintenanceController =
+      TextEditingController();
+  final TextEditingController returnDateController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
 
-  String status = vehicle?.status ?? 'available';
+  String status = 'available';
 
   await showModalBottomSheet(
     context: context,
@@ -57,7 +51,7 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                     ),
                   ),
                   Text(
-                    vehicle == null ? 'Add Vehicle' : 'Edit Vehicle',
+                    'Edit Vehicle',
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 20,
@@ -90,6 +84,23 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                     controller: plateController,
                     decoration: InputDecoration(
                       labelText: 'Plate Number',
+                      labelStyle: const TextStyle(
+                        fontFamily: 'Manrope',
+                        color: Color(0xFF4A5568),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF6F7F8),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    controller: priceController,
+                    decoration: InputDecoration(
+                      labelText: 'Rent Price (per Day)',
                       labelStyle: const TextStyle(
                         fontFamily: 'Manrope',
                         color: Color(0xFF4A5568),
@@ -168,22 +179,6 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                         fillColor: const Color(0xFFF6F7F8),
                       ),
                     ),
-                  if (status == 'Maintenance')
-                    TextField(
-                      controller: availabilityDateController,
-                      decoration: InputDecoration(
-                        labelText: 'Availability Date (optional)',
-                        labelStyle: const TextStyle(
-                          fontFamily: 'Manrope',
-                          color: Color(0xFF4A5568),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF6F7F8),
-                      ),
-                    ),
 
                   const SizedBox(height: 24),
 
@@ -215,11 +210,17 @@ Future<void> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
                         ),
                         onPressed: () {
                           // Normally save or update logic goes here
+                          print('calling addVehicle inside vehicle dialoge');
                           context.read<VehicleCubit>().addVehicle(
                             nameController.text,
                             plateController.text,
+                            double.parse(priceController.text),
                             nextMaintenanceController.text,
+                            returnDateController.text,
                             status,
+                          );
+                          print(
+                            'addVehicle successfully executed inside vehicle dialog',
                           );
                           Navigator.pop(context);
                         },
