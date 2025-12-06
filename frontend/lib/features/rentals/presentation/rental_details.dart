@@ -1,5 +1,6 @@
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,7 +33,7 @@ class RentalDetailsScreen extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: const Text('Rental Details'),
+      title: Text(AppLocalizations.of(context)!.rentalDetails),
       centerTitle: true,
       elevation: 0,
       backgroundColor: Colors.white,
@@ -65,7 +66,7 @@ class _RentalDetailsBody extends StatelessWidget {
             currentData = Map<String, dynamic>.from(rawRental);
           } catch (e) {
             // If firstWhere fails (item deleted), show a message
-            return const Center(child: Text("This rental no longer exists."));
+            return Center(child: Text(AppLocalizations.of(context)!.rentalNoLongerExists));
           }
         }
 

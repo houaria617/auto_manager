@@ -4,6 +4,7 @@
 // Note: Ensure these paths match your actual project structure
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -93,9 +94,9 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'AutoManager Rentals',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.rentalsTitle,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1a1a1a),
@@ -105,13 +106,13 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
           Row(
             children: [
               TabButton(
-                label: 'Ongoing',
+                label: AppLocalizations.of(context)!.tabOngoing,
                 isSelected: !_showCompleted,
                 onTap: () => _toggleView(false),
               ),
               const SizedBox(width: 8),
               TabButton(
-                label: 'Completed',
+                label: AppLocalizations.of(context)!.tabCompleted,
                 isSelected: _showCompleted,
                 onTap: () => _toggleView(true),
               ),
@@ -134,7 +135,9 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
     if (filteredList.isEmpty) {
       return Center(
         child: Text(
-          _showCompleted ? 'No completed rentals' : 'No ongoing rentals',
+          _showCompleted 
+              ? AppLocalizations.of(context)!.noRentalsCompleted 
+              : AppLocalizations.of(context)!.noRentalsOngoing,
           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
         ),
       );

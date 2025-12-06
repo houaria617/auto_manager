@@ -1,6 +1,7 @@
 // ============================================================================
 // FILE: lib/features/reports/presentation/widgets/timeframe_selector.dart
 // ============================================================================
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class TimeframeSelector extends StatelessWidget {
@@ -15,22 +16,30 @@ class TimeframeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeframes = ['This Week', 'This Month', 'All Time', 'Custom'];
-
+    final timeframeMap = {
+      'This Week': AppLocalizations.of(context)!.thisWeek,
+      'This Month': AppLocalizations.of(context)!.thisMonth,
+      'All Time': AppLocalizations.of(context)!.allTime,
+      'Custom': AppLocalizations.of(context)!.custom,
+    };
+    
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: timeframes.map((timeframe) {
-          final isSelected = selectedTimeframe == timeframe;
+        children: timeframeMap.entries.map((entry) {
+          final timeframeKey = entry.key;
+          final timeframeLabel = entry.value;
+          final isSelected = selectedTimeframe == timeframeKey;
+          
           return Padding(
             padding: const EdgeInsets.only(right: 10.0),
             child: ChoiceChip(
-              label: Text(timeframe),
+              label: Text(timeframeLabel),
               selected: isSelected,
               selectedColor: Colors.blue[100],
               onSelected: (selected) {
                 if (selected) {
-                  onTimeframeSelected(timeframe);
+                  onTimeframeSelected(timeframeKey);
                 }
               },
               labelStyle: TextStyle(

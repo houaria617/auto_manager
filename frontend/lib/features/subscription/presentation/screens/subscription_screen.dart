@@ -1,4 +1,5 @@
 import 'package:auto_manager/features/subscription/presentation/screens/payment_screen.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class SubscriptionScreen extends StatelessWidget {
@@ -14,9 +15,9 @@ class SubscriptionScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Upgrade to Premium',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.upgradeToPremium,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -40,40 +41,40 @@ class SubscriptionScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Free',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.free,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      '0DA',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.zeroDA,
+                      style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Row(
-                      children: const [
-                        Icon(Icons.check, color: Colors.blue),
-                        SizedBox(width: 18),
-                        Text('Access basic features'),
+                      children: [
+                        const Icon(Icons.check, color: Colors.blue),
+                        const SizedBox(width: 18),
+                        Text(AppLocalizations.of(context)!.accessBasicFeatures),
                       ],
                     ),
                     Row(
-                      children: const [
-                        Icon(Icons.check, color: Colors.blue),
-                        SizedBox(width: 18),
-                        Text('Limited rental entries (10 max)'),
+                      children: [
+                        const Icon(Icons.check, color: Colors.blue),
+                        const SizedBox(width: 18),
+                        Text(AppLocalizations.of(context)!.limitedRentals),
                       ],
                     ),
                     Row(
-                      children: const [
-                        Icon(Icons.check, color: Colors.blue),
-                        SizedBox(width: 18),
-                        Text('Limited car entries (10 max)'),
+                      children: [
+                        const Icon(Icons.check, color: Colors.blue),
+                        const SizedBox(width: 18),
+                        Text(AppLocalizations.of(context)!.limitedCars),
                       ],
                     ),
                   ],
@@ -97,21 +98,21 @@ class SubscriptionScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Premium',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.premium,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
-                          '5999DA / month',
-                          style: TextStyle(
+                          AppLocalizations.of(context)!.premiumPrice,
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -130,9 +131,9 @@ class SubscriptionScreen extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: const Text(
-                              'Upgrade to Premium',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.upgradeToPremium,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -140,40 +141,48 @@ class SubscriptionScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(height: 24),
+                        const SizedBox(height: 24),
                         Row(
                           children: [
-                            Icon(Icons.check, color: Colors.blue),
-                            SizedBox(width: 18),
-                            Text('Access all features'),
+                            const Icon(Icons.check, color: Colors.blue),
+                            const SizedBox(width: 18),
+                            Text(
+                              AppLocalizations.of(context)!.accessAllFeatures,
+                            ),
                           ],
                         ),
                         Row(
                           children: [
-                            Icon(Icons.check, color: Colors.blue),
-                            SizedBox(width: 18),
-                            Text('Unlimited rental entries'),
+                            const Icon(Icons.check, color: Colors.blue),
+                            const SizedBox(width: 18),
+                            Text(
+                              AppLocalizations.of(context)!.unlimitedRentals,
+                            ),
                           ],
                         ),
                         Row(
                           children: [
-                            Icon(Icons.check, color: Colors.blue),
-                            SizedBox(width: 18),
-                            Text('Unlimited car entries'),
+                            const Icon(Icons.check, color: Colors.blue),
+                            const SizedBox(width: 18),
+                            Text(AppLocalizations.of(context)!.unlimitedCars),
                           ],
                         ),
                         Row(
                           children: [
-                            Icon(Icons.check, color: Colors.blue),
-                            SizedBox(width: 18),
-                            Text('Rental history & analytics'),
+                            const Icon(Icons.check, color: Colors.blue),
+                            const SizedBox(width: 18),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.rentalHistoryAnalytics,
+                            ),
                           ],
                         ),
                         Row(
                           children: [
-                            Icon(Icons.check, color: Colors.blue),
-                            SizedBox(width: 18),
-                            Text('Custom reminders for customers'),
+                            const Icon(Icons.check, color: Colors.blue),
+                            const SizedBox(width: 18),
+                            Text(AppLocalizations.of(context)!.customReminders),
                           ],
                         ),
                       ],
@@ -194,9 +203,9 @@ class SubscriptionScreen extends StatelessWidget {
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      'Recommended',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.recommended,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

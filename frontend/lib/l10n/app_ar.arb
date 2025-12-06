@@ -61,5 +61,162 @@
     "avgDuration": "متوسط المدة",
     "topCars": "أفضل السيارات",
     "clientStats": "إحصائيات العملاء",
-    "exportPdf": "تصدير PDF"
+    "exportPdf": "تصدير PDF",
+    "client": "عميل",
+    "car": "سيارة",
+    "selectDate": "اختر التاريخ",
+    "pleaseSelectDates": "يرجى اختيار تاريخي البدء والنهاية",
+    "pleaseSelectClient": "يرجى اختيار عميل",
+    "pleaseSelectCar": "يرجى اختيار سيارة",
+    "pleaseEnterPrice": "يرجى إدخال السعر",
+    "invalidNumber": "رقم غير صحيح",
+    "addNewClient": "إضافة عميل جديد",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "phoneNumber": "رقم الهاتف",
+    "addNewCar": "إضافة سيارة جديدة",
+    "carNameModel": "اسم السيارة (الموديل)",
+    "plateNumber": "رقم اللوحة",
+    "dailyRentPrice": "سعر الإيجار اليومي",
+    "dateError": "يجب أن يكون تاريخ النهاية بعد أو يساوي تاريخ البدء",
+    "pricePerDay": "{price}/يوم",
+    "@pricePerDay": {
+        "placeholders": {
+            "price": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalId": "رقم التأجير: {id}",
+    "@rentalId": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalNoLongerExists": "هذا التأجير لم يعد موجوداً.",
+    "upgradeToPremium": "الترقية إلى المميز",
+    "free": "مجاني",
+    "zeroDA": "0 دج",
+    "accessBasicFeatures": "الوصول إلى الميزات الأساسية",
+    "limitedRentals": "إدخالات تأجير محدودة (10 كحد أقصى)",
+    "limitedCars": "إدخالات سيارات محدودة (10 كحد أقصى)",
+    "premium": "مميز",
+    "premiumPrice": "5999 دج / شهر",
+    "accessAllFeatures": "الوصول إلى جميع الميزات",
+    "unlimitedRentals": "إدخالات تأجير غير محدودة",
+    "unlimitedCars": "إدخالات سيارات غير محدودة",
+    "rentalHistoryAnalytics": "سجل التأجير والتحليلات",
+    "customReminders": "تذكيرات مخصصة للعملاء",
+    "recommended": "موصى به",
+    "returnCarComplete": "إرجاع السيارة (إكمال)",
+    "rentalCompleted": "تم إكمال التأجير",
+    "extendRentalDuration": "تمديد مدة التأجير.",
+    "additionalDays": "أيام إضافية",
+    "days": "أيام",
+    "estimatedDailyRate": "السعر اليومي المقدر:",
+    "extraCost": "التكلفة الإضافية:",
+    "confirmRenew": "تأكيد التجديد",
+    "renewedSuccess": "تم التجديد لمدة {days} أيام. تمت إضافة ${amount} إلى الإجمالي.",
+    "@renewedSuccess": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            },
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "errorRenewing": "خطأ في تجديد التأجير: {error}",
+    "@errorRenewing": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "statusOngoing": "جاري",
+    "statusCompleted": "مكتمل",
+    "statusOverdue": "متأخر",
+    "rentalIdLabel": "رقم التأجير: {id}",
+    "@rentalIdLabel": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "clientNumber": "عميل #{id}",
+    "@clientNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "carNumber": "سيارة #{id}",
+    "@carNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "viewClient": "عرض العميل",
+    "viewCar": "عرض السيارة",
+    "noPhoneInfo": "لا توجد معلومات هاتف",
+    "unknownPlate": "لوحة غير معروفة",
+    "rentalIdColon": "رقم التأجير: {id}",
+    "@rentalIdColon": {
+        "placeholders": {
+            "id": {
+                "type": "int"
+            }
+        }
+    },
+    "daysLabel": "{days} أيام",
+    "@daysLabel": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "start": "البدء",
+    "end": "النهاية",
+    "ongoingRentals": "التأجيرات الجارية",
+    "availableCars": "السيارات المتاحة",
+    "dueToday": "المستحقة اليوم",
+    "recentActivities": "الأنشطة الأخيرة",
+    "carRentedBy": "تم تأجير السيارة {plate} من قبل {client}",
+    "@carRentedBy": {
+        "placeholders": {
+            "plate": {
+                "type": "String"
+            },
+            "client": {
+                "type": "String"
+            }
+        }
+    },
+    "revenue": "الإيرادات",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "allTime": "كل الوقت",
+    "custom": "مخصص",
+    "totalClients": "إجمالي العملاء",
+    "newClients": "عملاء جدد",
+    "repeatClients": "عملاء متكررون",
+    "generatingPdf": "جارٍ إنشاء تقرير PDF...",
+    "errorGeneratingPdf": "خطأ في إنشاء PDF: {error}",
+    "@errorGeneratingPdf": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "pleaseWaitForData": "يرجى الانتظار حتى يتم تحميل البيانات."
 }

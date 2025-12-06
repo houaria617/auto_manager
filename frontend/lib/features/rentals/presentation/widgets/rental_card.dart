@@ -1,5 +1,6 @@
 // lib/features/rentals/presentation/widgets/rental_card.dart
 
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -36,33 +37,33 @@ class RentalCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 12),
-            _buildCustomerName(),
+            _buildCustomerName(context),
             const SizedBox(height: 12),
-            _buildVehicleInfo(),
+            _buildVehicleInfo(context),
             const SizedBox(height: 16),
-            _buildFooter(),
+            _buildFooter(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Rental ID: ${rental['id']}',
+          AppLocalizations.of(context)!.rentalIdLabel(rental['id'].toString()),
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
-        _buildStatusBadge(),
+        _buildStatusBadge(context),
       ],
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge(BuildContext context) {
     String state = (rental['state'] ?? 'Unknown').toString();
 
     // Check for Overdue
@@ -77,18 +78,20 @@ class RentalCard extends StatelessWidget {
     if (isOverdue) {
       bgColor = const Color(0xFFFEE2E2); // Red background
       textColor = const Color(0xFFDC2626); // Red text
-      displayText = "OVERDUE";
+      displayText = AppLocalizations.of(context)!.statusOverdue;
     } else {
       switch (state.toLowerCase()) {
         case 'ongoing':
         case 'active':
           bgColor = const Color(0xFFDBEAFE);
           textColor = const Color(0xFF2563EB);
+          displayText = AppLocalizations.of(context)!.statusOngoing;
           break;
         case 'completed':
         case 'returned':
           bgColor = const Color(0xFFD1FAE5);
           textColor = const Color(0xFF059669);
+          displayText = AppLocalizations.of(context)!.statusCompleted;
           break;
         default:
           bgColor = Colors.grey.shade200;
@@ -113,10 +116,10 @@ class RentalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomerName() {
+  Widget _buildCustomerName(BuildContext context) {
     final name =
         rental['client_name'] ??
-        (rental['full_name'] ?? 'Client #${rental['client_id']}');
+        (rental['full_name'] ?? AppLocalizations.of(context)!.clientNumber(rental['client_id'].toString()));
     return Text(
       name.toString(),
       style: const TextStyle(
@@ -127,10 +130,10 @@ class RentalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleInfo() {
+  Widget _buildVehicleInfo(BuildContext context) {
     final carModel =
         rental['car_model'] ??
-        (rental['name_model'] ?? 'Car #${rental['car_id']}');
+        (rental['name_model'] ?? AppLocalizations.of(context)!.carNumber(rental['car_id'].toString()));
     return Row(
       children: [
         const Icon(Icons.directions_car, size: 18, color: Color(0xFF2563EB)),
@@ -147,7 +150,7 @@ class RentalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     final dateFormat = DateFormat('MMM dd, yyyy');
     DateTime start =
         DateTime.tryParse(rental['date_from'] ?? '') ?? DateTime.now();
@@ -156,10 +159,11 @@ class RentalCard extends StatelessWidget {
     final dateRange = '${dateFormat.format(start)} - ${dateFormat.format(end)}';
 
     int daysLeft = end.difference(DateTime.now()).inDays;
-    String daysText = '$daysLeft days left';
-
-    if (daysLeft < 0) {
-      daysText = '${daysLeft.abs()} days overdue';
+    String daysText;
+    if (daysLeft >= 0) {
+      daysText = AppLocalizations.of(context)!.daysLabel(daysLeft);
+    } else {
+      daysText = '${daysLeft.abs()} ${AppLocalizations.of(context)!.daysOverdue}';
     }
 
     double amount = (rental['total_amount'] is int)

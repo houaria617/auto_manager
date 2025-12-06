@@ -1,3 +1,4 @@
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 // ============================================================================
@@ -34,9 +35,9 @@ class RentalSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(paymentStatus),
+            _buildHeader(context, paymentStatus),
             const SizedBox(height: 8),
-            _buildRentalInfo(rentalId, totalRentalDays),
+            _buildRentalInfo(context, rentalId, totalRentalDays),
             const SizedBox(height: 8),
             _buildAmountInfo(amount, paymentStatus),
           ],
@@ -45,26 +46,26 @@ class RentalSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(String status) {
+  Widget _buildHeader(BuildContext context, String status) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Rental Summary',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          AppLocalizations.of(context)!.rentalSummary,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         _StatusBadge(status: status),
       ],
     );
   }
 
-  Widget _buildRentalInfo(int id, int days) {
+  Widget _buildRentalInfo(BuildContext context, int id, int days) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Rental ID: $id'),
+        Text(AppLocalizations.of(context)!.rentalIdColon(id)),
         const SizedBox(height: 4),
-        Text('$days days'),
+        Text(AppLocalizations.of(context)!.daysLabel(days)),
       ],
     );
   }

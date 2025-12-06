@@ -1,5 +1,8 @@
 import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
+import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -8,6 +11,51 @@ class SettingsScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ComingSoonScreen(title: title)),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context)!.appLanguage),
+              content: DropdownButton<String>(
+                value: locale.languageCode,
+                isExpanded: true,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'en',
+                    child: Text('English'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'ar',
+                    child: Text('العربية'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'fr',
+                    child: Text('Français'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    context.read<LocaleCubit>().changeLanguage(value);
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(AppLocalizations.of(context)!.cancel),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -23,9 +71,9 @@ class SettingsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Settings",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.settingsTitle,
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: Padding(
@@ -35,17 +83,16 @@ class SettingsScreen extends StatelessWidget {
             _buildTile(
               context,
               icon: Icons.business_center,
-              title: "Agency Information",
-              subtitle:
-                  "Update your agency name, address, and contact details.",
-              onTap: () => _navigateToComingSoon(context, "Agency Information"),
+              title: AppLocalizations.of(context)!.agencyInfo,
+              subtitle: AppLocalizations.of(context)!.agencyInfoSubtitle,
+              onTap: () => _navigateToComingSoon(context, AppLocalizations.of(context)!.agencyInfo),
             ),
             _buildTile(
               context,
               icon: Icons.language,
-              title: "App Language",
-              subtitle: "Select your preferred language for the app.",
-              onTap: () => _navigateToComingSoon(context, "App Language"),
+              title: AppLocalizations.of(context)!.appLanguage,
+              subtitle: AppLocalizations.of(context)!.appLanguageSubtitle,
+              onTap: () => _showLanguageDialog(context),
             ),
             const SizedBox(height: 12),
             _buildSubscriptionCard(context),
@@ -142,21 +189,21 @@ class SettingsScreen extends StatelessWidget {
               child: const Icon(Icons.workspace_premium, color: Colors.white),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Subscription",
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.subscription,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    "You are on the Free Plan.",
-                    style: TextStyle(color: Colors.white70),
+                    AppLocalizations.of(context)!.subscriptionPlan,
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
@@ -174,11 +221,11 @@ class SettingsScreen extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Logged out successfully')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.logout)),
           );
         },
         icon: const Icon(Icons.logout),
-        label: const Text("Logout"),
+        label: Text(AppLocalizations.of(context)!.logout),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.redAccent,
           foregroundColor: Colors.white,
@@ -206,10 +253,10 @@ class ComingSoonScreen extends StatelessWidget {
         title: Text(title, style: const TextStyle(color: Colors.black)),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: const Center(
+      body: Center(
         child: Text(
-          "Coming Soon",
-          style: TextStyle(
+          AppLocalizations.of(context)!.comingSoon,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.black54,

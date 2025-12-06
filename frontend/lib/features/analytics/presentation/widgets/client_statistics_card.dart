@@ -1,5 +1,6 @@
 // lib/features/analytics/presentation/widgets/client_statistics_card.dart
 
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -29,9 +30,9 @@ class ClientStatisticsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Client Statistics',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.clientStats,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
 
@@ -79,9 +80,9 @@ class ClientStatisticsCard extends StatelessWidget {
                                 color: Colors.black,
                               ),
                             ),
-                            const Text(
-                              'Total Clients',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.totalClients,
+                              style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.grey,
                               ),
@@ -101,15 +102,17 @@ class ClientStatisticsCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildLegendItem(
+                        context: context,
                         color: Colors.blue,
-                        label: 'New Clients',
+                        label: AppLocalizations.of(context)!.newClients,
                         count: newClients,
                         total: totalClients,
                       ),
                       const SizedBox(height: 16),
                       _buildLegendItem(
+                        context: context,
                         color: Colors.green,
-                        label: 'Repeat Clients',
+                        label: AppLocalizations.of(context)!.repeatClients,
                         count: repeatClients,
                         total: totalClients,
                       ),
@@ -125,6 +128,7 @@ class ClientStatisticsCard extends StatelessWidget {
   }
 
   Widget _buildLegendItem({
+    required BuildContext context,
     required Color color,
     required String label,
     required int count,

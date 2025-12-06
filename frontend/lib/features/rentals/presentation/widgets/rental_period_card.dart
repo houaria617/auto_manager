@@ -1,3 +1,5 @@
+
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -29,27 +31,27 @@ class RentalPeriodCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(daysLeft),
+            _buildHeader(context, daysLeft),
             const SizedBox(height: 12),
             _buildProgressBar(totalDays, daysPassed),
             const SizedBox(height: 12),
-            _buildDateRange(start, end),
+            _buildDateRange(context, start, end),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(int daysLeft) {
+  Widget _buildHeader(BuildContext context, int daysLeft) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Rental Period',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          AppLocalizations.of(context)!.rentalPeriod,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Text(
-          '$daysLeft days left',
+          AppLocalizations.of(context)!.daysLabel(daysLeft),
           style: TextStyle(color: Colors.blue.shade700),
         ),
       ],
@@ -74,14 +76,14 @@ class RentalPeriodCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateRange(DateTime start, DateTime end) {
+  Widget _buildDateRange(BuildContext context, DateTime start, DateTime end) {
     final formatter = DateFormat('MMM dd, yyyy');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _DateColumn(label: 'Start', date: formatter.format(start)),
-        _DateColumn(label: 'End', date: formatter.format(end), isEnd: true),
+        _DateColumn(label: AppLocalizations.of(context)!.start, date: formatter.format(start)),
+        _DateColumn(label: AppLocalizations.of(context)!.end, date: formatter.format(end), isEnd: true),
       ],
     );
   }

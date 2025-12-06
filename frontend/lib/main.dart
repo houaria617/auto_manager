@@ -1,7 +1,9 @@
 import 'dart:io'; // Import this for Platform check
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/cars/cars_cubit.dart';
+import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,11 +36,21 @@ class MainApp extends StatelessWidget {
           create: (context) =>
               CarsCubit(AbstractCarRepo.getInstance())..loadVehicles(),
         ),
+        BlocProvider<LocaleCubit>(
+          create: (context) => LocaleCubit(),
+        ),
       ],
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Auto Manager',
-        home: LoginScreen(),
+      child: BlocBuilder<LocaleCubit, Locale>(
+        builder: (context, locale) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Auto Manager',
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: locale,
+            home: const LoginScreen(),
+          );
+        },
       ),
     );
   }

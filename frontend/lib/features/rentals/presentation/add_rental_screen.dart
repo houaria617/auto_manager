@@ -1,6 +1,7 @@
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -74,7 +75,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Client'),
+        title: Text(AppLocalizations.of(context)!.addNewClient),
         content: Form(
           key: formKeyClient,
           child: Column(
@@ -82,20 +83,20 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
             children: [
               TextFormField(
                 controller: firstNameController,
-                decoration: const InputDecoration(labelText: 'First Name'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.firstName),
+                validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               TextFormField(
                 controller: lastNameController,
-                decoration: const InputDecoration(labelText: 'Last Name'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.lastName),
+                validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               // CHANGED: Email Input -> Phone Input
               TextFormField(
                 controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.phoneNumber),
                 keyboardType: TextInputType.phone,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
             ],
           ),
@@ -103,7 +104,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -137,7 +138,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 if (mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            child: Text(AppLocalizations.of(context)!.add),
           ),
         ],
       ),
@@ -153,7 +154,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Car'),
+        title: Text(AppLocalizations.of(context)!.addNewCar),
         content: Form(
           key: formKeyCar,
           child: Column(
@@ -161,23 +162,23 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
             children: [
               TextFormField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Car Name (Model)',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.carNameModel,
                 ),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               TextFormField(
                 controller: plateController,
-                decoration: const InputDecoration(labelText: 'Plate Number'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.plateNumber),
+                validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               TextFormField(
                 controller: priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Daily Rent Price',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.dailyRentPrice,
                 ),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
             ],
           ),
@@ -185,7 +186,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -219,7 +220,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 if (mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            child: Text(AppLocalizations.of(context)!.add),
           ),
         ],
       ),
@@ -251,10 +252,10 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   }
 
   void _validateDates() {
-    if (_startDate != null && _endDate != null) {
+      if (_startDate != null && _endDate != null) {
       if (_endDate!.isBefore(_startDate!)) {
         setState(() {
-          _dateError = 'End date must be after or equal to start date';
+          _dateError = AppLocalizations.of(context)!.dateError;
         });
       } else {
         setState(() {
@@ -292,7 +293,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     if (_formKey.currentState!.validate()) {
       if (_startDate == null || _endDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select start and end dates')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectDates)),
         );
         return;
       }
@@ -324,9 +325,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'New Rental',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.addRentalTitle,
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: _isLoading
@@ -340,13 +341,13 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // CLIENT DROPDOWN
-                      _buildLabel('Client'),
+                      _buildLabel(AppLocalizations.of(context)!.client),
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _selectedClientId,
-                              hint: const Text("Select Client"),
+                              hint: Text(AppLocalizations.of(context)!.selectClient),
                               decoration: _inputDecoration(
                                 Icons.person_outline,
                               ),
@@ -365,7 +366,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                               onChanged: (value) =>
                                   setState(() => _selectedClientId = value),
                               validator: (value) => value == null
-                                  ? 'Please select a client'
+                                  ? AppLocalizations.of(context)!.pleaseSelectClient
                                   : null,
                             ),
                           ),
@@ -377,13 +378,13 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       const SizedBox(height: 20),
 
                       // CAR DROPDOWN
-                      _buildLabel('Car'),
+                      _buildLabel(AppLocalizations.of(context)!.car),
                       Row(
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _selectedCarId,
-                              hint: const Text("Select Car"),
+                              hint: Text(AppLocalizations.of(context)!.selectCar),
                               decoration: _inputDecoration(
                                 Icons.directions_car,
                               ),
@@ -395,7 +396,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                 return DropdownMenuItem<int>(
                                   value: car['id'] as int,
                                   child: Text(
-                                    "$name ($plate) - \$$price/day",
+                                    "$name ($plate) - ${AppLocalizations.of(context)!.pricePerDay(price.toStringAsFixed(2))}",
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 );
@@ -407,7 +408,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                 });
                               },
                               validator: (value) =>
-                                  value == null ? 'Please select a car' : null,
+                                  value == null ? AppLocalizations.of(context)!.pleaseSelectCar : null,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -424,7 +425,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel('Start Date'),
+                                _buildLabel(AppLocalizations.of(context)!.startDate),
                                 _buildDateSelector(true),
                               ],
                             ),
@@ -434,7 +435,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel('End Date'),
+                                _buildLabel(AppLocalizations.of(context)!.endDate),
                                 _buildDateSelector(false),
                               ],
                             ),
@@ -456,7 +457,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       const SizedBox(height: 20),
 
                       // PRICE
-                      _buildLabel('Total Price'),
+                      _buildLabel(AppLocalizations.of(context)!.totalPrice),
                       TextFormField(
                         controller: _priceController,
                         keyboardType: TextInputType.number,
@@ -474,9 +475,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty)
-                            return 'Please enter price';
+                            return AppLocalizations.of(context)!.pleaseEnterPrice;
                           if (double.tryParse(value) == null)
-                            return 'Invalid number';
+                            return AppLocalizations.of(context)!.invalidNumber;
                           return null;
                         },
                       ),
@@ -498,9 +499,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                 ),
                                 side: BorderSide(color: Colors.grey[300]!),
                               ),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.cancel,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -522,8 +523,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
-                                'Save Rental',
+                              child: Text(
+                                AppLocalizations.of(context)!.saveRental,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -601,7 +602,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           children: [
             Text(
               date == null
-                  ? 'Select Date'
+                  ? AppLocalizations.of(context)!.selectDate
                   : '${date.day}/${date.month}/${date.year}',
             ),
             const Icon(Icons.calendar_today, size: 20),
