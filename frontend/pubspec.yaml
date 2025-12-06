@@ -17,6 +17,12 @@ dependencies:
   path: ^1.9.1
   bloc: ^8.1.4
   path_provider: ^2.1.5
+  sqflite_common_ffi: ^2.3.6
+  flutter_localizations:
+    sdk: flutter
+  fl_chart: ^1.1.1
+  pdf: ^3.11.3
+  printing: ^5.14.2
 
 dev_dependencies:
   flutter_test:

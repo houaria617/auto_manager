@@ -67,23 +67,23 @@ class _NavBarState extends State<NavBar> {
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: const Icon(Icons.people),
-          label: AppLocalizations.of(context)!.navClients,
+          label: AppLocalizations.of(context)?.navClients ?? 'Clients',
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.car_rental),
-          label: AppLocalizations.of(context)!.navRentals,
+          label: AppLocalizations.of(context)?.navRentals ?? 'Rentals',
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.dashboard),
-          label: AppLocalizations.of(context)!.navDashboard,
+          label: AppLocalizations.of(context)?.navDashboard ?? 'Dashboard',
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.directions_car),
-          label: AppLocalizations.of(context)!.navCars,
+          label: AppLocalizations.of(context)?.navCars ?? 'Cars',
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.analytics),
-          label: AppLocalizations.of(context)!.navAnalytics,
+          label: AppLocalizations.of(context)?.navAnalytics ?? 'Analytics',
         ),
       ],
     );
