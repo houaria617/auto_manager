@@ -1,25 +1,20 @@
-// vehicle_dialog.dart (MODIFIED)
+import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
-import '../../data/models/vehicle_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+//import '../../../../cubit/vehicle_cubit.dart';
 
 // MODIFICATION 1: Change function signature to return Future<Vehicle?>
-Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) async {
-  final TextEditingController nameController = TextEditingController(
-    text: vehicle?.name ?? '',
-  );
-  final TextEditingController plateController = TextEditingController(
-    text: vehicle?.plate ?? '',
-  );
-  final TextEditingController nextMaintenanceController = TextEditingController(
-    text: vehicle?.nextMaintenanceDate ?? '',
-  );
-  final TextEditingController returnDateController = TextEditingController(
-    text: vehicle?.returnDate ?? '',
-  );
-  final TextEditingController availabilityDateController =
-      TextEditingController(text: vehicle?.availableFrom ?? '');
+Future<Map<String, dynamic>> showVehicleDialog(BuildContext context) async {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController plateController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController nextMaintenanceController =
+      TextEditingController();
+  final TextEditingController returnDateController = TextEditingController();
 
-  String status = vehicle?.status ?? 'Available';
+  late Map<String, dynamic> newVehicle;
+
+  String status = 'available';
 
   // MODIFICATION 2: Capture the result from the modal bottom sheet
   final result = await showModalBottomSheet(
@@ -57,7 +52,7 @@ Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) asy
                     ),
                   ),
                   Text(
-                    vehicle == null ? 'Add Vehicle' : 'Edit Vehicle',
+                    'Edit Vehicle',
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 20,
@@ -122,18 +117,35 @@ Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) asy
                   ),
                   const SizedBox(height: 12),
 
+                  TextField(
+                    controller: priceController,
+                    decoration: InputDecoration(
+                      labelText: 'Rent Price (per Day)',
+                      labelStyle: const TextStyle(
+                        fontFamily: 'Manrope',
+                        color: Color(0xFF4A5568),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF6F7F8),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
                   // Status Dropdown
                   DropdownButtonFormField<String>(
                     initialValue: status,
                     items: const [
                       DropdownMenuItem(
-                        value: 'Available',
-                        child: Text('Available'),
+                        value: 'available',
+                        child: Text('available'),
                       ),
-                      DropdownMenuItem(value: 'Rented', child: Text('Rented')),
+                      DropdownMenuItem(value: 'rented', child: Text('rented')),
                       DropdownMenuItem(
-                        value: 'Maintenance',
-                        child: Text('Maintenance'),
+                        value: 'maintenance',
+                        child: Text('maintenance'),
                       ),
                     ],
                     onChanged: (val) => setState(() => status = val!),
@@ -171,7 +183,7 @@ Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) asy
                     ),
                   if (status == 'Maintenance')
                     TextField(
-                      controller: availabilityDateController,
+                      controller: returnDateController,
                       decoration: InputDecoration(
                         labelText: 'Availability Date (optional)',
                         labelStyle: const TextStyle(
@@ -217,21 +229,23 @@ Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) asy
                         ),
                         onPressed: () {
                           // MODIFICATION 4: Create Vehicle object and pop with it
-                          final newVehicle = Vehicle(
-                            name: nameController.text.trim(),
-                            plate: plateController.text.trim(),
+                          newVehicle = {
+                            'name': nameController.text.trim(),
+                            'plate': plateController.text.trim(),
                             status: status,
+                            'price': double.parse(priceController.text.trim()),
                             // Ensure required field is handled (defaulting to 'N/A' if empty)
-                            nextMaintenanceDate: nextMaintenanceController.text.trim().isNotEmpty 
-                                ? nextMaintenanceController.text.trim() : 'N/A', 
-                            returnDate: returnDateController.text.trim().isNotEmpty 
-                                ? returnDateController.text.trim() : null,
-                            availableFrom: availabilityDateController.text.trim().isNotEmpty
-                                ? availabilityDateController.text.trim() : null,
-                            description: vehicle?.description, // Retain existing description if editing
-                          );
-                          
+                            'next_maintenance_date': nextMaintenanceController
+                                .text
+                                .trim(),
+                            'return_from_maintenance': returnDateController.text
+                                .trim(),
+                          };
+
                           Navigator.pop(context, newVehicle);
+                          // Normally save or update logic goes here
+                          context.read<VehicleCubit>().addVehicle(newVehicle);
+                          Navigator.pop(context);
                         },
                         child: const Text(
                           'Save',
@@ -251,7 +265,5 @@ Future<Vehicle?> showVehicleDialog(BuildContext context, {Vehicle? vehicle}) asy
       );
     },
   );
-  
-  // MODIFICATION 5: Return the captured result
-  return result as Vehicle?;
+  return newVehicle;
 }

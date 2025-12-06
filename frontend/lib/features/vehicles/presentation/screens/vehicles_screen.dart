@@ -29,6 +29,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
   String selectedFilter = 'All';
 
+  late Map<String, dynamic> vehicle;
+
   // LOGIC: DELETE the hardcoded list and local filter logic.
   // The state will handle data.
 
@@ -142,7 +144,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                 // 2. Error State
                 if (state is CarsError) {
                   return Center(
-                      child: Text('Failed to load data: ${state.message}'));
+                    child: Text('Failed to load data: ${state.message}'),
+                  );
                 }
 
                 // 3. Loaded State
@@ -157,45 +160,52 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                       child: _EmptyStateCard(),
                     );
                   }
-                  
+
                   // 5. Filtered Empty State (No vehicles matching the filter)
                   if (filteredVehicles.isEmpty) {
-                      return Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(24.0),
-                            child: Text(
-                                "No vehicles match the filter \"${state.vehicles.firstWhere((v) => v.status == selectedFilter, orElse: () => Vehicle(name: '', plate: '', status: selectedFilter, nextMaintenanceDate: '')).status}\".",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: textGray, fontSize: 16),
-                            ),
-                          ),
-                      );
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: Text(
+                          "No vehicles match the filter \"${state.vehicles.firstWhere(
+                            (v) => v.status == selectedFilter,
+                            orElse: () => Vehicle(name: '', plate: '', status: selectedFilter, nextMaintenanceDate: ''),
+                          ).status}\".",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: textGray, fontSize: 16),
+                        ),
+                      ),
+                    );
                   }
 
                   // 6. Actual Grid UI
                   return LayoutBuilder(
                     builder: (context, constraints) {
-                      final crossAxisCount = constraints.maxWidth >= 768 ? 2 : 1;
-                      
+                      final crossAxisCount = constraints.maxWidth >= 768
+                          ? 2
+                          : 1;
+
                       // Using filteredVehicles.length for the item count
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: GridView.builder(
                           itemCount: filteredVehicles.length,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.8,
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 1.8,
+                              ),
                           itemBuilder: (context, index) {
                             final vehicle = filteredVehicles[index];
                             return GestureDetector(
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        VehicleDetailsScreen(vehicle: vehicle),
+                                    builder: (_) => VehicleDetailsScreen(
+                                      vehicle: vehicle as Map<String, dynamic>,
+                                    ),
                                   ),
                                 );
                               },
@@ -219,11 +229,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
       floatingActionButton: FloatingActionButton(
         // NEW LOGIC: Make async and call cubit to add data
         onPressed: () async {
-          final newVehicle = await showVehicleDialog(context);
-          if (newVehicle != null) {
-            // Call cubit to insert data and refresh the list
-            context.read<CarsCubit>().addVehicle(newVehicle);
-          }
+          vehicle = await showVehicleDialog(context);
         },
         backgroundColor: primary,
         elevation: 6,

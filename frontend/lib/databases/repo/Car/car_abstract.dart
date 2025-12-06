@@ -1,21 +1,21 @@
 // THIS FILE IS USED TO DEFINE AN ABSTRACT
 // CLASS FOR ENTITY `Car`, FOLLOWING THE
 // ABSTRACT REPOSITORY DESIGN PATTERN.
-
-import '../../../features/vehicles/data/models/vehicle_model.dart';
 import 'car_db.dart';
 
 abstract class AbstractCarRepo {
-  Future<List<Vehicle>> getData();
-
+  Future<List<Map<String, dynamic>>> getData();
+  Future<int> countAvailableCars();
   Future<bool> insertCar(Map<String, dynamic> car);
-  Future<bool> deleteCar(int index);
-  Future<bool> updateCar(int index, Map<String, dynamic> car);
+  Future<List<Map<String, dynamic>>> getAllCars();
+  Future<Map<String, dynamic>?> getCar(int id);
+  Future<bool> deleteCar(int id);
+  Future<bool> updateCar(int id, Map<String, dynamic> car);
 
   static AbstractCarRepo? _carInstance;
 
   static AbstractCarRepo getInstance() {
-    // Instantiating the DB implementation directly
+    // later, ClientDB will replace ClientDummy here:
     _carInstance ??= CarDB();
     return _carInstance!;
   }

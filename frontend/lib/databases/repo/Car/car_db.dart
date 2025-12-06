@@ -1,55 +1,32 @@
-// car_db.dart (MODIFIED)
+// THIS FILE IS USED TO OVERRIDE ABSTRACT
+// METHODS DEFINED IN `AbstractClientRepo`
+// TO DO CRUD ON LOCAL DATABASE.
+
 import 'package:sqflite/sqflite.dart';
 import 'car_abstract.dart';
 import '../../dbhelper.dart';
-import '../../../features/vehicles/data/models/vehicle_model.dart';
 
+@override
 class CarDB extends AbstractCarRepo {
   @override
-  // CHANGE 1: Return type is now List<Vehicle>
-  Future<List<Vehicle>> getData() async {
+  Future<List<Map<String, dynamic>>> getData() async {
     final database = await DBHelper.getDatabase();
-
-    // FIX 1: Corrected SELECT alias from 'car' to 'cars' (or removed alias)
-    final List<Map<String, dynamic>> rawMaps = await database.rawQuery('''SELECT
-          id,
-          name,
-          plate,
-          price,
-          state,             
-          maintenance,       
-          return_from_maintenance
-        FROM cars
-        ''');
-
-    // MAPPING LOGIC: Convert List<Map> to List<Vehicle>
-    return rawMaps.map((map) {
-      return Vehicle(
-        // Assuming ID is not needed in the Model's constructor (if it was, we'd pass it)
-        name: map['name'] as String,
-        plate: map['plate'] as String,
-        // MAPPING: Database 'state' column maps to Vehicle 'status' field
-        status: map['state'] as String,
-        nextMaintenanceDate: map['maintenance'] as String,
-        availableFrom: map['return_from_maintenance'] as String?, // Can be null
-        // Note: Model also has 'returnDate' (for Rented status) which isn't in DB schema.
-        // This implies the DB schema may be incomplete or that field is not persisted.
-      );
-    }).toList();
+    return await database.rawQuery('''SELECT * FROM cars''');
   }
 
   @override
-  Future<bool> deleteCar(int index) async {
+  Future<int> countAvailableCars() async {
     final database = await DBHelper.getDatabase();
-    // FIX 2: Table name is 'cars', not 'car'
-    await database.rawQuery("""delete from cars where id=?""", [index]);
-    return true;
+    final results = await database.rawQuery(
+      '''SELECT COUNT(*) as count FROM cars WHERE state=?''',
+      ['available'],
+    );
+    return results.first['count'] as int;
   }
 
   @override
   Future<bool> insertCar(Map<String, dynamic> car) async {
     final database = await DBHelper.getDatabase();
-    // FIX 3: Table name is 'cars', not 'car'
     await database.insert(
       "cars",
       car,
@@ -58,16 +35,38 @@ class CarDB extends AbstractCarRepo {
     return true;
   }
 
-  // ... updateCar method remains the same but should use "cars" table name as well ...
   @override
-  Future<bool> updateCar(int index, Map<String, dynamic> car) async {
+  Future<List<Map<String, dynamic>>> getAllCars() async {
     final database = await DBHelper.getDatabase();
-    await database.update(
-      "cars",
-      car,
-      where: "id = ?",
-      whereArgs: [index],
-    ); // FIX 4: Changed 'car' to 'cars'
+    final results = await database.rawQuery('''SELECT * FROM cars''');
+    return results;
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getCar(int id) async {
+    final database = await DBHelper.getDatabase();
+    final result = await database.rawQuery(
+      '''SELECT * FROM cars WHERE id=?''',
+      [id],
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  @override
+  Future<bool> updateCar(int id, Map<String, dynamic> car) async {
+    final database = await DBHelper.getDatabase();
+    await database.update("cars", car, where: "id = ?", whereArgs: [id]);
     return true;
+  }
+
+  @override
+  Future<bool> deleteCar(int id) async {
+    final database = await DBHelper.getDatabase();
+    final count = await database.delete(
+      'cars',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return count > 0;
   }
 }

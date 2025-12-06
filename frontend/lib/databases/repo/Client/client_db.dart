@@ -6,45 +6,54 @@ import '../../../../databases/dbhelper.dart'; // Adjust path if needed
 
 class ClientDB extends AbstractClientRepo {
   @override
-  Future<List<Map>> getData() async {
+  Future<List<Map<String, dynamic>>> getAllClients() async {
     final database = await DBHelper.getDatabase();
-    // CHANGED: Fetch 'phone' instead of 'email'
-    return database.rawQuery('''SELECT
-          id,
-          first_name,
-          last_name,
-          phone
-        FROM client
+    return await database.rawQuery('''SELECT * FROM client
         ''');
   }
 
   @override
   Future<bool> deleteClient(int index) async {
     final database = await DBHelper.getDatabase();
-    await database.rawQuery("delete from client where id=?", [index]);
-    return true;
+    final count = await database.rawDelete(
+      """DELETE FROM  client WHERE id=?""",
+      [index],
+    );
+    return count > 0;
   }
 
   @override
-  Future<bool> insertClient(Map<String, dynamic> client) async {
+  Future<int> insertClient(Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
-    await database.insert(
+    final clientID = await database.insert(
       "client",
       client,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    return true;
+    return clientID;
   }
 
   @override
-  Future<bool> updateClient(int index, Map<String, dynamic> client) async {
+  Future<bool> updateClient(int id, Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
-    await database.update(
-      "client",
+    final count = await database.update(
+      'client',
       client,
-      where: "id = ?",
-      whereArgs: [index],
+      where: 'id=?',
+      whereArgs: [id],
     );
-    return true;
+    return count > 0;
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getClient(int index) async {
+    final database = await DBHelper.getDatabase();
+    final results = await database.rawQuery(
+      '''
+      SELECT * FROM client WHERE id == ?
+''',
+      [index],
+    );
+    return results.isEmpty ? null : results.first;
   }
 }
