@@ -18,7 +18,7 @@ class AnalyticsCubit extends Cubit<AnalyticsState> {
       // This casting prevents type errors later in the code
       final rawRentals = await _rentalRepo.getData();
       final rawCars = await _carRepo.getData();
-      final rawClients = await _clientRepo.getData();
+      final rawClients = await _clientRepo.getAllClients();
 
       final List<Map<String, dynamic>> allRentals =
           List<Map<String, dynamic>>.from(rawRentals);

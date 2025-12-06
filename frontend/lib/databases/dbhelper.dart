@@ -6,7 +6,8 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 4; // You can keep this or increment it
+  static const _database_version = 1;
+  static var database;
 
   static Database? _database;
 
@@ -19,20 +20,16 @@ class DBHelper {
   static Future<Database> _initDatabase() async {
     return openDatabase(
       join(await getDatabasesPath(), _database_name),
-      version: _database_version,
-      onCreate: (db, version) async {
-        // 1. Create Client Table (CHANGED: email -> phone)
-        await db.execute('''
-           CREATE TABLE client (
+      onCreate: (database, version) async {
+        await database.execute('''
+           CREATE TABLE  client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
-               first_name TEXT,
-               last_name TEXT,
-               phone TEXT
-           )
+               full_name TEXT,
+               phone TEXT,
+               state TEXT DEFAULT 'idle'
+               )
          ''');
-
-        // 2. Create Cars Table
-        await db.execute('''
+        await database.execute('''
            CREATE TABLE cars (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                name TEXT,
@@ -43,9 +40,14 @@ class DBHelper {
                return_from_maintenance TEXT
            )
          ''');
-
-        // 3. Create Rental Table
-        await db.execute('''
+        await database.execute('''
+           CREATE TABLE activity (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+               description TEXT,
+               date TEXT
+           )
+         ''');
+        await database.execute('''
           CREATE TABLE rental (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER,
@@ -59,9 +61,7 @@ class DBHelper {
             FOREIGN KEY (car_id) REFERENCES cars (id) 
           )
         ''');
-
-        // 4. Create Payment Table
-        await db.execute('''
+        await database.execute('''
           CREATE TABLE payment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             rental_id INTEGER,
@@ -70,6 +70,7 @@ class DBHelper {
             FOREIGN KEY (rental_id) REFERENCES rental (id)
           )
         ''');
+        // Add create statements for other tables.
       },
     );
   }

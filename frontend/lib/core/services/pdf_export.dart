@@ -1,6 +1,5 @@
 // lib/core/services/pdf_export_service.dart
 
-import 'dart:typed_data';
 import 'package:auto_manager/logic/cubits/analytics/analytics_state.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';

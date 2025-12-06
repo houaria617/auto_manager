@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; 
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/models/vehicle_model.dart';
 import '../dialogs/vehicle_dialog.dart';
 import '../../../../logic/cubits/cars/cars_cubit.dart';
 
 class VehicleDetailsScreen extends StatelessWidget {
-  final Vehicle vehicle;
+  final Map<String, dynamic> vehicle;
 
   const VehicleDetailsScreen({super.key, required this.vehicle});
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'available':
-        return const Color(0xFF28A745); 
+        return const Color(0xFF28A745);
       case 'rented':
-        return const Color(0xFF007BFF); 
+        return const Color(0xFF007BFF);
       case 'maintenance':
-        return const Color(0xFFFFA500); 
+        return const Color(0xFFFFA500);
       default:
-        return const Color(0xFF718096); 
+        return const Color(0xFF718096);
     }
   }
 
@@ -32,7 +31,7 @@ class VehicleDetailsScreen extends StatelessWidget {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          vehicle.name,
+          vehicle['name'],
           style: const TextStyle(
             fontFamily: 'Manrope',
             color: Color(0xFF2D3748),
@@ -45,17 +44,13 @@ class VehicleDetailsScreen extends StatelessWidget {
             icon: const Icon(Icons.edit, color: Color(0xFF007BFF)),
             onPressed: () async {
               // Show the dialog, pre-populating with current vehicle data
-              final updatedVehicle =
-                  await showVehicleDialog(context, vehicle: vehicle);
+              final updatedVehicle = await showVehicleDialog(context);
 
-              if (updatedVehicle != null) {
-                // 1. Call Cubit to update the vehicle
-                context.read<CarsCubit>().updateVehicle(updatedVehicle);
+              context.read<CarsCubit>().updateVehicle(updatedVehicle);
 
-                // 2. Pop the detail screen to show the updated list
-                // (The VehiclesScreen will automatically rebuild)
-                Navigator.of(context).pop();
-              }
+              // 2. Pop the detail screen to show the updated list
+              // (The VehiclesScreen will automatically rebuild)
+              Navigator.of(context).pop();
             },
           ),
           // 🗑️ DELETE LOGIC: Trigger confirmation
@@ -88,7 +83,7 @@ class VehicleDetailsScreen extends StatelessWidget {
                 ],
               ),
               child: Text(
-                vehicle.name,
+                vehicle['name'],
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 20,
@@ -104,16 +99,16 @@ class VehicleDetailsScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.circle,
-                  color: _getStatusColor(vehicle.status),
+                  color: _getStatusColor(vehicle['state']),
                   size: 14,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  vehicle.status,
+                  vehicle['status'],
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
-                    color: _getStatusColor(vehicle.status),
+                    color: _getStatusColor(vehicle['status']),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -122,21 +117,21 @@ class VehicleDetailsScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Basic Info
-            _buildDetail("Plate Number", vehicle.plate),
+            _buildDetail("Plate Number", vehicle['plate']),
             const Divider(color: Color(0xFFE2E8F0)),
 
             // Return date for rented vehicles
-            if (vehicle.status.toLowerCase() == 'rented' &&
-                vehicle.returnDate != null)
-              _buildDetail("Return Date", vehicle.returnDate),
+            if (vehicle['status'].toLowerCase() == 'rented' &&
+                vehicle['returnDate'] != null)
+              _buildDetail("Return Date", vehicle['returnDate']),
 
             // Available-from date for maintenance vehicles
-            if (vehicle.status.toLowerCase() == 'maintenance' &&
-                vehicle.availableFrom != null)
-              _buildDetail("Available On", vehicle.availableFrom),
+            if (vehicle['status'].toLowerCase() == 'maintenance' &&
+                vehicle['return_from_maintenace'] != null)
+              _buildDetail("Available On", vehicle['return_from_maintenace']),
 
             // Next maintenance (show for all vehicles)
-            _buildDetail("Next Maintenance", vehicle.nextMaintenanceDate),
+            _buildDetail("Next Maintenance", vehicle['next_maintenance']),
             const Divider(color: Color(0xFFE2E8F0)),
           ],
         ),
@@ -195,7 +190,7 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Are you sure you want to delete "${vehicle.name}"? This action cannot be undone.',
+          'Are you sure you want to delete "${vehicle['name']}"? This action cannot be undone.',
           style: const TextStyle(
             fontFamily: 'Manrope',
             fontSize: 14,
@@ -238,7 +233,7 @@ class VehicleDetailsScreen extends StatelessWidget {
       // 2. Show Snackbar confirmation
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Deleted "${vehicle.name}"'),
+          content: Text('Deleted "${vehicle['name']}"'),
           backgroundColor: const Color(0xFFE53E3E),
         ),
       );

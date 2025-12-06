@@ -55,10 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Welcome to AutoManager',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 50),
                   Container(
@@ -87,11 +84,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () => setState(() => _isLoginSelected = true),
+                                  onTap: () =>
+                                      setState(() => _isLoginSelected = true),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: _isLoginSelected ? Colors.white : Colors.transparent,
+                                      color: _isLoginSelected
+                                          ? Colors.white
+                                          : Colors.transparent,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -99,8 +101,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 16,
-                                        fontWeight: _isLoginSelected ? FontWeight.bold : FontWeight.normal,
-                                        color: _isLoginSelected ? Colors.black : Colors.grey[600],
+                                        fontWeight: _isLoginSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: _isLoginSelected
+                                            ? Colors.black
+                                            : Colors.grey[600],
                                       ),
                                     ),
                                   ),
@@ -111,11 +117,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                   onTap: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const RegisterScreen(),
+                                      ),
                                     );
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                     child: Text(
                                       'Register',
                                       textAlign: TextAlign.center,
@@ -176,7 +187,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     hintText: 'Enter your password',
                                     suffixIcon: IconButton(
                                       icon: Icon(
-                                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                        _obscurePassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -217,7 +230,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.blue,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
                                     ),
                                     child: const Text(
                                       'Login',

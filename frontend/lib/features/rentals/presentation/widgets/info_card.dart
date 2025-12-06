@@ -18,7 +18,9 @@ class ClientInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InfoCard(
       icon: Icons.person,
-      title: clientName ?? AppLocalizations.of(context)!.clientNumber(clientId.toString()),
+      title:
+          clientName ??
+          AppLocalizations.of(context)!.clientNumber(clientId.toString()),
       subtitle: phone ?? AppLocalizations.of(context)!.noPhoneInfo,
       actionLabel: AppLocalizations.of(context)!.viewClient,
       onActionPressed: () {
@@ -45,7 +47,8 @@ class CarInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InfoCard(
       icon: Icons.directions_car,
-      title: carModel ?? AppLocalizations.of(context)!.carNumber(carId.toString()),
+      title:
+          carModel ?? AppLocalizations.of(context)!.carNumber(carId.toString()),
       subtitle: plate ?? AppLocalizations.of(context)!.unknownPlate,
       actionLabel: AppLocalizations.of(context)!.viewCar,
       onActionPressed: () {

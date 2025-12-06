@@ -28,7 +28,8 @@ class VehicleCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => VehicleDetailsScreen(vehicle: vehicle),
+            builder: (context) =>
+                VehicleDetailsScreen(vehicle: vehicle as Map<String, dynamic>),
           ),
         );
       },
