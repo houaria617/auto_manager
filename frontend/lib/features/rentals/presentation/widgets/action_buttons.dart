@@ -1,4 +1,5 @@
 import 'package:auto_manager/features/payment/presentation/payment_screen.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,7 +52,9 @@ class ActionButtons extends StatelessWidget {
                 });
               },
               icon: Icon(isPaid ? Icons.check_circle : Icons.attach_money),
-              label: Text(isPaid ? 'View Payment History' : 'Manage Payments'),
+              label: Text(isPaid 
+                  ? AppLocalizations.of(context)!.viewPaymentHistory 
+                  : AppLocalizations.of(context)!.managePayments),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isPaid
                     ? Colors.green
@@ -80,9 +83,9 @@ class ActionButtons extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Return Car (Complete)',
-                  style: TextStyle(fontSize: 16),
+                child: Text(
+                  AppLocalizations.of(context)!.returnCarComplete,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),
@@ -94,7 +97,7 @@ class ActionButtons extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () => _showRenewDialog(context),
                 icon: const Icon(Icons.update),
-                label: const Text('Renew Rental'),
+                label: Text(AppLocalizations.of(context)!.renewRental),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange.shade800,
                   foregroundColor: Colors.white,
@@ -106,9 +109,9 @@ class ActionButtons extends StatelessWidget {
               ),
             ),
           ] else ...[
-            const Text(
-              "Rental Completed",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              AppLocalizations.of(context)!.rentalCompleted,
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ],
@@ -154,20 +157,20 @@ class ActionButtons extends StatelessWidget {
             double extraCost = days * dailyPrice;
 
             return AlertDialog(
-              title: const Text("Renew Rental"),
+              title: Text(AppLocalizations.of(context)!.renewRental),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Extend the rental duration."),
+                  Text(AppLocalizations.of(context)!.extendRentalDuration),
                   const SizedBox(height: 10),
 
                   TextField(
                     controller: daysController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Additional Days",
-                      border: OutlineInputBorder(),
-                      suffixText: "days",
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.additionalDays,
+                      border: const OutlineInputBorder(),
+                      suffixText: AppLocalizations.of(context)!.days,
                     ),
                     onChanged: (val) => setStateDialog(() {}),
                   ),
@@ -187,7 +190,7 @@ class ActionButtons extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text("Estimated Daily Rate:"),
+                            Text(AppLocalizations.of(context)!.estimatedDailyRate),
                             Text("\$${dailyPrice.toStringAsFixed(2)}"),
                           ],
                         ),
@@ -195,9 +198,9 @@ class ActionButtons extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              "Extra Cost:",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Text(
+                              AppLocalizations.of(context)!.extraCost,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "+\$${extraCost.toStringAsFixed(2)}",
@@ -216,7 +219,7 @@ class ActionButtons extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -229,9 +232,9 @@ class ActionButtons extends StatelessWidget {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text(
-                    "Confirm Renew",
-                    style: TextStyle(color: Colors.white),
+                  child: Text(
+                    AppLocalizations.of(context)!.confirmRenew,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
@@ -268,14 +271,19 @@ class ActionButtons extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Renewed for $days days. Added \$${extraCost.toStringAsFixed(2)} to total.',
+            AppLocalizations.of(context)!.renewedSuccess(
+              days,
+              '\$${extraCost.toStringAsFixed(2)}',
+            ),
           ),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error renewing rental: $e')));
+      ).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context)!.errorRenewing(e.toString())),
+      ));
     }
   }
 }

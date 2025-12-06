@@ -1,4 +1,5 @@
 import 'package:auto_manager/core/services/pdf_export.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/analytics/analytics_cubit.dart';
 import 'package:auto_manager/logic/cubits/analytics/analytics_state.dart';
 import 'package:flutter/material.dart';
@@ -50,9 +51,9 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
     if (state is AnalyticsLoaded) {
       // 2. Show loading feedback
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Generating PDF Report...'),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.generatingPdf),
+          duration: const Duration(seconds: 1),
         ),
       );
 
@@ -66,12 +67,14 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Error generating PDF: $e')));
+          ).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorGeneratingPdf(e.toString())),
+          ));
         }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please wait for data to load.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseWaitForData)),
       );
     }
   }
@@ -83,9 +86,9 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Reports & Analytics',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.analyticsTitle,
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
           Padding(
@@ -93,7 +96,7 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
             child: ElevatedButton.icon(
               onPressed: _onExportPressed,
               icon: const Icon(Icons.upload_file, size: 18),
-              label: const Text('Export PDF'),
+              label: Text(AppLocalizations.of(context)!.exportPdf),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.blue[600],
@@ -137,20 +140,20 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
                     // 3. Key Metrics Cards
                     MetricCard(
                       icon: Icons.account_balance_wallet_outlined,
-                      title: 'Total Revenue',
+                      title: AppLocalizations.of(context)!.totalRevenue,
                       value: '\$${state.totalRevenue.toStringAsFixed(0)}',
                     ),
                     const SizedBox(height: 15),
                     MetricCard(
                       icon: Icons.directions_car_outlined,
-                      title: 'Total Rentals',
+                      title: AppLocalizations.of(context)!.totalRentals,
                       value: '${state.totalRentals}',
                     ),
                     const SizedBox(height: 15),
                     MetricCard(
                       icon: Icons.access_time,
-                      title: 'Avg. Duration',
-                      value: '${state.avgDurationDays} days',
+                      title: AppLocalizations.of(context)!.avgDuration,
+                      value: '${state.avgDurationDays} ${AppLocalizations.of(context)!.days}',
                     ),
                     const SizedBox(height: 20),
 

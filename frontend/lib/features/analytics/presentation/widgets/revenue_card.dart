@@ -1,5 +1,6 @@
 // lib/features/analytics/presentation/widgets/revenue_card.dart
 
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -26,7 +27,7 @@ class RevenueCard extends StatelessWidget {
           children: [
             // Header Text
             Text(
-              'Revenue',
+              AppLocalizations.of(context)!.revenue,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -52,9 +53,9 @@ class RevenueCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      const Text(
-                        'This Week',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        AppLocalizations.of(context)!.thisWeek,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const SizedBox(width: 4),
                       Icon(

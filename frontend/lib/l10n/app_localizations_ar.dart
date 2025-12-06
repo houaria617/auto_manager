@@ -193,4 +193,248 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get exportPdf => 'تصدير PDF';
+
+  @override
+  String get client => 'عميل';
+
+  @override
+  String get car => 'سيارة';
+
+  @override
+  String get selectDate => 'اختر التاريخ';
+
+  @override
+  String get pleaseSelectDates => 'يرجى اختيار تاريخي البدء والنهاية';
+
+  @override
+  String get pleaseSelectClient => 'يرجى اختيار عميل';
+
+  @override
+  String get pleaseSelectCar => 'يرجى اختيار سيارة';
+
+  @override
+  String get pleaseEnterPrice => 'يرجى إدخال السعر';
+
+  @override
+  String get invalidNumber => 'رقم غير صحيح';
+
+  @override
+  String get addNewClient => 'إضافة عميل جديد';
+
+  @override
+  String get firstName => 'الاسم الأول';
+
+  @override
+  String get lastName => 'اسم العائلة';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get addNewCar => 'إضافة سيارة جديدة';
+
+  @override
+  String get carNameModel => 'اسم السيارة (الموديل)';
+
+  @override
+  String get plateNumber => 'رقم اللوحة';
+
+  @override
+  String get dailyRentPrice => 'سعر الإيجار اليومي';
+
+  @override
+  String get dateError => 'يجب أن يكون تاريخ النهاية بعد أو يساوي تاريخ البدء';
+
+  @override
+  String pricePerDay(String price) {
+    return '$price/يوم';
+  }
+
+  @override
+  String rentalId(String id) {
+    return 'رقم التأجير: $id';
+  }
+
+  @override
+  String get rentalNoLongerExists => 'هذا التأجير لم يعد موجوداً.';
+
+  @override
+  String get upgradeToPremium => 'الترقية إلى المميز';
+
+  @override
+  String get free => 'مجاني';
+
+  @override
+  String get zeroDA => '0 دج';
+
+  @override
+  String get accessBasicFeatures => 'الوصول إلى الميزات الأساسية';
+
+  @override
+  String get limitedRentals => 'إدخالات تأجير محدودة (10 كحد أقصى)';
+
+  @override
+  String get limitedCars => 'إدخالات سيارات محدودة (10 كحد أقصى)';
+
+  @override
+  String get premium => 'مميز';
+
+  @override
+  String get premiumPrice => '5999 دج / شهر';
+
+  @override
+  String get accessAllFeatures => 'الوصول إلى جميع الميزات';
+
+  @override
+  String get unlimitedRentals => 'إدخالات تأجير غير محدودة';
+
+  @override
+  String get unlimitedCars => 'إدخالات سيارات غير محدودة';
+
+  @override
+  String get rentalHistoryAnalytics => 'سجل التأجير والتحليلات';
+
+  @override
+  String get customReminders => 'تذكيرات مخصصة للعملاء';
+
+  @override
+  String get recommended => 'موصى به';
+
+  @override
+  String get returnCarComplete => 'إرجاع السيارة (إكمال)';
+
+  @override
+  String get rentalCompleted => 'تم إكمال التأجير';
+
+  @override
+  String get extendRentalDuration => 'تمديد مدة التأجير.';
+
+  @override
+  String get additionalDays => 'أيام إضافية';
+
+  @override
+  String get days => 'أيام';
+
+  @override
+  String get estimatedDailyRate => 'السعر اليومي المقدر:';
+
+  @override
+  String get extraCost => 'التكلفة الإضافية:';
+
+  @override
+  String get confirmRenew => 'تأكيد التجديد';
+
+  @override
+  String renewedSuccess(int days, String amount) {
+    return 'تم التجديد لمدة $days أيام. تمت إضافة \$$amount إلى الإجمالي.';
+  }
+
+  @override
+  String errorRenewing(String error) {
+    return 'خطأ في تجديد التأجير: $error';
+  }
+
+  @override
+  String get statusOngoing => 'جاري';
+
+  @override
+  String get statusCompleted => 'مكتمل';
+
+  @override
+  String get statusOverdue => 'متأخر';
+
+  @override
+  String rentalIdLabel(String id) {
+    return 'رقم التأجير: $id';
+  }
+
+  @override
+  String clientNumber(String id) {
+    return 'عميل #$id';
+  }
+
+  @override
+  String carNumber(String id) {
+    return 'سيارة #$id';
+  }
+
+  @override
+  String get viewClient => 'عرض العميل';
+
+  @override
+  String get viewCar => 'عرض السيارة';
+
+  @override
+  String get noPhoneInfo => 'لا توجد معلومات هاتف';
+
+  @override
+  String get unknownPlate => 'لوحة غير معروفة';
+
+  @override
+  String rentalIdColon(int id) {
+    return 'رقم التأجير: $id';
+  }
+
+  @override
+  String daysLabel(int days) {
+    return '$days أيام';
+  }
+
+  @override
+  String get start => 'البدء';
+
+  @override
+  String get end => 'النهاية';
+
+  @override
+  String get ongoingRentals => 'التأجيرات الجارية';
+
+  @override
+  String get availableCars => 'السيارات المتاحة';
+
+  @override
+  String get dueToday => 'المستحقة اليوم';
+
+  @override
+  String get recentActivities => 'الأنشطة الأخيرة';
+
+  @override
+  String carRentedBy(String plate, String client) {
+    return 'تم تأجير السيارة $plate من قبل $client';
+  }
+
+  @override
+  String get revenue => 'الإيرادات';
+
+  @override
+  String get thisWeek => 'هذا الأسبوع';
+
+  @override
+  String get thisMonth => 'هذا الشهر';
+
+  @override
+  String get allTime => 'كل الوقت';
+
+  @override
+  String get custom => 'مخصص';
+
+  @override
+  String get totalClients => 'إجمالي العملاء';
+
+  @override
+  String get newClients => 'عملاء جدد';
+
+  @override
+  String get repeatClients => 'عملاء متكررون';
+
+  @override
+  String get generatingPdf => 'جارٍ إنشاء تقرير PDF...';
+
+  @override
+  String errorGeneratingPdf(String error) {
+    return 'خطأ في إنشاء PDF: $error';
+  }
+
+  @override
+  String get pleaseWaitForData => 'يرجى الانتظار حتى يتم تحميل البيانات.';
 }

@@ -61,5 +61,162 @@
     "avgDuration": "Avg. Duration",
     "topCars": "Top Rented Cars",
     "clientStats": "Client Statistics",
-    "exportPdf": "Export PDF"
+    "exportPdf": "Export PDF",
+    "client": "Client",
+    "car": "Car",
+    "selectDate": "Select Date",
+    "pleaseSelectDates": "Please select start and end dates",
+    "pleaseSelectClient": "Please select a client",
+    "pleaseSelectCar": "Please select a car",
+    "pleaseEnterPrice": "Please enter price",
+    "invalidNumber": "Invalid number",
+    "addNewClient": "Add New Client",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phoneNumber": "Phone Number",
+    "addNewCar": "Add New Car",
+    "carNameModel": "Car Name (Model)",
+    "plateNumber": "Plate Number",
+    "dailyRentPrice": "Daily Rent Price",
+    "dateError": "End date must be after or equal to start date",
+    "pricePerDay": "{price}/day",
+    "@pricePerDay": {
+        "placeholders": {
+            "price": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalId": "Rental ID: {id}",
+    "@rentalId": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalNoLongerExists": "This rental no longer exists.",
+    "upgradeToPremium": "Upgrade to Premium",
+    "free": "Free",
+    "zeroDA": "0DA",
+    "accessBasicFeatures": "Access basic features",
+    "limitedRentals": "Limited rental entries (10 max)",
+    "limitedCars": "Limited car entries (10 max)",
+    "premium": "Premium",
+    "premiumPrice": "5999DA / month",
+    "accessAllFeatures": "Access all features",
+    "unlimitedRentals": "Unlimited rental entries",
+    "unlimitedCars": "Unlimited car entries",
+    "rentalHistoryAnalytics": "Rental history & analytics",
+    "customReminders": "Custom reminders for customers",
+    "recommended": "Recommended",
+    "returnCarComplete": "Return Car (Complete)",
+    "rentalCompleted": "Rental Completed",
+    "extendRentalDuration": "Extend the rental duration.",
+    "additionalDays": "Additional Days",
+    "days": "days",
+    "estimatedDailyRate": "Estimated Daily Rate:",
+    "extraCost": "Extra Cost:",
+    "confirmRenew": "Confirm Renew",
+    "renewedSuccess": "Renewed for {days} days. Added ${amount} to total.",
+    "@renewedSuccess": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            },
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "errorRenewing": "Error renewing rental: {error}",
+    "@errorRenewing": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "statusOngoing": "ONGOING",
+    "statusCompleted": "COMPLETED",
+    "statusOverdue": "OVERDUE",
+    "rentalIdLabel": "Rental ID: {id}",
+    "@rentalIdLabel": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "clientNumber": "Client #{id}",
+    "@clientNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "carNumber": "Car #{id}",
+    "@carNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "viewClient": "View Client",
+    "viewCar": "View Car",
+    "noPhoneInfo": "No phone info",
+    "unknownPlate": "Unknown Plate",
+    "rentalIdColon": "Rental ID: {id}",
+    "@rentalIdColon": {
+        "placeholders": {
+            "id": {
+                "type": "int"
+            }
+        }
+    },
+    "daysLabel": "{days} days",
+    "@daysLabel": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "start": "Start",
+    "end": "End",
+    "ongoingRentals": "Ongoing Rentals",
+    "availableCars": "Available Cars",
+    "dueToday": "Due Today",
+    "recentActivities": "Recent Activities",
+    "carRentedBy": "Car {plate} rented by {client}",
+    "@carRentedBy": {
+        "placeholders": {
+            "plate": {
+                "type": "String"
+            },
+            "client": {
+                "type": "String"
+            }
+        }
+    },
+    "revenue": "Revenue",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "allTime": "All Time",
+    "custom": "Custom",
+    "totalClients": "Total Clients",
+    "newClients": "New Clients",
+    "repeatClients": "Repeat Clients",
+    "generatingPdf": "Generating PDF Report...",
+    "errorGeneratingPdf": "Error generating PDF: {error}",
+    "@errorGeneratingPdf": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "pleaseWaitForData": "Please wait for data to load."
 }

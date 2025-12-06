@@ -63,7 +63,8 @@ import 'app_localizations_fr.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,7 +72,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,18 +85,19 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
     Locale('en'),
-    Locale('fr')
+    Locale('fr'),
   ];
 
   /// No description provided for @appName.
@@ -468,9 +471,454 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export PDF'**
   String get exportPdf;
+
+  /// No description provided for @client.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get client;
+
+  /// No description provided for @car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get car;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @pleaseSelectDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select start and end dates'**
+  String get pleaseSelectDates;
+
+  /// No description provided for @pleaseSelectClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a client'**
+  String get pleaseSelectClient;
+
+  /// No description provided for @pleaseSelectCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a car'**
+  String get pleaseSelectCar;
+
+  /// No description provided for @pleaseEnterPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter price'**
+  String get pleaseEnterPrice;
+
+  /// No description provided for @invalidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid number'**
+  String get invalidNumber;
+
+  /// No description provided for @addNewClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Client'**
+  String get addNewClient;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @addNewCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Car'**
+  String get addNewCar;
+
+  /// No description provided for @carNameModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Name (Model)'**
+  String get carNameModel;
+
+  /// No description provided for @plateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate Number'**
+  String get plateNumber;
+
+  /// No description provided for @dailyRentPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Rent Price'**
+  String get dailyRentPrice;
+
+  /// No description provided for @dateError.
+  ///
+  /// In en, this message translates to:
+  /// **'End date must be after or equal to start date'**
+  String get dateError;
+
+  /// No description provided for @pricePerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/day'**
+  String pricePerDay(String price);
+
+  /// No description provided for @rentalId.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental ID: {id}'**
+  String rentalId(String id);
+
+  /// No description provided for @rentalNoLongerExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This rental no longer exists.'**
+  String get rentalNoLongerExists;
+
+  /// No description provided for @upgradeToPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradeToPremium;
+
+  /// No description provided for @free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get free;
+
+  /// No description provided for @zeroDA.
+  ///
+  /// In en, this message translates to:
+  /// **'0DA'**
+  String get zeroDA;
+
+  /// No description provided for @accessBasicFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Access basic features'**
+  String get accessBasicFeatures;
+
+  /// No description provided for @limitedRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Limited rental entries (10 max)'**
+  String get limitedRentals;
+
+  /// No description provided for @limitedCars.
+  ///
+  /// In en, this message translates to:
+  /// **'Limited car entries (10 max)'**
+  String get limitedCars;
+
+  /// No description provided for @premium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get premium;
+
+  /// No description provided for @premiumPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'5999DA / month'**
+  String get premiumPrice;
+
+  /// No description provided for @accessAllFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Access all features'**
+  String get accessAllFeatures;
+
+  /// No description provided for @unlimitedRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited rental entries'**
+  String get unlimitedRentals;
+
+  /// No description provided for @unlimitedCars.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited car entries'**
+  String get unlimitedCars;
+
+  /// No description provided for @rentalHistoryAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental history & analytics'**
+  String get rentalHistoryAnalytics;
+
+  /// No description provided for @customReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom reminders for customers'**
+  String get customReminders;
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommended;
+
+  /// No description provided for @returnCarComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Return Car (Complete)'**
+  String get returnCarComplete;
+
+  /// No description provided for @rentalCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental Completed'**
+  String get rentalCompleted;
+
+  /// No description provided for @extendRentalDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Extend the rental duration.'**
+  String get extendRentalDuration;
+
+  /// No description provided for @additionalDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Days'**
+  String get additionalDays;
+
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get days;
+
+  /// No description provided for @estimatedDailyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Daily Rate:'**
+  String get estimatedDailyRate;
+
+  /// No description provided for @extraCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Cost:'**
+  String get extraCost;
+
+  /// No description provided for @confirmRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Renew'**
+  String get confirmRenew;
+
+  /// No description provided for @renewedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewed for {days} days. Added \${amount} to total.'**
+  String renewedSuccess(int days, String amount);
+
+  /// No description provided for @errorRenewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Error renewing rental: {error}'**
+  String errorRenewing(String error);
+
+  /// No description provided for @statusOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'ONGOING'**
+  String get statusOngoing;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'COMPLETED'**
+  String get statusCompleted;
+
+  /// No description provided for @statusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'OVERDUE'**
+  String get statusOverdue;
+
+  /// No description provided for @rentalIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental ID: {id}'**
+  String rentalIdLabel(String id);
+
+  /// No description provided for @clientNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Client #{id}'**
+  String clientNumber(String id);
+
+  /// No description provided for @carNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Car #{id}'**
+  String carNumber(String id);
+
+  /// No description provided for @viewClient.
+  ///
+  /// In en, this message translates to:
+  /// **'View Client'**
+  String get viewClient;
+
+  /// No description provided for @viewCar.
+  ///
+  /// In en, this message translates to:
+  /// **'View Car'**
+  String get viewCar;
+
+  /// No description provided for @noPhoneInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No phone info'**
+  String get noPhoneInfo;
+
+  /// No description provided for @unknownPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Plate'**
+  String get unknownPlate;
+
+  /// No description provided for @rentalIdColon.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental ID: {id}'**
+  String rentalIdColon(int id);
+
+  /// No description provided for @daysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String daysLabel(int days);
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @end.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get end;
+
+  /// No description provided for @ongoingRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing Rentals'**
+  String get ongoingRentals;
+
+  /// No description provided for @availableCars.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Cars'**
+  String get availableCars;
+
+  /// No description provided for @dueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Today'**
+  String get dueToday;
+
+  /// No description provided for @recentActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activities'**
+  String get recentActivities;
+
+  /// No description provided for @carRentedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Car {plate} rented by {client}'**
+  String carRentedBy(String plate, String client);
+
+  /// No description provided for @revenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get revenue;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
+
+  /// No description provided for @allTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get allTime;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @totalClients.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Clients'**
+  String get totalClients;
+
+  /// No description provided for @newClients.
+  ///
+  /// In en, this message translates to:
+  /// **'New Clients'**
+  String get newClients;
+
+  /// No description provided for @repeatClients.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat Clients'**
+  String get repeatClients;
+
+  /// No description provided for @generatingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating PDF Report...'**
+  String get generatingPdf;
+
+  /// No description provided for @errorGeneratingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Error generating PDF: {error}'**
+  String errorGeneratingPdf(String error);
+
+  /// No description provided for @pleaseWaitForData.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait for data to load.'**
+  String get pleaseWaitForData;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -479,26 +927,28 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return AppLocalizationsAr();
-    case 'en': return AppLocalizationsEn();
-    case 'fr': return AppLocalizationsFr();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

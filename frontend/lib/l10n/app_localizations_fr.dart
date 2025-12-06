@@ -193,4 +193,251 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportPdf => 'Exporter PDF';
+
+  @override
+  String get client => 'Client';
+
+  @override
+  String get car => 'Voiture';
+
+  @override
+  String get selectDate => 'Sélectionner la date';
+
+  @override
+  String get pleaseSelectDates =>
+      'Veuillez sélectionner les dates de début et de fin';
+
+  @override
+  String get pleaseSelectClient => 'Veuillez sélectionner un client';
+
+  @override
+  String get pleaseSelectCar => 'Veuillez sélectionner une voiture';
+
+  @override
+  String get pleaseEnterPrice => 'Veuillez entrer le prix';
+
+  @override
+  String get invalidNumber => 'Nombre invalide';
+
+  @override
+  String get addNewClient => 'Ajouter un nouveau client';
+
+  @override
+  String get firstName => 'Prénom';
+
+  @override
+  String get lastName => 'Nom de famille';
+
+  @override
+  String get phoneNumber => 'Numéro de téléphone';
+
+  @override
+  String get addNewCar => 'Ajouter une nouvelle voiture';
+
+  @override
+  String get carNameModel => 'Nom de la voiture (Modèle)';
+
+  @override
+  String get plateNumber => 'Numéro de plaque';
+
+  @override
+  String get dailyRentPrice => 'Prix de location quotidien';
+
+  @override
+  String get dateError =>
+      'La date de fin doit être après ou égale à la date de début';
+
+  @override
+  String pricePerDay(String price) {
+    return '$price/jour';
+  }
+
+  @override
+  String rentalId(String id) {
+    return 'ID Location: $id';
+  }
+
+  @override
+  String get rentalNoLongerExists => 'Cette location n\'existe plus.';
+
+  @override
+  String get upgradeToPremium => 'Passer à Premium';
+
+  @override
+  String get free => 'Gratuit';
+
+  @override
+  String get zeroDA => '0DA';
+
+  @override
+  String get accessBasicFeatures => 'Accéder aux fonctionnalités de base';
+
+  @override
+  String get limitedRentals => 'Entrées de location limitées (10 max)';
+
+  @override
+  String get limitedCars => 'Entrées de voitures limitées (10 max)';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get premiumPrice => '5999DA / mois';
+
+  @override
+  String get accessAllFeatures => 'Accéder à toutes les fonctionnalités';
+
+  @override
+  String get unlimitedRentals => 'Entrées de location illimitées';
+
+  @override
+  String get unlimitedCars => 'Entrées de voitures illimitées';
+
+  @override
+  String get rentalHistoryAnalytics => 'Historique et analyses de location';
+
+  @override
+  String get customReminders => 'Rappels personnalisés pour les clients';
+
+  @override
+  String get recommended => 'Recommandé';
+
+  @override
+  String get returnCarComplete => 'Retourner la voiture (Terminer)';
+
+  @override
+  String get rentalCompleted => 'Location terminée';
+
+  @override
+  String get extendRentalDuration => 'Prolonger la durée de location.';
+
+  @override
+  String get additionalDays => 'Jours supplémentaires';
+
+  @override
+  String get days => 'jours';
+
+  @override
+  String get estimatedDailyRate => 'Tarif journalier estimé:';
+
+  @override
+  String get extraCost => 'Coût supplémentaire:';
+
+  @override
+  String get confirmRenew => 'Confirmer le renouvellement';
+
+  @override
+  String renewedSuccess(int days, String amount) {
+    return 'Renouvelé pour $days jours. Ajouté \$$amount au total.';
+  }
+
+  @override
+  String errorRenewing(String error) {
+    return 'Erreur lors du renouvellement de la location: $error';
+  }
+
+  @override
+  String get statusOngoing => 'EN COURS';
+
+  @override
+  String get statusCompleted => 'TERMINÉ';
+
+  @override
+  String get statusOverdue => 'EN RETARD';
+
+  @override
+  String rentalIdLabel(String id) {
+    return 'ID Location: $id';
+  }
+
+  @override
+  String clientNumber(String id) {
+    return 'Client #$id';
+  }
+
+  @override
+  String carNumber(String id) {
+    return 'Voiture #$id';
+  }
+
+  @override
+  String get viewClient => 'Voir le client';
+
+  @override
+  String get viewCar => 'Voir la voiture';
+
+  @override
+  String get noPhoneInfo => 'Aucune info téléphone';
+
+  @override
+  String get unknownPlate => 'Plaque inconnue';
+
+  @override
+  String rentalIdColon(int id) {
+    return 'ID Location: $id';
+  }
+
+  @override
+  String daysLabel(int days) {
+    return '$days jours';
+  }
+
+  @override
+  String get start => 'Début';
+
+  @override
+  String get end => 'Fin';
+
+  @override
+  String get ongoingRentals => 'Locations en cours';
+
+  @override
+  String get availableCars => 'Voitures disponibles';
+
+  @override
+  String get dueToday => 'Échéance aujourd\'hui';
+
+  @override
+  String get recentActivities => 'Activités récentes';
+
+  @override
+  String carRentedBy(String plate, String client) {
+    return 'Voiture $plate louée par $client';
+  }
+
+  @override
+  String get revenue => 'Revenu';
+
+  @override
+  String get thisWeek => 'Cette semaine';
+
+  @override
+  String get thisMonth => 'Ce mois';
+
+  @override
+  String get allTime => 'Tout le temps';
+
+  @override
+  String get custom => 'Personnalisé';
+
+  @override
+  String get totalClients => 'Total Clients';
+
+  @override
+  String get newClients => 'Nouveaux Clients';
+
+  @override
+  String get repeatClients => 'Clients récurrents';
+
+  @override
+  String get generatingPdf => 'Génération du rapport PDF...';
+
+  @override
+  String errorGeneratingPdf(String error) {
+    return 'Erreur lors de la génération du PDF: $error';
+  }
+
+  @override
+  String get pleaseWaitForData =>
+      'Veuillez attendre le chargement des données.';
 }

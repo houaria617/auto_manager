@@ -1,3 +1,4 @@
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 // import 'package:auto_manager/features/Clients/clients_history.dart'; // Uncomment when needed
 
@@ -17,9 +18,9 @@ class ClientInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InfoCard(
       icon: Icons.person,
-      title: clientName ?? 'Client #$clientId',
-      subtitle: phone ?? 'No phone info',
-      actionLabel: 'View Client',
+      title: clientName ?? AppLocalizations.of(context)!.clientNumber(clientId.toString()),
+      subtitle: phone ?? AppLocalizations.of(context)!.noPhoneInfo,
+      actionLabel: AppLocalizations.of(context)!.viewClient,
       onActionPressed: () {
         // Navigation logic to Client Profile
         // Navigator.push(...);
@@ -44,9 +45,9 @@ class CarInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InfoCard(
       icon: Icons.directions_car,
-      title: carModel ?? 'Car #$carId',
-      subtitle: plate ?? 'Unknown Plate',
-      actionLabel: 'View Car',
+      title: carModel ?? AppLocalizations.of(context)!.carNumber(carId.toString()),
+      subtitle: plate ?? AppLocalizations.of(context)!.unknownPlate,
+      actionLabel: AppLocalizations.of(context)!.viewCar,
       onActionPressed: () {
         // Navigation logic to Car Details
       },

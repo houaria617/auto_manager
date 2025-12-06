@@ -193,4 +193,248 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportPdf => 'Export PDF';
+
+  @override
+  String get client => 'Client';
+
+  @override
+  String get car => 'Car';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get pleaseSelectDates => 'Please select start and end dates';
+
+  @override
+  String get pleaseSelectClient => 'Please select a client';
+
+  @override
+  String get pleaseSelectCar => 'Please select a car';
+
+  @override
+  String get pleaseEnterPrice => 'Please enter price';
+
+  @override
+  String get invalidNumber => 'Invalid number';
+
+  @override
+  String get addNewClient => 'Add New Client';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get addNewCar => 'Add New Car';
+
+  @override
+  String get carNameModel => 'Car Name (Model)';
+
+  @override
+  String get plateNumber => 'Plate Number';
+
+  @override
+  String get dailyRentPrice => 'Daily Rent Price';
+
+  @override
+  String get dateError => 'End date must be after or equal to start date';
+
+  @override
+  String pricePerDay(String price) {
+    return '$price/day';
+  }
+
+  @override
+  String rentalId(String id) {
+    return 'Rental ID: $id';
+  }
+
+  @override
+  String get rentalNoLongerExists => 'This rental no longer exists.';
+
+  @override
+  String get upgradeToPremium => 'Upgrade to Premium';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String get zeroDA => '0DA';
+
+  @override
+  String get accessBasicFeatures => 'Access basic features';
+
+  @override
+  String get limitedRentals => 'Limited rental entries (10 max)';
+
+  @override
+  String get limitedCars => 'Limited car entries (10 max)';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get premiumPrice => '5999DA / month';
+
+  @override
+  String get accessAllFeatures => 'Access all features';
+
+  @override
+  String get unlimitedRentals => 'Unlimited rental entries';
+
+  @override
+  String get unlimitedCars => 'Unlimited car entries';
+
+  @override
+  String get rentalHistoryAnalytics => 'Rental history & analytics';
+
+  @override
+  String get customReminders => 'Custom reminders for customers';
+
+  @override
+  String get recommended => 'Recommended';
+
+  @override
+  String get returnCarComplete => 'Return Car (Complete)';
+
+  @override
+  String get rentalCompleted => 'Rental Completed';
+
+  @override
+  String get extendRentalDuration => 'Extend the rental duration.';
+
+  @override
+  String get additionalDays => 'Additional Days';
+
+  @override
+  String get days => 'days';
+
+  @override
+  String get estimatedDailyRate => 'Estimated Daily Rate:';
+
+  @override
+  String get extraCost => 'Extra Cost:';
+
+  @override
+  String get confirmRenew => 'Confirm Renew';
+
+  @override
+  String renewedSuccess(int days, String amount) {
+    return 'Renewed for $days days. Added \$$amount to total.';
+  }
+
+  @override
+  String errorRenewing(String error) {
+    return 'Error renewing rental: $error';
+  }
+
+  @override
+  String get statusOngoing => 'ONGOING';
+
+  @override
+  String get statusCompleted => 'COMPLETED';
+
+  @override
+  String get statusOverdue => 'OVERDUE';
+
+  @override
+  String rentalIdLabel(String id) {
+    return 'Rental ID: $id';
+  }
+
+  @override
+  String clientNumber(String id) {
+    return 'Client #$id';
+  }
+
+  @override
+  String carNumber(String id) {
+    return 'Car #$id';
+  }
+
+  @override
+  String get viewClient => 'View Client';
+
+  @override
+  String get viewCar => 'View Car';
+
+  @override
+  String get noPhoneInfo => 'No phone info';
+
+  @override
+  String get unknownPlate => 'Unknown Plate';
+
+  @override
+  String rentalIdColon(int id) {
+    return 'Rental ID: $id';
+  }
+
+  @override
+  String daysLabel(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get end => 'End';
+
+  @override
+  String get ongoingRentals => 'Ongoing Rentals';
+
+  @override
+  String get availableCars => 'Available Cars';
+
+  @override
+  String get dueToday => 'Due Today';
+
+  @override
+  String get recentActivities => 'Recent Activities';
+
+  @override
+  String carRentedBy(String plate, String client) {
+    return 'Car $plate rented by $client';
+  }
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get allTime => 'All Time';
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get totalClients => 'Total Clients';
+
+  @override
+  String get newClients => 'New Clients';
+
+  @override
+  String get repeatClients => 'Repeat Clients';
+
+  @override
+  String get generatingPdf => 'Generating PDF Report...';
+
+  @override
+  String errorGeneratingPdf(String error) {
+    return 'Error generating PDF: $error';
+  }
+
+  @override
+  String get pleaseWaitForData => 'Please wait for data to load.';
 }

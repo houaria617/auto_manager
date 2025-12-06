@@ -1,3 +1,4 @@
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class TopRentedCarsCard extends StatelessWidget {
@@ -15,9 +16,9 @@ class TopRentedCarsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Top Rented Cars',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.topCars,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
             ListView.separated(

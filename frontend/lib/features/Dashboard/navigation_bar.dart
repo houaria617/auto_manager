@@ -1,6 +1,7 @@
 import 'package:auto_manager/features/analytics/presentation/analytics.dart';
 import 'package:auto_manager/features/rentals/presentation/rentals.dart';
 import 'package:auto_manager/features/vehicles/presentation/screens/vehicles_screen.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../Clients/clients_list.dart';
 import 'dashboard.dart';
@@ -63,20 +64,26 @@ class _NavBarState extends State<NavBar> {
       type: BottomNavigationBarType.fixed,
       currentIndex: selectedIndex,
       onTap: onItemTapped,
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clients'),
-        BottomNavigationBarItem(icon: Icon(Icons.car_rental), label: 'Rentals'),
+      items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: 'Dashboard',
+          icon: const Icon(Icons.people),
+          label: AppLocalizations.of(context)!.navClients,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.directions_car),
-          label: 'Cars',
+          icon: const Icon(Icons.car_rental),
+          label: AppLocalizations.of(context)!.navRentals,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.analytics),
-          label: 'Analytics',
+          icon: const Icon(Icons.dashboard),
+          label: AppLocalizations.of(context)!.navDashboard,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.directions_car),
+          label: AppLocalizations.of(context)!.navCars,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.analytics),
+          label: AppLocalizations.of(context)!.navAnalytics,
         ),
       ],
     );
