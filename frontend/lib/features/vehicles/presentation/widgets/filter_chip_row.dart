@@ -1,5 +1,5 @@
-// filter_chip_row.dart
 import 'package:flutter/material.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
 
 class FilterChipRow extends StatelessWidget {
   final String selected;
@@ -13,8 +13,18 @@ class FilterChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // matches your HTML palette
-    final Map<String, Color?> chips = {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Logic keys (what we send to logic) -> UI Display Strings (Translated)
+    final Map<String, String> labels = {
+      'All': l10n.filterAll,
+      'Available': l10n
+          .statusAvailable, // Note: Use capital casing in logic if that matches your current setup, usually db is lowercase 'available'
+      'Rented': l10n.statusRented,
+      'Maintenance': l10n.statusMaintenance,
+    };
+
+    final Map<String, Color?> colors = {
       'All': null,
       'Available': const Color(0xFF34C759),
       'Rented': const Color(0xFF007AFF),
@@ -22,15 +32,16 @@ class FilterChipRow extends StatelessWidget {
     };
 
     return Row(
-      children: chips.entries.map((e) {
-        final label = e.key;
-        final color = e.value;
-        final isSelected = label == selected;
+      children: labels.keys.map((key) {
+        final displayLabel = labels[key]!;
+        final color = colors[key];
+        final isSelected =
+            key == selected; // selected stores the logic key (e.g., 'All')
 
         return Padding(
           padding: const EdgeInsets.only(right: 8.0),
           child: GestureDetector(
-            onTap: () => onSelected(label),
+            onTap: () => onSelected(key), // Pass back logic key
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
@@ -55,7 +66,7 @@ class FilterChipRow extends StatelessWidget {
                       ),
                     ),
                   Text(
-                    label,
+                    displayLabel,
                     style: TextStyle(
                       color: isSelected
                           ? (color ?? const Color(0xFF007AFF))

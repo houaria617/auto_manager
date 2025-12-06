@@ -218,5 +218,83 @@
             }
         }
     },
-    "pleaseWaitForData": "Please wait for data to load."
+    "pleaseWaitForData": "Please wait for data to load.",
+    "clientsTitle": "Clients",
+    "noClientFound": "No Client Found",
+    "searchClientHint": "Search by name or phone number",
+    "clientProfileTitle": "Client Profile",
+    "noRecentActivities": "No recent activities",
+    "ninLabel": "NIN",
+    "statusActive": "ACTIVE",
+    "statusIdle": "IDLE",
+    "days": "Days",
+    "totalRents": "TOTAL RENTS",
+    "rentHistory": "Rent History",
+    "from": "from",
+    "to": "to",
+    "totalIs": "Total is",
+    "statusCompleted": "Completed",
+    "statusOngoing": "Ongoing",
+    "unknown": "Unknown",
+    "noPhone": "No phone",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "dashboardTitle": "Dashboard",
+    "appName": "Auto Manager",
+    "ongoingRentals": "Ongoing Rentals",
+    "availableCars": "Available Cars",
+    "dueToday": "Due Today",
+    "recentActivities": "Recent Activities",
+    "noRecentActivities": "No recent activities",
+    "newRental": "New Rental",
+    "atTime": "at",
+    "myVehicles": "My Vehicles",
+    "searchCarPlaceholder": "Search for a car or plate...",
+    "failedToLoadData": "Failed to load data",
+    "noVehiclesMatchFilter": "No vehicles match the filter",
+    "addFirstVehicle": "Add Your First Vehicle",
+    "tapPlusToBegin": "Tap the \"+\" button to begin.",
+    "vehicleDetails": "Vehicle Details",
+    "unknownName": "Unknown Name",
+    "plateNumber": "Plate Number",
+    "pricePerDay": "Price {value}",
+    "returnDate": "Return Date",
+    "availableOn": "Available On",
+    "nextMaintenance": "Next Maintenance",
+    "deleteVehicleTitle": "Delete vehicle",
+    "deleteVehicleConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "@deleteVehicleConfirm": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "editVehicle": "Edit Vehicle",
+    "carName": "Car Name",
+    "nextMaintenanceOptional": "Next Maintenance Date (optional)",
+    "rentPricePerDay": "Rent Price (per Day)",
+    "availabilityDate": "Availability Date",
+    "save": "Save",
+    "deletedVehicle": "Deleted \"{name}\"",
+    "@deletedVehicle": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "statusAvailable": "Available",
+    "statusRented": "Rented",
+    "statusMaintenance": "Maintenance",
+    "filterAll": "All",
+    "labelClient": "Client",
+    "labelCar": "Car",
+    "labelStartDate": "Start Date",
+    "labelEndDate": "End Date",
+    "labelTotalPrice": "Total Price",
+    "selectDate": "Select Date",
+    "selectClient": "Select Client",
+    "selectCar": "Select Car",
+    "saveRental": "Save Rental"
 }

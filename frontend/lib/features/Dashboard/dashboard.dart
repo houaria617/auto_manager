@@ -4,6 +4,8 @@ import 'package:auto_manager/features/settings/presentation/screens/settings_scr
 import 'package:flutter/material.dart';
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+// ✅ Import AppLocalizations
+import 'package:auto_manager/l10n/app_localizations.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -18,16 +20,20 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = context.read<DashboardCubit>();
-      cubit.countOngoingRentals(); // these function calls
-      cubit.countAvailableCars(); // trigger cubit functions to
-      cubit.countDueToday(); // fetch data and emit new states.
+      cubit.countOngoingRentals();
+      cubit.countAvailableCars();
+      cubit.countDueToday();
+      // Note: Descriptions added here will be in the language active at the moment of addition
+      // unless you store keys instead of text in the database.
       cubit.addActivity({'description': '', 'date': DateTime.now()});
-      print('#' * 1000);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Initialize Localization
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -56,9 +62,9 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
         ],
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(
+        title: Text(
+          l10n.dashboardTitle, // 🌍 Localized
+          style: const TextStyle(
             fontFamily: 'ManropeExtraBold',
             color: Color(0xFF2D3748),
             fontSize: 24,
@@ -75,14 +81,16 @@ class _DashboardState extends State<Dashboard> {
                 const SizedBox(height: 20),
                 Center(
                   child: Text(
-                    "Auto Manager",
-                    style: TextStyle(
+                    l10n.appName, // 🌍 Localized
+                    style: const TextStyle(
                       fontSize: 22,
                       fontFamily: 'ManropeExtraBold',
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // --- CARD 1: Ongoing Rentals ---
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -111,7 +119,7 @@ class _DashboardState extends State<Dashboard> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.car_rental,
                           size: 22,
                           color: Colors.white,
@@ -120,7 +128,7 @@ class _DashboardState extends State<Dashboard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Ongoing Rentals',
+                          l10n.ongoingRentals, // 🌍 Localized
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -128,7 +136,6 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ),
                       ),
-                      // BLOC BUILDER
                       BlocBuilder<DashboardCubit, DashboardStatistics>(
                         builder: (context, state) {
                           return Text(
@@ -146,6 +153,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 const SizedBox(height: 10),
 
+                // --- CARD 2: Available Cars ---
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -174,7 +182,7 @@ class _DashboardState extends State<Dashboard> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.directions_car_outlined,
                           size: 22,
                           color: Colors.white,
@@ -183,7 +191,7 @@ class _DashboardState extends State<Dashboard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Available Cars',
+                          l10n.availableCars, // 🌍 Localized
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -191,7 +199,6 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ),
                       ),
-                      // BLOC BUILDER
                       BlocBuilder<DashboardCubit, DashboardStatistics>(
                         builder: (context, state) {
                           return Text(
@@ -209,6 +216,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 const SizedBox(height: 10),
 
+                // --- CARD 3: Due Today ---
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -237,7 +245,7 @@ class _DashboardState extends State<Dashboard> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.access_time,
                           size: 22,
                           color: Colors.white,
@@ -246,7 +254,7 @@ class _DashboardState extends State<Dashboard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Due Today',
+                          l10n.dueToday, // 🌍 Localized
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -254,7 +262,6 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ),
                       ),
-                      // BLOC BUILDER
                       BlocBuilder<DashboardCubit, DashboardStatistics>(
                         builder: (context, state) {
                           return Text(
@@ -273,10 +280,10 @@ class _DashboardState extends State<Dashboard> {
 
                 const SizedBox(height: 24),
 
-                // RECENT ACTIVITIES
-                const Text(
-                  'Recent Activities',
-                  style: TextStyle(
+                // --- RECENT ACTIVITIES HEADER ---
+                Text(
+                  l10n.recentActivities, // 🌍 Localized
+                  style: const TextStyle(
                     fontSize: 22,
                     fontFamily: 'ManropeExtraBold',
                     color: Color(0xFF2D3748),
@@ -284,12 +291,13 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 const SizedBox(height: 16),
 
+                // --- RECENT ACTIVITIES LIST ---
                 Expanded(
                   child: BlocBuilder<DashboardCubit, DashboardStatistics>(
                     builder: (context, state) {
                       if (state.recentActivities.isEmpty) {
-                        return const Center(
-                          child: Text('No recent activities'),
+                        return Center(
+                          child: Text(l10n.noRecentActivities), // 🌍 Localized
                         );
                       }
 
@@ -297,6 +305,8 @@ class _DashboardState extends State<Dashboard> {
                         itemCount: state.recentActivities.length,
                         itemBuilder: (context, index) {
                           final activity = state.recentActivities[index];
+                          final date = DateTime.parse(activity['date']);
+
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
@@ -348,7 +358,8 @@ class _DashboardState extends State<Dashboard> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              activity['description'],
+                                              // Ensure description is not null
+                                              activity['description'] ?? '',
                                               style: const TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w600,
@@ -369,7 +380,8 @@ class _DashboardState extends State<Dashboard> {
                                                 Text(
                                                   overflow:
                                                       TextOverflow.ellipsis,
-                                                  '${DateTime.parse(activity['date']).day}/${DateTime.parse(activity['date']).month}/${DateTime.parse(activity['date']).year} at ${DateTime.parse(activity['date']).hour}:${DateTime.parse(activity['date']).minute}',
+                                                  // 🌍 Localized Date Format
+                                                  '${date.day}/${date.month}/${date.year} ${l10n.atTime} ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
                                                   style: const TextStyle(
                                                     fontSize: 13,
                                                     fontWeight: FontWeight.w400,
@@ -414,7 +426,7 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
 
-          // Floating Action Button
+          // --- FLOATING ACTION BUTTON ---
           Positioned(
             bottom: 16,
             right: 16,
@@ -460,9 +472,9 @@ class _DashboardState extends State<Dashboard> {
                           color: Colors.white,
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'New Rental',
-                          style: TextStyle(
+                        Text(
+                          l10n.newRental, // 🌍 Localized
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -480,58 +492,4 @@ class _DashboardState extends State<Dashboard> {
       bottomNavigationBar: const NavBar(),
     );
   }
-
-  // Widget _buildStatCard({
-  //   required IconData icon,
-  //   required String title,
-  //   required String value,
-  //   required Gradient gradient,
-  // }) {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-  //     decoration: BoxDecoration(
-  //       gradient: gradient,
-  //       borderRadius: BorderRadius.circular(14),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.08),
-  //           blurRadius: 8,
-  //           offset: const Offset(0, 3),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           padding: const EdgeInsets.all(8),
-  //           decoration: BoxDecoration(
-  //             color: Colors.white.withOpacity(0.2),
-  //             borderRadius: BorderRadius.circular(10),
-  //           ),
-  //           child: Icon(icon, size: 22, color: Colors.white),
-  //         ),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: Text(
-  //             title,
-  //             style: const TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 14,
-  //               fontWeight: FontWeight.w600,
-  //             ),
-  //           ),
-  //         ),
-  //         // BLOC BUILDER
-  //         Text(
-  //           value,
-  //           style: const TextStyle(
-  //             fontSize: 24,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.white,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

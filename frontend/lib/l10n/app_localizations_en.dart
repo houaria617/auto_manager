@@ -246,8 +246,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateError => 'End date must be after or equal to start date';
 
   @override
-  String pricePerDay(String price) {
-    return '$price/day';
+  String pricePerDay(String price, Object value) {
+    return 'Price $value';
   }
 
   @override
@@ -313,7 +313,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get additionalDays => 'Additional Days';
 
   @override
-  String get days => 'days';
+  String get days => 'Days';
 
   @override
   String get estimatedDailyRate => 'Estimated Daily Rate:';
@@ -335,10 +335,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get statusOngoing => 'ONGOING';
+  String get statusOngoing => 'Ongoing';
 
   @override
-  String get statusCompleted => 'COMPLETED';
+  String get statusCompleted => 'Completed';
 
   @override
   String get statusOverdue => 'OVERDUE';
@@ -437,4 +437,146 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseWaitForData => 'Please wait for data to load.';
+
+  @override
+  String get clientsTitle => 'Clients';
+
+  @override
+  String get noClientFound => 'No Client Found';
+
+  @override
+  String get searchClientHint => 'Search by name or phone number';
+
+  @override
+  String get clientProfileTitle => 'Client Profile';
+
+  @override
+  String get noRecentActivities => 'No recent activities';
+
+  @override
+  String get ninLabel => 'NIN';
+
+  @override
+  String get statusActive => 'ACTIVE';
+
+  @override
+  String get statusIdle => 'IDLE';
+
+  @override
+  String get totalRents => 'TOTAL RENTS';
+
+  @override
+  String get rentHistory => 'Rent History';
+
+  @override
+  String get from => 'from';
+
+  @override
+  String get to => 'to';
+
+  @override
+  String get totalIs => 'Total is';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get noPhone => 'No phone';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get dashboardTitle => 'Dashboard';
+
+  @override
+  String get atTime => 'at';
+
+  @override
+  String get myVehicles => 'My Vehicles';
+
+  @override
+  String get searchCarPlaceholder => 'Search for a car or plate...';
+
+  @override
+  String get failedToLoadData => 'Failed to load data';
+
+  @override
+  String get noVehiclesMatchFilter => 'No vehicles match the filter';
+
+  @override
+  String get addFirstVehicle => 'Add Your First Vehicle';
+
+  @override
+  String get tapPlusToBegin => 'Tap the \"+\" button to begin.';
+
+  @override
+  String get vehicleDetails => 'Vehicle Details';
+
+  @override
+  String get unknownName => 'Unknown Name';
+
+  @override
+  String get returnDate => 'Return Date';
+
+  @override
+  String get availableOn => 'Available On';
+
+  @override
+  String get nextMaintenance => 'Next Maintenance';
+
+  @override
+  String get deleteVehicleTitle => 'Delete vehicle';
+
+  @override
+  String deleteVehicleConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String get editVehicle => 'Edit Vehicle';
+
+  @override
+  String get carName => 'Car Name';
+
+  @override
+  String get nextMaintenanceOptional => 'Next Maintenance Date (optional)';
+
+  @override
+  String get rentPricePerDay => 'Rent Price (per Day)';
+
+  @override
+  String get availabilityDate => 'Availability Date';
+
+  @override
+  String deletedVehicle(String name) {
+    return 'Deleted \"$name\"';
+  }
+
+  @override
+  String get statusAvailable => 'Available';
+
+  @override
+  String get statusRented => 'Rented';
+
+  @override
+  String get statusMaintenance => 'Maintenance';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get labelClient => 'Client';
+
+  @override
+  String get labelCar => 'Car';
+
+  @override
+  String get labelStartDate => 'Start Date';
+
+  @override
+  String get labelEndDate => 'End Date';
+
+  @override
+  String get labelTotalPrice => 'Total Price';
 }

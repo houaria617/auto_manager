@@ -5,8 +5,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:auto_manager/cubit/client_cubit.dart';
 import 'package:auto_manager/cubit/dashboard_cubit.dart';
 import 'package:auto_manager/cubit/profile_cubit.dart';
-import 'package:auto_manager/cubit/rental_cubit.dart';
-import 'package:auto_manager/cubit/vehicle_cubit.dart';
+import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
+import 'package:auto_manager/logic/cubits/cars/cars_cubit.dart';
 import 'package:auto_manager/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,18 +34,16 @@ class MainApp extends StatelessWidget {
         BlocProvider<ProfileCubit>(create: (context) => ProfileCubit()),
         BlocProvider<ClientCubit>(create: (context) => ClientCubit()),
         BlocProvider<RentalCubit>(
-          create: (context) => RentalCubit(
-            dashboardCubit: context.read<DashboardCubit>(),
-            clientCubit: context.read<ClientCubit>(),
-          ),
+          create: (context) => RentalCubit()..loadRentals(),
         ),
-        BlocProvider<VehicleCubit>(
-          create: (context) =>
-              VehicleCubit(dashboardCubit: context.read<DashboardCubit>()),
+        BlocProvider<CarsCubit>(
+          create: (context) {
+            final cubit = CarsCubit();
+            cubit.dashboardCubit = context.read<DashboardCubit>();
+            return cubit;
+          },
         ),
-        BlocProvider<LocaleCubit>(
-          create: (context) => LocaleCubit(),
-        ),
+        BlocProvider<LocaleCubit>(create: (context) => LocaleCubit()),
       ],
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) {

@@ -1,7 +1,8 @@
 import 'package:auto_manager/l10n/app_localizations.dart';
+import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
+import 'package:auto_manager/cubit/client_cubit.dart';
 import '../../../databases/repo/Car/car_abstract.dart';
 import '../../../databases/repo/Client/client_abstract.dart';
-import '../../../cubit/rental_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -52,8 +53,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       final rawCars = await _carRepo.getData();
 
       if (mounted) {
-        setState(() {
-          print('### MOUNTED: $mounted');
+      setState(() {
+        print('### MOUNTED: $mounted');
           // FIXED: Safely cast the database results
           _clients = List<Map<String, dynamic>>.from(rawClients);
           _cars = List<Map<String, dynamic>>.from(rawCars);
@@ -113,36 +114,41 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           ElevatedButton(
             onPressed: () async {
               if (formKeyClient.currentState!.validate()) {
-                // CHANGED: Map key is now 'phone'
-                final newClient = {
-                  'full_name': fullNameController.text,
-                  //'last_name': lastNameController.text,
-                  'phone': phoneController.text,
-                };
+                try {
+                  // CHANGED: Map key is now 'phone'
+                  final newClient = {
+                    'full_name': fullNameController.text.trim(),
+                    'phone': phoneController.text.trim(),
+                  };
 
-                // 1. Insert into DB
-                // this already return the created client id
-                final clientID = await _clientRepo.insertClient(newClient);
-                print('&&&& inside _showAddClientDialog, id: $clientID');
+                  // 1. Use ClientCubit to add client (it handles duplicate checking)
+                  final clientID = await context.read<ClientCubit>().addClient(newClient);
+                  print('&&&& inside _showAddClientDialog, id: $clientID');
 
-                // 2. Reload Data
-                await _loadData();
+                  // 2. Reload Data
+                  await _loadData();
 
-                // 3. Auto-select (Find highest ID)
-                if (_clients.isNotEmpty) {
-                  final newest = _clients.reduce((curr, next) {
-                    final currId = curr['id'] as int;
-                    final nextId = next['id'] as int;
-                    return currId > nextId ? curr : next;
-                  });
-
+                  // 3. Auto-select the newly added client
                   setState(() {
-                    print('inside set state');
-                    _selectedClientId = newest['id'] as int;
-                  });
+                    _selectedClientId = clientID;
+                    print('Selected client ID: $_selectedClientId');
+      });
+    
+                  // 4. Close dialog
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                } catch (e) {
+                  print('Error adding client: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error adding client: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 }
-
-                if (mounted) Navigator.pop(context);
               }
             },
             child: Text(AppLocalizations.of(context)!.add),
@@ -270,17 +276,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     if (picked != null && mounted) {
       setState(() {
         if (isStartDate) {
-          _startDate = picked;
+_startDate = picked;
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate = null;
+_endDate = null;
           }
         } else {
-          _endDate = picked;
+_endDate = picked;
         }
-        _dateError = null;
+      _dateError = null;
         _validateDates();
-        _calculateTotalPrice();
-      });
+      _calculateTotalPrice();
+});
     }
   }
 
@@ -299,26 +305,63 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   }
 
   void _calculateTotalPrice() {
-    if (_selectedCarId != null &&
-        _startDate != null &&
-        _endDate != null &&
-        _dateError == null) {
+    // Only calculate if we have all required data
+    if (_selectedCarId == null || _startDate == null || _endDate == null) {
+      return;
+    }
+
+    if (_dateError != null) {
+      return;
+    }
+
+    try {
       final car = _cars.firstWhere(
         (element) => element['id'] == _selectedCarId,
-        orElse: () => {},
+        orElse: () => <String, dynamic>{},
       );
 
-      if (car.isNotEmpty && car['price'] != null) {
-        final days = _endDate!.difference(_startDate!).inDays;
-        final billableDays = days == 0 ? 1 : days;
-
-        final dailyPrice = (car['price'] is int)
-            ? (car['price'] as int).toDouble()
-            : (car['price'] as double);
-
-        final total = dailyPrice * billableDays;
-        _priceController.text = total.toStringAsFixed(2);
+      if (car.isEmpty) {
+        print('Car not found for ID: $_selectedCarId');
+        return;
       }
+
+      // Get price from car, handle different possible field names
+      dynamic priceValue = car['price'] ?? car['rentPrice'] ?? 0.0;
+      
+      if (priceValue == null) {
+        print('Price is null for car: $car');
+        return;
+      }
+
+      // Convert price to double
+      final dailyPrice = (priceValue is int)
+          ? priceValue.toDouble()
+          : (priceValue is double)
+              ? priceValue
+              : double.tryParse(priceValue.toString()) ?? 0.0;
+
+      if (dailyPrice <= 0) {
+        print('Invalid daily price: $dailyPrice');
+        return;
+      }
+
+      // Calculate days
+      final days = _endDate!.difference(_startDate!).inDays;
+      final billableDays = days <= 0 ? 1 : days;
+
+      // Calculate total
+      final total = dailyPrice * billableDays;
+      
+      // Update the price controller
+      if (mounted) {
+        setState(() {
+          _priceController.text = total.toStringAsFixed(2);
+        });
+      }
+      
+      print('Price calculated: $dailyPrice x $billableDays = $total');
+    } catch (e) {
+      print('Error calculating price: $e');
     }
   }
 
@@ -354,11 +397,11 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+        return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+                backgroundColor: Colors.white,
+elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
@@ -366,50 +409,50 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         title: Text(
           AppLocalizations.of(context)!.addRentalTitle,
           style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-          // title: const Text(
+                        color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
+        // title: const Text(
           //   'New Rental',
           //   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Form(
+: SingleChildScrollView(
+child: Padding(
+        padding: const EdgeInsets.all(24.0),
+child: Form(
                   key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // CLIENT DROPDOWN
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // CLIENT DROPDOWN
                       _buildLabel(AppLocalizations.of(context)!.client),
                       //_buildLabel('Client'),
-                      Row(
-                        children: [
-                          Expanded(
+            Row(
+              children: [
+                Expanded(
                             child: DropdownButtonFormField<int>(
-                              initialValue: _selectedClientId,
-                              hint: Text(
-                                AppLocalizations.of(context)!.selectClient,
+                              value: _selectedClientId,
+                          hint: Text(
+                            AppLocalizations.of(context)!.selectClient,
                               ),
                               //hint: const Text("Select Client"),
                               decoration: _inputDecoration(
-                                Icons.person_outline,
-                              ),
-                              items: _clients.map((client) {
-                                final name = "${client['full_name']}";
-                                return DropdownMenuItem<int>(
-                                  value: client['id'] as int,
-                                  child: Text(
-                                    name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) =>
+                            Icons.person_outline,
+                          ),
+                          items: _clients.map((client) {
+final name = "${client['full_name']}";
+                            return DropdownMenuItem<int>(
+                              value: client['id'] as int,
+                              child: Text(
+                                name,
+                                overflow: TextOverflow.ellipsis,
+                                                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) =>
                                   setState(() => _selectedClientId = value),
                               validator: (value) => value == null
                                   ? AppLocalizations.of(
@@ -417,49 +460,49 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                                     )!.pleaseSelectClient
                                   //? 'Please select a client'
                                   : null,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
+),
+                    ),
+                    const SizedBox(width: 10),
                           _buildAddButton(_showAddClientDialog),
-                        ],
-                      ),
+              ],
+            ),
 
-                      const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-                      // CAR DROPDOWN
+            // CAR DROPDOWN
                       _buildLabel(AppLocalizations.of(context)!.car),
                       //_buildLabel('Car'),
-                      Row(
-                        children: [
-                          Expanded(
+            Row(
+              children: [
+                Expanded(
                             child: DropdownButtonFormField<int>(
-                              initialValue: _selectedCarId,
-                              hint: Text(
-                                AppLocalizations.of(context)!.selectCar,
+                              value: _selectedCarId,
+                          hint: Text(
+                            AppLocalizations.of(context)!.selectCar,
                               ),
                               //hint: const Text("Select Car"),
                               decoration: _inputDecoration(
-                                Icons.directions_car,
-                              ),
+                                    Icons.directions_car,
+                                    ),
                               items: _cars.map((car) {
                                 // Matches new schema: name, plate, price
                                 final name = car['name'] ?? 'Unknown';
                                 final plate = car['plate'] ?? '';
                                 return DropdownMenuItem<int>(
                                   value: car['id'] as int,
-                                  child: Text(
-                                    "$name ($plate)",
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedCarId = value;
-                                  _calculateTotalPrice();
-                                });
-                              },
-                              validator: (value) => value == null
+                                    child: Text(
+                                      "$name ($plate)",
+                                      overflow: TextOverflow.ellipsis,
+                                                                    ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCarId = value;
+                            _calculateTotalPrice();
+                          });
+                    },
+                  validator: (value) => value == null
                                   ? AppLocalizations.of(
                                       context,
                                     )!.pleaseSelectCar
@@ -469,54 +512,54 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                           ),
                           const SizedBox(width: 10),
                           _buildAddButton(_showAddCarDialog),
-                        ],
-                      ),
+              ],
+            ),
 
-                      const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-                      // DATES
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(
+            // DATES
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel(
                                   AppLocalizations.of(context)!.startDate,
-                                ),
-                                //_buildLabel('Start Date'),
-                                _buildDateSelector(true),
-                              ],
-                            ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(
+                          //_buildLabel('Start Date'),
+                                _buildDateSelector(true),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildLabel(
                                   AppLocalizations.of(context)!.endDate,
                                 ),
                                 //_buildLabel('End Date'),
                                 _buildDateSelector(false),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_dateError != null)
+                    ],
+                  ),
+                ),
+              ],
+            ),
+if (_dateError != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 8, left: 12),
-                          child: Text(
-                            _dateError!,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
+child: Text(
+              _dateError!,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+),
+              ),
+            ),
 
-                      const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
                       // PRICE
                       _buildLabel(AppLocalizations.of(context)!.totalPrice),
@@ -524,19 +567,19 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       TextFormField(
                         controller: _priceController,
                         keyboardType: TextInputType.number,
-                        decoration: _inputDecoration(null).copyWith(
+              decoration: _inputDecoration(null).copyWith(
                           prefixIcon: const Padding(
                             padding: EdgeInsets.all(16),
-                            child: Text(
-                              '\$',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
+              child: Text(
+                '\$',
+                style: TextStyle(
+                                    fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  ),
+),
+                ),
+              ),
+validator: (value) {
                           if (value == null || value.isEmpty) {
                             return AppLocalizations.of(
                               context,
@@ -553,67 +596,67 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                           // }
                           // return null;
                         },
+            ),
+
+            const SizedBox(height: 40),
+
+// BUTTONS
+            Row(
+              children: [
+                Expanded(
+                                    child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+vertical: 16,
+),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-
-                      const SizedBox(height: 40),
-
-                      // BUTTONS
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                side: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              child: Text(
-                                AppLocalizations.of(context)!.cancel,
-                                style: const TextStyle(
-                                  // child: const Text(
+side: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.cancel,
+                      style: const TextStyle(
+                        // child: const Text(
                                   //   'Cancel',
-                                  //   style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+//   style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: _saveRental,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+vertical: 16,
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            flex: 2,
-                            child: ElevatedButton(
-                              onPressed: _saveRental,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text(
-                                AppLocalizations.of(context)!.saveRental,
-                                // child: const Text(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.saveRental,
+                      // child: const Text(
                                 //   'Save Rental',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                                                fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                    ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ],
                   ),
                 ),
               ),
@@ -691,414 +734,3 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     );
   }
 }
-
-// ######## FIRST FILE ENDS #########
-
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import '../../../cubit/rental_cubit.dart';
-
-// class AddRentalScreen extends StatefulWidget {
-//   const AddRentalScreen({super.key});
-
-//   @override
-//   State<AddRentalScreen> createState() => _AddRentalScreenState();
-// }
-
-// class _AddRentalScreenState extends State<AddRentalScreen> {
-//   final _formKey = GlobalKey<FormState>();
-//   final _clientNameController = TextEditingController();
-//   final _phoneController = TextEditingController();
-//   final _carModelController = TextEditingController();
-//   final _priceController = TextEditingController();
-//   DateTime? _startDate;
-//   DateTime? _endDate;
-//   String? _dateError;
-
-//   @override
-//   void dispose() {
-//     _clientNameController.dispose();
-//     _carModelController.dispose();
-//     _priceController.dispose();
-//     super.dispose();
-//   }
-
-//   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-//     final DateTime? picked = await showDatePicker(
-//       context: context,
-//       initialDate: DateTime.now(),
-//       firstDate: DateTime.now(),
-//       lastDate: DateTime(2026),
-//     );
-//     if (picked != null && mounted) {
-//       setState(() {
-//         if (isStartDate) {
-//           _startDate = picked;
-//           // Clear end date if it's before the new start date
-//           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-//             _endDate = null;
-//           }
-//         } else {
-//           _endDate = picked;
-//         }
-//         _dateError = null; // Clear error when dates are selected
-//         _validateDates();
-//       });
-//     }
-//   }
-
-//   void _validateDates() {
-//     if (_startDate != null && _endDate != null) {
-//       if (_endDate!.isBefore(_startDate!)) {
-//         setState(() {
-//           _dateError = 'End date must be after or equal to start date';
-//         });
-//       } else {
-//         setState(() {
-//           _dateError = null;
-//         });
-//       }
-//     }
-//   }
-
-//   void _saveRental() {
-//     print('1. Save rental clicked');
-//     if (!_formKey.currentState!.validate()) {
-//       print('2. Form validation failed');
-//       return; // Form invalid, stop here
-//     }
-//     print('3. Form validation passed');
-
-//     if (_startDate == null || _endDate == null) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(content: Text('Please select start and end dates')),
-//       );
-//       return;
-//     }
-
-//     if (_dateError != null) {
-//       ScaffoldMessenger.of(
-//         context,
-//       ).showSnackBar(SnackBar(content: Text(_dateError!)));
-//       return;
-//     }
-
-//     // All validations passed
-//     print('4. Calling addRental');
-//     final newRental = {
-//         'client_id': _selectedClientId,
-//         'car_id': _selectedCarId,
-//         'date_from': _startDate!.toIso8601String(),
-//         'date_to': _endDate!.toIso8601String(),
-//         'total_amount': double.parse(_priceController.text),
-//         'payment_state': 'unpaid',
-//         'state': 'ongoing',
-//       };
-//       print('4. Calling addRental');
-//       context.read<RentalCubit>().addRental(newRental);
-//     print('5. Navigator pop');
-//     Navigator.pop(context);
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-//       appBar: AppBar(
-//         backgroundColor: Colors.white,
-//         elevation: 0,
-//         leading: IconButton(
-//           icon: const Icon(Icons.close, color: Colors.black),
-//           onPressed: () => Navigator.of(context).pop(),
-//         ),
-//         title: const Text(
-//           'New Rental',
-//           style: TextStyle(
-//             color: Colors.black,
-//             fontWeight: FontWeight.bold,
-//             fontSize: 20,
-//           ),
-//         ),
-//       ),
-//       body: SingleChildScrollView(
-//         child: Padding(
-//           padding: const EdgeInsets.all(24.0),
-//           child: Form(
-//             key: _formKey,
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 _buildLabel('Client Name'),
-//                 TextFormField(
-//                   controller: _clientNameController,
-//                   decoration: InputDecoration(
-//                     hintText: 'Enter client name',
-//                     filled: true,
-//                     fillColor: Colors.grey[100],
-//                     border: OutlineInputBorder(
-//                       borderRadius: BorderRadius.circular(12),
-//                       borderSide: BorderSide.none,
-//                     ),
-//                     prefixIcon: const Icon(Icons.person_outline),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please enter client name';
-//                     }
-//                     if (value.trim().length < 2) {
-//                       return 'Client name must be at least 2 characters';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 20),
-//                 _buildLabel('Client Phone'),
-//                 TextFormField(
-//                   controller: _phoneController,
-//                   decoration: InputDecoration(
-//                     hintText: 'Enter client\'s phone',
-//                     filled: true,
-//                     fillColor: Colors.grey[100],
-//                     border: OutlineInputBorder(
-//                       borderRadius: BorderRadius.circular(12),
-//                       borderSide: BorderSide.none,
-//                     ),
-//                     prefixIcon: const Icon(Icons.phone),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please enter client\s phone';
-//                     }
-//                     if (value.trim().length < 10) {
-//                       return 'Client\'s phone must be at least 10 characters';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 20),
-//                 _buildLabel('Car Model'),
-//                 TextFormField(
-//                   controller: _carModelController,
-//                   decoration: InputDecoration(
-//                     hintText: 'Enter car model',
-//                     filled: true,
-//                     fillColor: Colors.grey[100],
-//                     border: OutlineInputBorder(
-//                       borderRadius: BorderRadius.circular(12),
-//                       borderSide: BorderSide.none,
-//                     ),
-//                     prefixIcon: const Icon(Icons.directions_car),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please enter car model';
-//                     }
-//                     if (value.trim().length < 2) {
-//                       return 'Car model must be at least 2 characters';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 20),
-//                 Row(
-//                   children: [
-//                     Expanded(
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           _buildLabel('Start Date'),
-//                           GestureDetector(
-//                             onTap: () => _selectDate(context, true),
-//                             child: Container(
-//                               padding: const EdgeInsets.all(16),
-//                               decoration: BoxDecoration(
-//                                 color: Colors.grey[100],
-//                                 borderRadius: BorderRadius.circular(12),
-//                                 border: Border.all(
-//                                   color:
-//                                       _dateError != null && _startDate == null
-//                                       ? Colors.red
-//                                       : Colors.transparent,
-//                                   width: 1,
-//                                 ),
-//                               ),
-//                               child: Row(
-//                                 mainAxisAlignment:
-//                                     MainAxisAlignment.spaceBetween,
-//                                 children: [
-//                                   Text(
-//                                     _startDate == null
-//                                         ? 'Select Date'
-//                                         : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
-//                                     style: TextStyle(
-//                                       color: _startDate == null
-//                                           ? Colors.grey[600]
-//                                           : Colors.black,
-//                                     ),
-//                                   ),
-//                                   const Icon(Icons.calendar_today, size: 20),
-//                                 ],
-//                               ),
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                     const SizedBox(width: 16),
-//                     Expanded(
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           _buildLabel('End Date'),
-//                           GestureDetector(
-//                             onTap: () => _selectDate(context, false),
-//                             child: Container(
-//                               padding: const EdgeInsets.all(16),
-//                               decoration: BoxDecoration(
-//                                 color: Colors.grey[100],
-//                                 borderRadius: BorderRadius.circular(12),
-//                                 border: Border.all(
-//                                   color: _dateError != null
-//                                       ? Colors.red
-//                                       : Colors.transparent,
-//                                   width: 1,
-//                                 ),
-//                               ),
-//                               child: Row(
-//                                 mainAxisAlignment:
-//                                     MainAxisAlignment.spaceBetween,
-//                                 children: [
-//                                   Text(
-//                                     _endDate == null
-//                                         ? 'Select Date'
-//                                         : '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
-//                                     style: TextStyle(
-//                                       color: _endDate == null
-//                                           ? Colors.grey[600]
-//                                           : Colors.black,
-//                                     ),
-//                                   ),
-//                                   const Icon(Icons.calendar_today, size: 20),
-//                                 ],
-//                               ),
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 if (_dateError != null)
-//                   Padding(
-//                     padding: const EdgeInsets.only(top: 8, left: 12),
-//                     child: Text(
-//                       _dateError!,
-//                       style: const TextStyle(color: Colors.red, fontSize: 12),
-//                     ),
-//                   ),
-//                 const SizedBox(height: 20),
-//                 _buildLabel('Total Price'),
-//                 TextFormField(
-//                   controller: _priceController,
-//                   keyboardType: TextInputType.number,
-//                   decoration: InputDecoration(
-//                     hintText: 'Enter amount',
-//                     filled: true,
-//                     fillColor: Colors.grey[100],
-//                     border: OutlineInputBorder(
-//                       borderRadius: BorderRadius.circular(12),
-//                       borderSide: BorderSide.none,
-//                     ),
-//                     prefixIcon: const Padding(
-//                       padding: EdgeInsets.all(16),
-//                       child: Text(
-//                         '\$',
-//                         style: TextStyle(
-//                           fontSize: 16,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please enter price';
-//                     }
-//                     final price = double.tryParse(value);
-//                     if (price == null) {
-//                       return 'Please enter a valid number';
-//                     }
-//                     if (price <= 0) {
-//                       return 'Price must be greater than 0';
-//                     }
-//                     if (price > 1000000) {
-//                       return 'Price must be reasonable';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 40),
-//                 Row(
-//                   children: [
-//                     Expanded(
-//                       child: OutlinedButton(
-//                         onPressed: () => Navigator.of(context).pop(),
-//                         style: OutlinedButton.styleFrom(
-//                           padding: const EdgeInsets.symmetric(vertical: 16),
-//                           shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(12),
-//                           ),
-//                           side: BorderSide(color: Colors.grey[300]!),
-//                         ),
-//                         child: const Text(
-//                           'Cancel',
-//                           style: TextStyle(
-//                             fontSize: 16,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.black,
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                     const SizedBox(width: 16),
-//                     Expanded(
-//                       flex: 2,
-//                       child: ElevatedButton(
-//                         onPressed: _saveRental,
-//                         style: ElevatedButton.styleFrom(
-//                           backgroundColor: Colors.green,
-//                           padding: const EdgeInsets.symmetric(vertical: 16),
-//                           shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(12),
-//                           ),
-//                         ),
-//                         child: const Text(
-//                           'Save Rental',
-//                           style: TextStyle(
-//                             fontSize: 16,
-//                             fontWeight: FontWeight.bold,
-//                             color: Colors.white,
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildLabel(String text) {
-//     return Padding(
-//       padding: const EdgeInsets.only(bottom: 8),
-//       child: Text(
-//         text,
-//         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-//       ),
-//     );
-//   }
-// }

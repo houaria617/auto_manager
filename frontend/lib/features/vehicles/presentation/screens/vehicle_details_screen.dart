@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:auto_manager/l10n/app_localizations.dart'; // Import Localization
 
 import '../dialogs/vehicle_dialog.dart';
 import '../../../../logic/cubits/cars/cars_cubit.dart';
@@ -9,8 +10,8 @@ class VehicleDetailsScreen extends StatelessWidget {
 
   const VehicleDetailsScreen({super.key, required this.vehicle});
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase() ?? '') {
       case 'available':
         return const Color(0xFF28A745);
       case 'rented':
@@ -22,8 +23,25 @@ class VehicleDetailsScreen extends StatelessWidget {
     }
   }
 
+  // Helper to translate status
+  String _getLocalizedStatus(BuildContext context, String? status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status?.toLowerCase()) {
+      case 'available':
+        return l10n.statusAvailable;
+      case 'rented':
+        return l10n.statusRented;
+      case 'maintenance':
+        return l10n.statusMaintenance;
+      default:
+        return status ?? 'N/A';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F8),
       appBar: AppBar(
@@ -31,7 +49,7 @@ class VehicleDetailsScreen extends StatelessWidget {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          vehicle['name'],
+          vehicle['name'] ?? l10n.vehicleDetails, // Localized default title
           style: const TextStyle(
             fontFamily: 'Manrope',
             color: Color(0xFF2D3748),
@@ -39,21 +57,22 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          // 🛠️ EDIT LOGIC: Await result and call Cubit update
+          // EDIT
           IconButton(
             icon: const Icon(Icons.edit, color: Color(0xFF007BFF)),
             onPressed: () async {
-              // Show the dialog, pre-populating with current vehicle data
-              final updatedVehicle = await showVehicleDialog(context);
-
-              context.read<CarsCubit>().updateVehicle(updatedVehicle);
-
-              // 2. Pop the detail screen to show the updated list
-              // (The VehiclesScreen will automatically rebuild)
-              Navigator.of(context).pop();
+              final updatedVehicleData = await showVehicleDialog(context);
+              if (updatedVehicleData != null && context.mounted) {
+                final Map<String, dynamic> finalUpdateData = Map.from(
+                  updatedVehicleData,
+                );
+                finalUpdateData['id'] = vehicle['id'];
+                context.read<CarsCubit>().updateVehicle(finalUpdateData);
+                Navigator.of(context).pop();
+              }
             },
           ),
-          // 🗑️ DELETE LOGIC: Trigger confirmation
+          // DELETE
           IconButton(
             icon: const Icon(Icons.delete, color: Color(0xFFE53E3E)),
             onPressed: () {
@@ -62,7 +81,6 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -83,7 +101,7 @@ class VehicleDetailsScreen extends StatelessWidget {
                 ],
               ),
               child: Text(
-                vehicle['name'],
+                vehicle['name'] ?? l10n.unknownName, // Localized
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 20,
@@ -99,12 +117,15 @@ class VehicleDetailsScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.circle,
-                  color: _getStatusColor(vehicle['state']),
+                  color: _getStatusColor(vehicle['status']),
                   size: 14,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  vehicle['status'],
+                  _getLocalizedStatus(
+                    context,
+                    vehicle['status'],
+                  ), // Localized status
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
@@ -116,22 +137,27 @@ class VehicleDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // Basic Info
-            _buildDetail("Plate Number", vehicle['plate']),
+            _buildDetail(l10n.plateNumber, vehicle['plate']),
+            _buildDetail("Price / Day", "${vehicle['price'] ?? 0}"),
+
             const Divider(color: Color(0xFFE2E8F0)),
 
-            // Return date for rented vehicles
-            if (vehicle['status'].toLowerCase() == 'rented' &&
-                vehicle['returnDate'] != null)
-              _buildDetail("Return Date", vehicle['returnDate']),
+            if (vehicle['status'].toString().toLowerCase() == 'rented' &&
+                vehicle['return_from_maintenance'] != null)
+              _buildDetail(l10n.returnDate, vehicle['return_from_maintenance']),
 
-            // Available-from date for maintenance vehicles
-            if (vehicle['status'].toLowerCase() == 'maintenance' &&
-                vehicle['return_from_maintenace'] != null)
-              _buildDetail("Available On", vehicle['return_from_maintenace']),
+            if (vehicle['status'].toString().toLowerCase() == 'maintenance' &&
+                vehicle['return_from_maintenance'] != null)
+              _buildDetail(
+                l10n.availableOn,
+                vehicle['return_from_maintenance'],
+              ),
 
-            // Next maintenance (show for all vehicles)
-            _buildDetail("Next Maintenance", vehicle['next_maintenance']),
+            _buildDetail(
+              l10n.nextMaintenance,
+              vehicle['next_maintenance_date'],
+            ),
+
             const Divider(color: Color(0xFFE2E8F0)),
           ],
         ),
@@ -146,7 +172,7 @@ class VehicleDetailsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 130,
+            width: 150,
             child: Text(
               "$title:",
               style: const TextStyle(
@@ -159,7 +185,7 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value ?? '-',
+              (value == null || value.isEmpty) ? '-' : value,
               style: const TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 15,
@@ -172,17 +198,17 @@ class VehicleDetailsScreen extends StatelessWidget {
     );
   }
 
-  // 🗑️ DELETE LOGIC: Refactor to await confirmation and then call Cubit
   Future<void> _showDeleteConfirmation(BuildContext context) async {
-    // Await the result from the dialog
+    final l10n = AppLocalizations.of(context)!;
+
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text(
-          'Delete vehicle',
-          style: TextStyle(
+        title: Text(
+          l10n.deleteVehicleTitle,
+          style: const TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -190,7 +216,9 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Are you sure you want to delete "${vehicle['name']}"? This action cannot be undone.',
+          l10n.deleteVehicleConfirm(
+            vehicle['name'] ?? '',
+          ), // Localized with param
           style: const TextStyle(
             fontFamily: 'Manrope',
             fontSize: 14,
@@ -199,11 +227,13 @@ class VehicleDetailsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            // Pop the dialog and return false (canceled)
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Color(0xFF718096), fontFamily: 'Manrope'),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(
+                color: Color(0xFF718096),
+                fontFamily: 'Manrope',
+              ),
             ),
           ),
           ElevatedButton(
@@ -216,29 +246,24 @@ class VehicleDetailsScreen extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              // Pop the dialog and return true (confirmed)
               Navigator.of(dialogContext).pop(true);
             },
-            child: const Text('Delete'),
+            child: Text(l10n.delete), // "Delete"
           ),
         ],
       ),
     );
 
-    // If confirmed is true, perform deletion
-    if (confirmed == true) {
-      // 1. Call the Cubit's delete method
-      context.read<CarsCubit>().deleteVehicle(vehicle);
-
-      // 2. Show Snackbar confirmation
+    if (confirmed == true && context.mounted) {
+      context.read<CarsCubit>().deleteVehicle(vehicle['id']);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Deleted "${vehicle['name']}"'),
+          content: Text(
+            l10n.deletedVehicle(vehicle['name'] ?? ''),
+          ), // "Deleted 'Car'"
           backgroundColor: const Color(0xFFE53E3E),
         ),
       );
-
-      // 3. Navigate back to the list screen
       Navigator.of(context).pop();
     }
   }
