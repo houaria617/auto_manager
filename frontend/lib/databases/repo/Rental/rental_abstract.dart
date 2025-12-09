@@ -21,4 +21,6 @@ abstract class AbstractRentalRepo {
     _rentalInstance ??= RentalDB();
     return _rentalInstance!;
   }
+
+  Future<List<Map<String, dynamic>>> getRentalsDueOn(String dateIsoString);
 }

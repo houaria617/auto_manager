@@ -19,17 +19,20 @@ class DashboardStatistics {
 }
 
 class DashboardCubit extends Cubit<DashboardStatistics> {
-  DateTime? _lastDueNotification;
-
   DashboardCubit()
     : super(DashboardStatistics(0, 0, 0, <Map<String, dynamic>>[]));
 
   final _rentalRepo = AbstractRentalRepo.getInstance();
   final _carRepo = AbstractCarRepo.getInstance();
   final _activityRepo = AbstractActivityRepo.getInstance();
+  // ignore: unused_field
   final _clientRepo = AbstractClientRepo.getInstance();
 
-  // ✅ NEW: Helper method to specifically load activities from DB
+  // Helper: Get Today's date as String "YYYY-MM-DD"
+  String _getTodayIso() {
+    return DateTime.now().toIso8601String().split('T')[0];
+  }
+
   void loadActivities() async {
     final recentActivities = await _activityRepo.getActivities();
     emit(
@@ -42,26 +45,86 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
     );
   }
 
-  // ✅ UPDATED: Inserts activity, then refreshes the list
   void addActivity(Map<String, dynamic> activity) async {
-    // If description is empty or null, just reload existing data
     if (activity['description'] == null || activity['description'] == '') {
       loadActivities();
       return;
     }
 
-    // Insert into database
-    await _activityRepo.insertActivity(activity);
+    // Ensure date is string to prevent UI crashes
+    Map<String, dynamic> safeActivity = Map.from(activity);
+    if (safeActivity['date'] is DateTime) {
+      safeActivity['date'] = (safeActivity['date'] as DateTime)
+          .toIso8601String();
+    }
 
-    // Fetch the updated list from DB to ensure correct order/IDs
+    await _activityRepo.insertActivity(safeActivity);
+    loadActivities();
+  }
+
+  // ✅ NEW: Automatic Reminder Check
+  Future<void> checkForDailyReminders() async {
+    final todayStr = _getTodayIso();
+
+    // 1. Load current activities to check for duplicates
+    // We don't want to add the same reminder 5 times a day
+    final existingActivities = await _activityRepo.getActivities();
+
+    // --- CHECK RENTALS DUE TODAY ---
+    final dueRentals = await _rentalRepo.getRentalsDueOn(todayStr);
+
+    for (var rental in dueRentals) {
+      final clientName = rental['full_name'] ?? 'Client';
+      final carName = rental['car_name'] ?? 'Car';
+
+      final String reminderText = "⚠️ Due: $clientName returns $carName today";
+
+      // Check if we already added this reminder today
+      bool alreadyExists = existingActivities.any((act) {
+        final actDate = act['date'].toString().split('T')[0];
+        return actDate == todayStr && act['description'] == reminderText;
+      });
+
+      if (!alreadyExists) {
+        await _activityRepo.insertActivity({
+          'description': reminderText,
+          'date': DateTime.now().toIso8601String(),
+        });
+      }
+    }
+
+    // --- CHECK MAINTENANCE DUE TODAY ---
+    final maintenanceCars = await _carRepo.getCarsMaintenanceOn(todayStr);
+
+    for (var car in maintenanceCars) {
+      final carName = car['name'] ?? 'Vehicle';
+      final plate = car['plate'] ?? '';
+
+      final String reminderText =
+          "🔧 Maintenance: $carName ($plate) is due today";
+
+      bool alreadyExists = existingActivities.any((act) {
+        final actDate = act['date'].toString().split('T')[0];
+        return actDate == todayStr && act['description'] == reminderText;
+      });
+
+      if (!alreadyExists) {
+        await _activityRepo.insertActivity({
+          'description': reminderText,
+          'date': DateTime.now().toIso8601String(),
+        });
+      }
+    }
+
+    // Reload list to show new reminders
     loadActivities();
   }
 
   void countOngoingRentals() async {
-    int ongRentalsCount = await _rentalRepo.countOngoingRentals();
+    int count = await _rentalRepo.countOngoingRentals();
     emit(
       DashboardStatistics(
-        ongRentalsCount,
+        count,
         state.availableCars,
         state.dueToday,
         state.recentActivities,
@@ -70,11 +133,11 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
   }
 
   void countAvailableCars() async {
-    int avCarsCount = await _carRepo.countAvailableCars();
+    int count = await _carRepo.countAvailableCars();
     emit(
       DashboardStatistics(
         state.ongoingRentals,
-        avCarsCount,
+        count,
         state.dueToday,
         state.recentActivities,
       ),
@@ -82,39 +145,14 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
   }
 
   void countDueToday() async {
-    int dueTodayCount = await _rentalRepo.countDueToday();
+    int count = await _rentalRepo.countDueToday();
     emit(
       DashboardStatistics(
         state.ongoingRentals,
         state.availableCars,
-        dueTodayCount,
+        count,
         state.recentActivities,
       ),
     );
-  }
-
-  void checkDueToday(String carModel, int clientID) async {
-    final int dueTodayCount = await _rentalRepo.countDueToday();
-
-    bool isSameDay(DateTime instanceDate, DateTime today) {
-      return instanceDate.year == today.year &&
-          instanceDate.month == today.month &&
-          instanceDate.day == today.day;
-    }
-
-    if (dueTodayCount > 0) {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final client = await _clientRepo.getClient(clientID);
-      final lastNotified = _lastDueNotification;
-
-      if (lastNotified == null || !isSameDay(lastNotified, today)) {
-        addActivity({
-          'description': '${client?['full_name']} Returns $carModel Today',
-          'date': DateTime.now(),
-        });
-        _lastDueNotification = today;
-      }
-    }
   }
 }

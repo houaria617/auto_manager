@@ -34,4 +34,5 @@ abstract class AbstractCarRepo {
 
   // Alias for getData (if used elsewhere)
   Future<List<Map<String, dynamic>>> getAllCars();
+  Future<List<Map<String, dynamic>>> getCarsMaintenanceOn(String dateIsoString);
 }

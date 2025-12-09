@@ -17,13 +17,14 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = context.read<DashboardCubit>();
       cubit.countOngoingRentals();
       cubit.countAvailableCars();
       cubit.countDueToday();
-      cubit.loadActivities(); // Make sure this is called!
+      cubit.loadActivities();
+
+      cubit.checkForDailyReminders();
     });
   }
 
