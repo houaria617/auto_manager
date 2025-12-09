@@ -21,18 +21,9 @@ class PaymentScreen extends StatelessWidget {
             return DropdownButton<String>(
               value: locale.languageCode,
               items: const [
-                DropdownMenuItem(
-                  value: 'en',
-                  child: Text('English'),
-                ),
-                DropdownMenuItem(
-                  value: 'fr',
-                  child: Text('Français'),
-                ),
-                DropdownMenuItem(
-                  value: 'ar',
-                  child: Text('العربية'),
-                ),
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'fr', child: Text('Français')),
+                DropdownMenuItem(value: 'ar', child: Text('العربية')),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -45,10 +36,7 @@ class PaymentScreen extends StatelessWidget {
                 color: Colors.black,
               ),
               icon: const Icon(Icons.language, color: Colors.black),
-              underline: Container(
-                height: 2,
-                color: Colors.black,
-              ),
+              underline: Container(height: 2, color: Colors.black),
               dropdownColor: Colors.white,
             );
           },

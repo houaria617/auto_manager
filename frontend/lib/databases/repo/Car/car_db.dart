@@ -1,72 +1,73 @@
-// THIS FILE IS USED TO OVERRIDE ABSTRACT
-// METHODS DEFINED IN `AbstractClientRepo`
-// TO DO CRUD ON LOCAL DATABASE.
-
 import 'package:sqflite/sqflite.dart';
 import 'car_abstract.dart';
 import '../../dbhelper.dart';
 
-@override
 class CarDB extends AbstractCarRepo {
+  // ✅ ALL QUERIES USE 'car' (Singular)
+
   @override
   Future<List<Map<String, dynamic>>> getData() async {
     final database = await DBHelper.getDatabase();
-    return await database.rawQuery('''SELECT * FROM cars''');
-  }
-
-  @override
-  Future<int> countAvailableCars() async {
-    final database = await DBHelper.getDatabase();
-    final results = await database.rawQuery(
-      '''SELECT COUNT(*) as count FROM cars WHERE state=?''',
-      ['available'],
-    );
-    return results.first['count'] as int;
-  }
-
-  @override
-  Future<bool> insertCar(Map<String, dynamic> car) async {
-    final database = await DBHelper.getDatabase();
-    await database.insert(
-      "cars",
-      car,
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    return true;
+    return await database.query("car");
   }
 
   @override
   Future<List<Map<String, dynamic>>> getAllCars() async {
-    final database = await DBHelper.getDatabase();
-    final results = await database.rawQuery('''SELECT * FROM cars''');
-    return results;
+    return await getData();
   }
 
   @override
   Future<Map<String, dynamic>?> getCar(int id) async {
     final database = await DBHelper.getDatabase();
-    final result = await database.rawQuery(
-      '''SELECT * FROM cars WHERE id=?''',
-      [id],
-    );
-    return result.isNotEmpty ? result.first : null;
-  }
-
-  @override
-  Future<bool> updateCar(int id, Map<String, dynamic> car) async {
-    final database = await DBHelper.getDatabase();
-    await database.update("cars", car, where: "id = ?", whereArgs: [id]);
-    return true;
-  }
-
-  @override
-  Future<bool> deleteCar(int id) async {
-    final database = await DBHelper.getDatabase();
-    final count = await database.delete(
-      'cars',
+    final results = await database.query(
+      'car',
       where: 'id = ?',
       whereArgs: [id],
+      limit: 1,
     );
-    return count > 0;
+    return results.isNotEmpty ? results.first : null;
+  }
+
+  @override
+  Future<int> insertCar(Map<String, dynamic> car) async {
+    final database = await DBHelper.getDatabase();
+    return await database.insert(
+      "car",
+      car,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
+  Future<void> updateCar(int id, Map<String, dynamic> car) async {
+    final database = await DBHelper.getDatabase();
+    await database.update("car", car, where: "id = ?", whereArgs: [id]);
+  }
+
+  @override
+  Future<void> deleteCar(int id) async {
+    final database = await DBHelper.getDatabase();
+    await database.delete("car", where: "id = ?", whereArgs: [id]);
+  }
+
+  @override
+  Future<int> countAvailableCars() async {
+    final database = await DBHelper.getDatabase();
+    // Use 'car' singular
+    final result = await database.rawQuery(
+      "SELECT COUNT(*) FROM car WHERE state LIKE 'available'",
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  @override
+  Future<void> updateCarStatus(int carId, String status) async {
+    final database = await DBHelper.getDatabase();
+    await database.update(
+      'car',
+      {'state': status},
+      where: 'id = ?',
+      whereArgs: [carId],
+    );
   }
 }

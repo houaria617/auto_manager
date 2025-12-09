@@ -25,10 +25,11 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   DateTime? _endDate;
   String? _dateError;
 
-  // FIXED: Explicitly typed lists
+  // Data lists
   List<Map<String, dynamic>> _clients = [];
   List<Map<String, dynamic>> _cars = [];
 
+  // Selections
   int? _selectedClientId;
   int? _selectedCarId;
 
@@ -50,16 +51,20 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     setState(() => _isLoading = true);
     try {
       final rawClients = await _clientRepo.getAllClients();
-      final rawCars = await _carRepo.getData();
+      final rawCars = await _carRepo.getData(); // This now queries 'cars' table
 
       if (mounted) {
-      setState(() {
-        print('### MOUNTED: $mounted');
-          // FIXED: Safely cast the database results
+        setState(() {
           _clients = List<Map<String, dynamic>>.from(rawClients);
-          _cars = List<Map<String, dynamic>>.from(rawCars);
+
+          // Filter: Only show cars that are 'Available'
+          _cars = List<Map<String, dynamic>>.from(rawCars).where((car) {
+            final state =
+                car['state']?.toString().trim().toLowerCase() ?? 'available';
+            return state == 'available';
+          }).toList();
+
           _isLoading = false;
-          print('### Current _clients: $_clients');
         });
       }
     } catch (e) {
@@ -68,18 +73,16 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     }
   }
 
+  // ✅ FULL DIALOG LOGIC FOR ADDING CLIENTS
   Future<void> _showAddClientDialog() async {
     final fullNameController = TextEditingController();
-    // final lastNameController = TextEditingController();
-    final phoneController =
-        TextEditingController(); // CHANGED: Was emailController
+    final phoneController = TextEditingController();
     final formKeyClient = GlobalKey<FormState>();
 
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.addNewClient),
-        //title: const Text('Add New Client'),
         content: Form(
           key: formKeyClient,
           child: Column(
@@ -90,12 +93,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 decoration: const InputDecoration(labelText: 'Full Name'),
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
-              // TextFormField(
-              //   controller: lastNameController,
-              //   decoration: const InputDecoration(labelText: 'Last Name'),
-              //   validator: (v) => v!.isEmpty ? 'Required' : null,
-              // ),
-              // CHANGED: Email Input -> Phone Input
               TextFormField(
                 controller: phoneController,
                 decoration: const InputDecoration(labelText: 'Phone Number'),
@@ -109,56 +106,43 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(AppLocalizations.of(context)!.cancel),
-            //child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
               if (formKeyClient.currentState!.validate()) {
                 try {
-                  // CHANGED: Map key is now 'phone'
                   final newClient = {
                     'full_name': fullNameController.text.trim(),
                     'phone': phoneController.text.trim(),
                   };
 
-                  // 1. Use ClientCubit to add client (it handles duplicate checking)
-                  final clientID = await context.read<ClientCubit>().addClient(newClient);
-                  print('&&&& inside _showAddClientDialog, id: $clientID');
+                  // Add client via Cubit
+                  final clientID = await context.read<ClientCubit>().addClient(
+                    newClient,
+                  );
 
-                  // 2. Reload Data
+                  // Reload list to see new client
                   await _loadData();
 
-                  // 3. Auto-select the newly added client
+                  // Auto-select the new client
                   setState(() {
                     _selectedClientId = clientID;
-                    print('Selected client ID: $_selectedClientId');
-      });
-    
-                  // 4. Close dialog
-                  if (mounted) {
-                    Navigator.pop(context);
-                  }
+                  });
+
+                  if (mounted) Navigator.pop(context);
                 } catch (e) {
                   print('Error adding client: $e');
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error adding client: ${e.toString()}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
                 }
               }
             },
             child: Text(AppLocalizations.of(context)!.add),
-            //child: const Text('Add'),
           ),
         ],
       ),
     );
   }
 
+  // ✅ FULL DIALOG LOGIC FOR ADDING CARS
   Future<void> _showAddCarDialog() async {
     final nameController = TextEditingController();
     final plateController = TextEditingController();
@@ -169,7 +153,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.addNewCar),
-        //title: const Text('Add New Car'),
         content: Form(
           key: formKeyCar,
           child: Column(
@@ -199,23 +182,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                 keyboardType: TextInputType.number,
                 validator: (v) =>
                     v!.isEmpty ? AppLocalizations.of(context)!.required : null,
-                //   decoration: const InputDecoration(
-                //     labelText: 'Car Name (Model)',
-                //   ),
-                //   validator: (v) => v!.isEmpty ? 'Required' : null,
-                // ),
-                // TextFormField(
-                //   controller: plateController,
-                //   decoration: const InputDecoration(labelText: 'Plate Number'),
-                //   validator: (v) => v!.isEmpty ? 'Required' : null,
-                // ),
-                // TextFormField(
-                //   controller: priceController,
-                //   decoration: const InputDecoration(
-                //     labelText: 'Daily Rent Price',
-                //   ),
-                //   keyboardType: TextInputType.number,
-                //   validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
             ],
           ),
@@ -224,7 +190,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(AppLocalizations.of(context)!.cancel),
-            //child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -233,22 +198,26 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                   'name': nameController.text,
                   'plate': plateController.text,
                   'price': double.tryParse(priceController.text) ?? 0.0,
-                  'state': 'Available',
+                  'state':
+                      'Available', // Important: Title Case or lowercase to match filter
                   'maintenance': '',
                   'return_from_maintenance': '',
                 };
 
+                // Insert into DB
                 await _carRepo.insertCar(newCar);
+
+                // Reload lists
                 await _loadData();
 
-                // FIXED: Type-safe reduce
-                if (_cars.isNotEmpty) {
+                // Select the new car automatically (simplest logic: last added)
+                if (_cars.isNotEmpty && mounted) {
+                  // Assuming ID increments, pick largest ID
                   final newest = _cars.reduce((curr, next) {
                     final currId = curr['id'] as int;
                     final nextId = next['id'] as int;
                     return currId > nextId ? curr : next;
                   });
-
                   setState(() {
                     _selectedCarId = newest['id'] as int;
                     _calculateTotalPrice();
@@ -259,7 +228,6 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
               }
             },
             child: Text(AppLocalizations.of(context)!.add),
-            //child: const Text('Add'),
           ),
         ],
       ),
@@ -276,17 +244,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     if (picked != null && mounted) {
       setState(() {
         if (isStartDate) {
-_startDate = picked;
+          _startDate = picked;
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-_endDate = null;
+            _endDate = null;
           }
         } else {
-_endDate = picked;
+          _endDate = picked;
         }
-      _dateError = null;
+        _dateError = null;
         _validateDates();
-      _calculateTotalPrice();
-});
+        _calculateTotalPrice();
+      });
     }
   }
 
@@ -305,14 +273,10 @@ _endDate = picked;
   }
 
   void _calculateTotalPrice() {
-    // Only calculate if we have all required data
     if (_selectedCarId == null || _startDate == null || _endDate == null) {
       return;
     }
-
-    if (_dateError != null) {
-      return;
-    }
+    if (_dateError != null) return;
 
     try {
       final car = _cars.firstWhere(
@@ -320,56 +284,34 @@ _endDate = picked;
         orElse: () => <String, dynamic>{},
       );
 
-      if (car.isEmpty) {
-        print('Car not found for ID: $_selectedCarId');
-        return;
-      }
+      if (car.isEmpty) return;
 
-      // Get price from car, handle different possible field names
       dynamic priceValue = car['price'] ?? car['rentPrice'] ?? 0.0;
-      
-      if (priceValue == null) {
-        print('Price is null for car: $car');
-        return;
-      }
 
-      // Convert price to double
       final dailyPrice = (priceValue is int)
           ? priceValue.toDouble()
           : (priceValue is double)
-              ? priceValue
-              : double.tryParse(priceValue.toString()) ?? 0.0;
+          ? priceValue
+          : double.tryParse(priceValue.toString()) ?? 0.0;
 
-      if (dailyPrice <= 0) {
-        print('Invalid daily price: $dailyPrice');
-        return;
-      }
-
-      // Calculate days
       final days = _endDate!.difference(_startDate!).inDays;
       final billableDays = days <= 0 ? 1 : days;
 
-      // Calculate total
       final total = dailyPrice * billableDays;
-      
-      // Update the price controller
+
       if (mounted) {
         setState(() {
           _priceController.text = total.toStringAsFixed(2);
         });
       }
-      
-      print('Price calculated: $dailyPrice x $billableDays = $total');
     } catch (e) {
       print('Error calculating price: $e');
     }
   }
 
-  void _saveRental() {
-    print('1. Save rental clicked');
+  void _saveRental() async {
     if (_formKey.currentState!.validate()) {
       if (_startDate == null || _endDate == null) {
-        print('2. Form validation failed');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.pleaseSelectDates),
@@ -377,7 +319,6 @@ _endDate = picked;
         );
         return;
       }
-      print('3. Form validation passed');
       if (_dateError != null) return;
 
       final newRental = {
@@ -385,23 +326,41 @@ _endDate = picked;
         'car_id': _selectedCarId,
         'date_from': _startDate!.toIso8601String(),
         'date_to': _endDate!.toIso8601String(),
-        'total_amount': double.parse(_priceController.text),
+        'total_amount': double.tryParse(_priceController.text) ?? 0.0,
         'payment_state': 'unpaid',
         'state': 'ongoing',
       };
-      print('4. Calling addRental');
+
+      // Add rental via Cubit
       context.read<RentalCubit>().addRental(newRental);
-      Navigator.pop(context);
+
+      // Update Car Status in DB (so it shows as Rented in Vehicle Screen)
+      if (_selectedCarId != null) {
+        await _carRepo.updateCarStatus(_selectedCarId!, 'rented');
+      }
+
+      // Get car name for Dashboard activity
+      String rentedCarName = "Car";
+      try {
+        final selectedCar = _cars.firstWhere((c) => c['id'] == _selectedCarId);
+        rentedCarName = selectedCar['name'] ?? "Car";
+      } catch (e) {
+        print("Could not find car name");
+      }
+
+      if (mounted) {
+        Navigator.pop(context, rentedCarName);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-        return Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-                backgroundColor: Colors.white,
-elevation: 0,
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
@@ -409,177 +368,164 @@ elevation: 0,
         title: Text(
           AppLocalizations.of(context)!.addRentalTitle,
           style: const TextStyle(
-                        color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-        // title: const Text(
-          //   'New Rental',
-          //   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-: SingleChildScrollView(
-child: Padding(
-        padding: const EdgeInsets.all(24.0),
-child: Form(
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
                   key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // CLIENT DROPDOWN
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // CLIENT DROPDOWN
                       _buildLabel(AppLocalizations.of(context)!.client),
-                      //_buildLabel('Client'),
-            Row(
-              children: [
-                Expanded(
+                      Row(
+                        children: [
+                          Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _selectedClientId,
-                          hint: Text(
-                            AppLocalizations.of(context)!.selectClient,
+                              hint: Text(
+                                AppLocalizations.of(context)!.selectClient,
                               ),
-                              //hint: const Text("Select Client"),
                               decoration: _inputDecoration(
-                            Icons.person_outline,
-                          ),
-                          items: _clients.map((client) {
-final name = "${client['full_name']}";
-                            return DropdownMenuItem<int>(
-                              value: client['id'] as int,
-                              child: Text(
-                                name,
-                                overflow: TextOverflow.ellipsis,
-                                                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) =>
+                                Icons.person_outline,
+                              ),
+                              items: _clients.map((client) {
+                                final name = "${client['full_name']}";
+                                return DropdownMenuItem<int>(
+                                  value: client['id'] as int,
+                                  child: Text(
+                                    name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) =>
                                   setState(() => _selectedClientId = value),
                               validator: (value) => value == null
                                   ? AppLocalizations.of(
                                       context,
                                     )!.pleaseSelectClient
-                                  //? 'Please select a client'
                                   : null,
-),
-                    ),
-                    const SizedBox(width: 10),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
                           _buildAddButton(_showAddClientDialog),
-              ],
-            ),
+                        ],
+                      ),
 
-            const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-            // CAR DROPDOWN
+                      // CAR DROPDOWN
                       _buildLabel(AppLocalizations.of(context)!.car),
-                      //_buildLabel('Car'),
-            Row(
-              children: [
-                Expanded(
+                      Row(
+                        children: [
+                          Expanded(
                             child: DropdownButtonFormField<int>(
                               value: _selectedCarId,
-                          hint: Text(
-                            AppLocalizations.of(context)!.selectCar,
+                              hint: Text(
+                                AppLocalizations.of(context)!.selectCar,
                               ),
-                              //hint: const Text("Select Car"),
                               decoration: _inputDecoration(
-                                    Icons.directions_car,
-                                    ),
+                                Icons.directions_car,
+                              ),
                               items: _cars.map((car) {
-                                // Matches new schema: name, plate, price
                                 final name = car['name'] ?? 'Unknown';
                                 final plate = car['plate'] ?? '';
                                 return DropdownMenuItem<int>(
                                   value: car['id'] as int,
-                                    child: Text(
-                                      "$name ($plate)",
-                                      overflow: TextOverflow.ellipsis,
-                                                                    ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCarId = value;
-                            _calculateTotalPrice();
-                          });
-                    },
-                  validator: (value) => value == null
+                                  child: Text(
+                                    "$name ($plate)",
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedCarId = value;
+                                  _calculateTotalPrice();
+                                });
+                              },
+                              validator: (value) => value == null
                                   ? AppLocalizations.of(
                                       context,
                                     )!.pleaseSelectCar
                                   : null,
-                              //value == null ? 'Please select a car' : null,
                             ),
                           ),
                           const SizedBox(width: 10),
                           _buildAddButton(_showAddCarDialog),
-              ],
-            ),
+                        ],
+                      ),
 
-            const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-            // DATES
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel(
+                      // DATES
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel(
                                   AppLocalizations.of(context)!.startDate,
-                          ),
-                          //_buildLabel('Start Date'),
+                                ),
                                 _buildDateSelector(true),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel(
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLabel(
                                   AppLocalizations.of(context)!.endDate,
                                 ),
-                                //_buildLabel('End Date'),
                                 _buildDateSelector(false),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-if (_dateError != null)
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_dateError != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 8, left: 12),
-child: Text(
-              _dateError!,
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: 12,
-),
-              ),
-            ),
+                          child: Text(
+                            _dateError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
 
-            const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
                       // PRICE
                       _buildLabel(AppLocalizations.of(context)!.totalPrice),
-                      //_buildLabel('Total Price'),
                       TextFormField(
                         controller: _priceController,
                         keyboardType: TextInputType.number,
-              decoration: _inputDecoration(null).copyWith(
+                        decoration: _inputDecoration(null).copyWith(
                           prefixIcon: const Padding(
                             padding: EdgeInsets.all(16),
-              child: Text(
-                '\$',
-                style: TextStyle(
-                                    fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  ),
-),
-                ),
-              ),
-validator: (value) {
+                            child: Text(
+                              '\$',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
                           if (value == null || value.isEmpty) {
                             return AppLocalizations.of(
                               context,
@@ -588,75 +534,64 @@ validator: (value) {
                           if (double.tryParse(value) == null) {
                             return AppLocalizations.of(context)!.invalidNumber;
                           }
-                          // if (value.isEmpty) {
-                          //   return 'Please enter price';
-                          // }
-                          // if (double.tryParse(value) == null) {
-                          //   return 'Invalid number';
-                          // }
-                          // return null;
+                          return null;
                         },
-            ),
-
-            const SizedBox(height: 40),
-
-// BUTTONS
-            Row(
-              children: [
-                Expanded(
-                                    child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-vertical: 16,
-),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
-side: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.cancel,
-                      style: const TextStyle(
-                        // child: const Text(
-                                  //   'Cancel',
-//   style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _saveRental,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(
-vertical: 16,
+
+                      const SizedBox(height: 40),
+
+                      // BUTTONS
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
                                 ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                side: BorderSide(color: Colors.grey[300]!),
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)!.cancel,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            flex: 2,
+                            child: ElevatedButton(
+                              onPressed: _saveRental,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)!.saveRental,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.saveRental,
-                      // child: const Text(
-                                //   'Save Rental',
-                                style: TextStyle(
-                                                fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            ],
+                    ],
                   ),
                 ),
               ),
@@ -687,16 +622,19 @@ vertical: 16,
     );
   }
 
+  // ✅ FIXED BUTTON: Using Material so InkWell ripple works visibly,
+  // and ensure it's robust against layout changes.
   Widget _buildAddButton(VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: Colors.blue,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -724,7 +662,6 @@ vertical: 16,
             Text(
               date == null
                   ? AppLocalizations.of(context)!.selectDate
-                  //? 'Select Date'
                   : '${date.day}/${date.month}/${date.year}',
             ),
             const Icon(Icons.calendar_today, size: 20),

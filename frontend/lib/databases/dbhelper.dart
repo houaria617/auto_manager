@@ -1,13 +1,10 @@
-// lib/databases/dbhelper.dart
-
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 2; // Incremented to trigger migration
-  static var database;
+  static const _database_version = 2;
 
   static Database? _database;
 
@@ -22,16 +19,19 @@ class DBHelper {
       join(await getDatabasesPath(), _database_name),
       version: _database_version,
       onCreate: (database, version) async {
+        // 1. Client
         await database.execute('''
-           CREATE TABLE  client (
+           CREATE TABLE client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                full_name TEXT,
                phone TEXT,
                state TEXT DEFAULT 'idle'
-               )
+           )
          ''');
+
+        // 2. Car (Singular)
         await database.execute('''
-           CREATE TABLE cars (
+           CREATE TABLE car (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                name TEXT,
                plate TEXT,
@@ -41,13 +41,17 @@ class DBHelper {
                return_from_maintenance TEXT
            )
          ''');
+
+        // 3. Activity
         await database.execute('''
            CREATE TABLE activity (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
                description TEXT,
                date TEXT
            )
          ''');
+
+        // 4. Rental (References car singular)
         await database.execute('''
           CREATE TABLE rental (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,9 +63,11 @@ class DBHelper {
             payment_state TEXT,
             state TEXT,
             FOREIGN KEY (client_id) REFERENCES client (id),
-            FOREIGN KEY (car_id) REFERENCES cars (id) 
+            FOREIGN KEY (car_id) REFERENCES car (id)
           )
         ''');
+
+        // 5. Payment
         await database.execute('''
           CREATE TABLE payment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,7 +77,6 @@ class DBHelper {
             FOREIGN KEY (rental_id) REFERENCES rental (id)
           )
         ''');
-        // Add create statements for other tables.
       },
       onUpgrade: (database, oldVersion, newVersion) async {
         // Handle database migration
