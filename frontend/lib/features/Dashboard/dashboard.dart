@@ -4,7 +4,6 @@ import 'package:auto_manager/features/settings/presentation/screens/settings_scr
 import 'package:flutter/material.dart';
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// ✅ Import AppLocalizations
 import 'package:auto_manager/l10n/app_localizations.dart';
 
 class Dashboard extends StatefulWidget {
@@ -18,20 +17,18 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
+    // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = context.read<DashboardCubit>();
       cubit.countOngoingRentals();
       cubit.countAvailableCars();
       cubit.countDueToday();
-      // Note: Descriptions added here will be in the language active at the moment of addition
-      // unless you store keys instead of text in the database.
-      cubit.addActivity({'description': '', 'date': DateTime.now()});
+      cubit.loadActivities(); // Make sure this is called!
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Initialize Localization
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -63,7 +60,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ],
         title: Text(
-          l10n.dashboardTitle, // 🌍 Localized
+          l10n.dashboardTitle,
           style: const TextStyle(
             fontFamily: 'ManropeExtraBold',
             color: Color(0xFF2D3748),
@@ -81,7 +78,7 @@ class _DashboardState extends State<Dashboard> {
                 const SizedBox(height: 20),
                 Center(
                   child: Text(
-                    l10n.appName, // 🌍 Localized
+                    l10n.appName,
                     style: const TextStyle(
                       fontSize: 22,
                       fontFamily: 'ManropeExtraBold',
@@ -91,198 +88,34 @@ class _DashboardState extends State<Dashboard> {
                 const SizedBox(height: 24),
 
                 // --- CARD 1: Ongoing Rentals ---
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.car_rental,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.ongoingRentals, // 🌍 Localized
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      BlocBuilder<DashboardCubit, DashboardStatistics>(
-                        builder: (context, state) {
-                          return Text(
-                            '${state.ongoingRentals}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                _buildStatCard(
+                  l10n.ongoingRentals,
+                  Icons.car_rental,
+                  [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
+                  (state) => state.ongoingRentals,
                 ),
                 const SizedBox(height: 10),
 
                 // --- CARD 2: Available Cars ---
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF10B981), Color(0xFF059669)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.directions_car_outlined,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.availableCars, // 🌍 Localized
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      BlocBuilder<DashboardCubit, DashboardStatistics>(
-                        builder: (context, state) {
-                          return Text(
-                            '${state.availableCars}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                _buildStatCard(
+                  l10n.availableCars,
+                  Icons.directions_car_outlined,
+                  [const Color(0xFF10B981), const Color(0xFF059669)],
+                  (state) => state.availableCars,
                 ),
                 const SizedBox(height: 10),
 
                 // --- CARD 3: Due Today ---
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.access_time,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.dueToday, // 🌍 Localized
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      BlocBuilder<DashboardCubit, DashboardStatistics>(
-                        builder: (context, state) {
-                          return Text(
-                            '${state.dueToday}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                _buildStatCard(l10n.dueToday, Icons.access_time, [
+                  const Color(0xFFEF4444),
+                  const Color(0xFFDC2626),
+                ], (state) => state.dueToday),
 
                 const SizedBox(height: 24),
 
                 // --- RECENT ACTIVITIES HEADER ---
                 Text(
-                  l10n.recentActivities, // 🌍 Localized
+                  l10n.recentActivities,
                   style: const TextStyle(
                     fontSize: 22,
                     fontFamily: 'ManropeExtraBold',
@@ -296,16 +129,28 @@ class _DashboardState extends State<Dashboard> {
                   child: BlocBuilder<DashboardCubit, DashboardStatistics>(
                     builder: (context, state) {
                       if (state.recentActivities.isEmpty) {
-                        return Center(
-                          child: Text(l10n.noRecentActivities), // 🌍 Localized
-                        );
+                        return Center(child: Text(l10n.noRecentActivities));
                       }
 
                       return ListView.builder(
                         itemCount: state.recentActivities.length,
                         itemBuilder: (context, index) {
                           final activity = state.recentActivities[index];
-                          final date = DateTime.parse(activity['date']);
+
+                          // SAFE DATE PARSING
+                          // We ensure the date is parsed correctly whether it's String or DateTime
+                          DateTime date;
+                          try {
+                            if (activity['date'] is DateTime) {
+                              date = activity['date'];
+                            } else {
+                              date = DateTime.parse(
+                                activity['date'].toString(),
+                              );
+                            }
+                          } catch (e) {
+                            date = DateTime.now(); // Fallback if parsing fails
+                          }
 
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -324,96 +169,55 @@ class _DashboardState extends State<Dashboard> {
                                 width: 1,
                               ),
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(16),
-                                onTap: () {},
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFEEF2FF),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: const Color(0xFFE0E7FF),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.directions_car_outlined,
-                                          color: Color(0xFF2563EB),
-                                          size: 24,
-                                        ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEEF2FF),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: const Color(0xFFE0E7FF),
+                                        width: 1,
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              // Ensure description is not null
-                                              activity['description'] ?? '',
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                                color: Color(0xFF2D3748),
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.access_time,
-                                                  size: 14,
-                                                  color: Color(0xFF94A3B8),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  // 🌍 Localized Date Format
-                                                  '${date.day}/${date.month}/${date.year} ${l10n.atTime} ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xFF64748B),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF8FAFC),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: IconButton(
-                                          onPressed: () {},
-                                          icon: const Icon(
-                                            Icons.arrow_forward_ios,
-                                            size: 16,
-                                          ),
-                                          color: const Color(0xFF64748B),
-                                          padding: const EdgeInsets.all(8),
-                                          constraints: const BoxConstraints(),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.directions_car_outlined,
+                                      color: Color(0xFF2563EB),
+                                      size: 24,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          activity['description'] ?? 'Activity',
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF2D3748),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${date.day}/${date.month}/${date.year} ${l10n.atTime} ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -450,14 +254,43 @@ class _DashboardState extends State<Dashboard> {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    Navigator.push(
+
+                  // ✅✅✅ THIS IS THE CRITICAL FIX ✅✅✅
+                  onTap: () async {
+                    // 1. Wait for AddRentalScreen to finish
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const AddRentalScreen(),
                       ),
                     );
+
+                    if (!context.mounted) return;
+
+                    final cubit = context.read<DashboardCubit>();
+
+                    // 2. If we got a car name back, add the activity
+                    if (result != null && result is String) {
+                      print(
+                        "DEBUG: Adding Activity for $result",
+                      ); // Debug print
+                      cubit.addActivity({
+                        'description': 'Rented $result',
+                        // Store as String to match DateTime.parse in UI
+                        'date': DateTime.now().toIso8601String(),
+                      });
+                    } else {
+                      // Just refresh if they backed out or result was null
+                      cubit.loadActivities();
+                    }
+
+                    // 3. Always refresh counters
+                    cubit.countOngoingRentals();
+                    cubit.countAvailableCars();
+                    cubit.countDueToday();
                   },
+
+                  // ✅✅✅ END CRITICAL FIX ✅✅✅
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -473,7 +306,7 @@ class _DashboardState extends State<Dashboard> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          l10n.newRental, // 🌍 Localized
+                          l10n.newRental,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -490,6 +323,68 @@ class _DashboardState extends State<Dashboard> {
         ],
       ),
       bottomNavigationBar: const NavBar(),
+    );
+  }
+
+  // Helper for cleaner code
+  Widget _buildStatCard(
+    String title,
+    IconData icon,
+    List<Color> colors,
+    int Function(DashboardStatistics) valueSelector,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 22, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          BlocBuilder<DashboardCubit, DashboardStatistics>(
+            builder: (context, state) {
+              return Text(
+                '${valueSelector(state)}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

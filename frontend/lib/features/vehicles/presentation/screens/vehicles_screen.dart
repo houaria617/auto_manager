@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:auto_manager/l10n/app_localizations.dart'; // Import Localization
-
+import 'package:auto_manager/l10n/app_localizations.dart';
 import '../../../../logic/cubits/cars/cars_cubit.dart';
 import '../../../../logic/cubits/cars/cars_state.dart';
 import '../../data/models/vehicle_model.dart';
@@ -28,20 +27,18 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   String selectedFilter = 'All';
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CarsCubit>().loadVehicles();
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    context.read<CarsCubit>().loadVehicles();
   }
 
-  // Filter logic remains based on internal DB strings (English keys)
-  // 'All' is a special UI key, but status in DB is likely 'available', 'rented', etc.
   List<Vehicle> _getFilteredVehicles(List<Vehicle> allVehicles) {
     if (selectedFilter == 'All') return allVehicles;
-    return allVehicles
-        .where((v) => v.status == selectedFilter.toLowerCase())
-        .toList();
+    return allVehicles.where((v) {
+      final vStatus = v.status.trim().toLowerCase();
+      final fStatus = selectedFilter.trim().toLowerCase();
+      return vStatus == fStatus;
+    }).toList();
   }
 
   @override
@@ -56,7 +53,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          l10n.myVehicles, // Localized
+          l10n.myVehicles,
           style: const TextStyle(
             color: textDark,
             fontWeight: FontWeight.w800,
@@ -68,6 +65,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
       ),
       body: Column(
         children: [
+          // Search Bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Container(
@@ -83,7 +81,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: l10n.searchCarPlaceholder, // Localized
+                  hintText: l10n.searchCarPlaceholder,
                   hintStyle: const TextStyle(
                     fontFamily: 'Manrope',
                     color: Color(0xFF9CA3AF),
@@ -107,6 +105,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
               ),
             ),
           ),
+
+          // Filter Chips
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: SingleChildScrollView(
@@ -122,6 +122,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
             ),
           ),
           const SizedBox(height: 8),
+
+          // Vehicle Grid
           Expanded(
             child: BlocBuilder<CarsCubit, CarsState>(
               builder: (context, state) {
@@ -134,10 +136,9 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                   );
                 }
                 if (state is CarsLoaded) {
-                  final allVehicles = state.vehicles;
-                  final filteredVehicles = _getFilteredVehicles(allVehicles);
+                  final filteredVehicles = _getFilteredVehicles(state.vehicles);
 
-                  if (allVehicles.isEmpty) {
+                  if (state.vehicles.isEmpty) {
                     return const Padding(
                       padding: EdgeInsets.all(12.0),
                       child: _EmptyStateCard(),
@@ -159,20 +160,22 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 
                   return LayoutBuilder(
                     builder: (context, constraints) {
+                      // ✅ CHANGE: Always use at least 2 columns
                       final crossAxisCount = constraints.maxWidth >= 768
-                          ? 2
-                          : 1;
+                          ? 3
+                          : 2;
+
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: GridView.builder(
                           itemCount: filteredVehicles.length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: 1.8,
-                              ),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            // ✅ CHANGE: 0.85 makes them taller to fit text in narrow columns
+                            childAspectRatio: 0.85,
+                          ),
                           itemBuilder: (context, index) {
                             final vehicleObj = filteredVehicles[index];
                             return GestureDetector(
@@ -239,7 +242,7 @@ class _EmptyStateCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.addFirstVehicle, // Localized
+              l10n.addFirstVehicle,
               style: const TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 16,
@@ -249,7 +252,7 @@ class _EmptyStateCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              l10n.tapPlusToBegin, // Localized
+              l10n.tapPlusToBegin,
               style: const TextStyle(
                 fontFamily: 'Manrope',
                 fontSize: 13,

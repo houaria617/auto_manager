@@ -4,13 +4,6 @@ import '../databases/repo/Rental/rental_abstract.dart';
 import '../databases/repo/Car/car_abstract.dart';
 import '../databases/repo/Activity/activity_abstract.dart';
 
-// class Activity {
-//   final String description;
-//   final DateTime date;
-
-//   Activity(this.description, this.date);
-// }
-
 class DashboardStatistics {
   final int ongoingRentals;
   final int availableCars;
@@ -27,6 +20,7 @@ class DashboardStatistics {
 
 class DashboardCubit extends Cubit<DashboardStatistics> {
   DateTime? _lastDueNotification;
+
   DashboardCubit()
     : super(DashboardStatistics(0, 0, 0, <Map<String, dynamic>>[]));
 
@@ -34,6 +28,34 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
   final _carRepo = AbstractCarRepo.getInstance();
   final _activityRepo = AbstractActivityRepo.getInstance();
   final _clientRepo = AbstractClientRepo.getInstance();
+
+  // ✅ NEW: Helper method to specifically load activities from DB
+  void loadActivities() async {
+    final recentActivities = await _activityRepo.getActivities();
+    emit(
+      DashboardStatistics(
+        state.ongoingRentals,
+        state.availableCars,
+        state.dueToday,
+        recentActivities,
+      ),
+    );
+  }
+
+  // ✅ UPDATED: Inserts activity, then refreshes the list
+  void addActivity(Map<String, dynamic> activity) async {
+    // If description is empty or null, just reload existing data
+    if (activity['description'] == null || activity['description'] == '') {
+      loadActivities();
+      return;
+    }
+
+    // Insert into database
+    await _activityRepo.insertActivity(activity);
+
+    // Fetch the updated list from DB to ensure correct order/IDs
+    loadActivities();
+  }
 
   void countOngoingRentals() async {
     int ongRentalsCount = await _rentalRepo.countOngoingRentals();
@@ -45,35 +67,6 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
         state.recentActivities,
       ),
     );
-    print('!' * 1000);
-  }
-
-  void checkDueToday(String carModel, int clientID) async {
-    final int dueTodayCount = await _rentalRepo.countDueToday();
-
-    bool isSameDay(DateTime instanceDate, DateTime today) {
-      return instanceDate.year == today.year &&
-          instanceDate.month == today.month &&
-          instanceDate.day == today.day;
-    }
-
-    if (dueTodayCount > 0) {
-      // Check if we already notified today
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      final client = await _clientRepo.getClient(clientID);
-
-      // Store last notification date
-      final lastNotified = _lastDueNotification;
-      if (lastNotified == null || !isSameDay(lastNotified, today)) {
-        addActivity({
-          'description': '${client?['full_name']} Returns $carModel Today',
-          'date': DateTime.now(),
-        });
-        _lastDueNotification = today;
-      }
-    }
   }
 
   void countAvailableCars() async {
@@ -100,33 +93,28 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
     );
   }
 
-  void addActivity(Map<String, dynamic> activity) async {
-    final recentActivities = await _activityRepo.getActivities();
-    print('activities fetched from DB, $recentActivities');
-    if (activity['description'] == '') {
-      emit(
-        DashboardStatistics(
-          state.ongoingRentals,
-          state.availableCars,
-          state.dueToday,
-          recentActivities,
-        ),
-      );
-      return;
-    }
-    await _activityRepo.insertActivity(activity);
-    List<Map<String, dynamic>> updated = [activity, ...recentActivities];
-    if (updated.length > 3) {
-      updated = updated.sublist(0, 3);
+  void checkDueToday(String carModel, int clientID) async {
+    final int dueTodayCount = await _rentalRepo.countDueToday();
+
+    bool isSameDay(DateTime instanceDate, DateTime today) {
+      return instanceDate.year == today.year &&
+          instanceDate.month == today.month &&
+          instanceDate.day == today.day;
     }
 
-    emit(
-      DashboardStatistics(
-        state.ongoingRentals,
-        state.availableCars,
-        state.dueToday,
-        updated,
-      ),
-    );
+    if (dueTodayCount > 0) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final client = await _clientRepo.getClient(clientID);
+      final lastNotified = _lastDueNotification;
+
+      if (lastNotified == null || !isSameDay(lastNotified, today)) {
+        addActivity({
+          'description': '${client?['full_name']} Returns $carModel Today',
+          'date': DateTime.now(),
+        });
+        _lastDueNotification = today;
+      }
+    }
   }
 }
