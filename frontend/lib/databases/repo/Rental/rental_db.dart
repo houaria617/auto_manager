@@ -59,4 +59,20 @@ class RentalDB extends AbstractRentalRepo {
       whereArgs: [clientID],
     );
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRentalsDueOn(
+    String dateIsoString,
+  ) async {
+    final db = await DBHelper.getDatabase();
+    // We perform a JOIN to get the Client Name and Car Name directly
+    // We check if date_to starts with the specific date string (e.g. "2023-10-25")
+    return await db.rawQuery('''
+    SELECT rental.*, client.full_name, car.name as car_name 
+    FROM rental
+    INNER JOIN client ON rental.client_id = client.id
+    INNER JOIN car ON rental.car_id = car.id
+    WHERE rental.date_to LIKE '$dateIsoString%'
+  ''');
+  }
 }

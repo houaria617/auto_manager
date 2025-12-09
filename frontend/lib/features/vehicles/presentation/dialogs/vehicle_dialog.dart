@@ -1,20 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_manager/logic/cubits/cars/cars_cubit.dart';
-import 'package:auto_manager/l10n/app_localizations.dart'; // Localization
+import 'package:auto_manager/l10n/app_localizations.dart';
+import 'package:intl/intl.dart'; // Add intl package for date formatting if you haven't
 
-Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
-  final l10n = AppLocalizations.of(context)!; // Access localization
+Future<Map<String, dynamic>?> showVehicleDialog(
+  BuildContext context, {
+  Map<String, dynamic>? existingVehicle, // Optional: Pass for Editing
+}) async {
+  final l10n = AppLocalizations.of(context)!;
+  final isEditing = existingVehicle != null;
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController plateController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController nextMaintenanceController =
-      TextEditingController();
-  final TextEditingController returnDateController = TextEditingController();
+  // Controllers
+  final TextEditingController nameController = TextEditingController(
+    text: existingVehicle?['name'] ?? '',
+  );
+  final TextEditingController plateController = TextEditingController(
+    text: existingVehicle?['plate'] ?? '',
+  );
+  final TextEditingController priceController = TextEditingController(
+    text: existingVehicle?['price']?.toString() ?? '',
+  );
+  final TextEditingController nextMaintenanceController = TextEditingController(
+    text:
+        existingVehicle?['maintenance'] ??
+        existingVehicle?['next_maintenance_date'] ??
+        '',
+  );
+  final TextEditingController returnDateController = TextEditingController(
+    text: existingVehicle?['return_from_maintenance'] ?? '',
+  );
 
-  Map<String, dynamic>? newVehicle;
-  String status = 'available'; // Internal logic key
+  // Use 'state' if 'status' is missing (common db naming mismatch)
+  String status =
+      existingVehicle?['state'] ?? existingVehicle?['status'] ?? 'available';
+  status = status.toLowerCase().trim();
+  // Safe default if invalid status in DB
+  if (!['available', 'rented', 'maintenance'].contains(status)) {
+    status = 'available';
+  }
+
+  Map<String, dynamic>? finalData;
+
+  // Helper for Date Picker
+  Future<void> _selectDate(
+    BuildContext ctx,
+    TextEditingController controller,
+  ) async {
+    DateTime initial = DateTime.now();
+    if (controller.text.isNotEmpty) {
+      try {
+        initial = DateTime.parse(controller.text);
+      } catch (e) {
+        // ignore invalid format
+      }
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: ctx,
+      initialDate: initial,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+
+    if (picked != null) {
+      // Use ISO8601 string for DB consistency
+      controller.text = picked.toIso8601String().split('T')[0];
+    }
+  }
 
   await showModalBottomSheet(
     context: context,
@@ -25,6 +78,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
     ),
     builder: (context) {
       final mediaQuery = MediaQuery.of(context);
+
       return Padding(
         padding: EdgeInsets.only(
           bottom: mediaQuery.viewInsets.bottom + 20,
@@ -39,6 +93,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Handle Bar
                   Center(
                     child: Container(
                       width: 40,
@@ -50,8 +105,10 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                       ),
                     ),
                   ),
+
+                  // Title
                   Text(
-                    l10n.editVehicle, // Localized
+                    isEditing ? l10n.editVehicle : l10n.addNewCar,
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 20,
@@ -61,10 +118,11 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                   ),
                   const SizedBox(height: 20),
 
+                  // Name
                   TextField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      labelText: l10n.carName, // Localized
+                      labelText: l10n.carName,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -74,10 +132,11 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                   ),
                   const SizedBox(height: 12),
 
+                  // Plate
                   TextField(
                     controller: plateController,
                     decoration: InputDecoration(
-                      labelText: l10n.plateNumber, // Localized
+                      labelText: l10n.plateNumber,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -87,24 +146,12 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                   ),
                   const SizedBox(height: 12),
 
-                  TextField(
-                    controller: nextMaintenanceController,
-                    decoration: InputDecoration(
-                      labelText: l10n.nextMaintenanceOptional, // Localized
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF6F7F8),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
+                  // Price
                   TextField(
                     controller: priceController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: l10n.rentPricePerDay, // Localized
+                      labelText: l10n.rentPricePerDay,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -114,8 +161,30 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                   ),
                   const SizedBox(height: 12),
 
+                  // Next Maintenance (Date Picker)
+                  TextField(
+                    controller: nextMaintenanceController,
+                    readOnly: true, // Prevent manual typing
+                    onTap: () =>
+                        _selectDate(context, nextMaintenanceController),
+                    decoration: InputDecoration(
+                      labelText: l10n.nextMaintenanceOptional,
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: Colors.grey,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF6F7F8),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Status Dropdown
                   DropdownButtonFormField<String>(
-                    initialValue: status,
+                    value: status,
                     items: [
                       DropdownMenuItem(
                         value: 'available',
@@ -132,7 +201,8 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                     ],
                     onChanged: (val) => setState(() => status = val!),
                     decoration: InputDecoration(
-                      labelText: 'Status',
+                      labelText:
+                          'Status', // You might want to localize this label too
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -142,13 +212,20 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                   ),
                   const SizedBox(height: 12),
 
+                  // Return Date (Conditional + Date Picker)
                   if (status == 'rented' || status == 'maintenance')
                     TextField(
                       controller: returnDateController,
+                      readOnly: true,
+                      onTap: () => _selectDate(context, returnDateController),
                       decoration: InputDecoration(
                         labelText: status == 'rented'
                             ? l10n.returnDate
-                            : l10n.availabilityDate,
+                            : l10n.availableOn,
+                        suffixIcon: const Icon(
+                          Icons.calendar_today,
+                          color: Colors.grey,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -159,6 +236,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
 
                   const SizedBox(height: 24),
 
+                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -182,26 +260,41 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
                           ),
                         ),
                         onPressed: () {
-                          newVehicle = {
+                          // 1. Prepare Data
+                          finalData = {
                             'name': nameController.text.trim(),
                             'plate': plateController.text.trim(),
-                            'status': status,
+                            'state':
+                                status, // Use 'state' to match DB column 'state'
+                            'status':
+                                status, // Keep 'status' for UI compatibility
                             'price':
                                 double.tryParse(priceController.text.trim()) ??
                                 0.0,
-                            'next_maintenance_date':
-                                nextMaintenanceController.text.trim().isEmpty
-                                ? 'N/A'
-                                : nextMaintenanceController.text.trim(),
+                            'maintenance': nextMaintenanceController.text
+                                .trim(),
+                            'next_maintenance_date': nextMaintenanceController
+                                .text
+                                .trim(),
                             'return_from_maintenance': returnDateController.text
                                 .trim(),
                           };
-                          context.read<CarsCubit>().addVehicle(newVehicle!);
+
+                          // 2. IMPORTANT: If NOT editing (Adding new), call Add here.
+                          // If Editing, we return data and let parent handle it to avoid duplications.
+                          if (!isEditing) {
+                            context.read<CarsCubit>().addVehicle(finalData!);
+                          }
+
+                          // 3. Close Dialog
                           Navigator.pop(context);
                         },
                         child: Text(
-                          l10n.save,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          isEditing ? l10n.save : l10n.add,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -215,5 +308,5 @@ Future<Map<String, dynamic>?> showVehicleDialog(BuildContext context) async {
     },
   );
 
-  return newVehicle;
+  return finalData;
 }

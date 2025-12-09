@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:auto_manager/l10n/app_localizations.dart'; // Import Localization
+import 'package:auto_manager/l10n/app_localizations.dart';
 
 import '../dialogs/vehicle_dialog.dart';
 import '../../../../logic/cubits/cars/cars_cubit.dart';
@@ -11,7 +11,7 @@ class VehicleDetailsScreen extends StatelessWidget {
   const VehicleDetailsScreen({super.key, required this.vehicle});
 
   Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase() ?? '') {
+    switch (status?.toLowerCase().trim() ?? '') {
       case 'available':
         return const Color(0xFF28A745);
       case 'rented':
@@ -23,10 +23,9 @@ class VehicleDetailsScreen extends StatelessWidget {
     }
   }
 
-  // Helper to translate status
   String _getLocalizedStatus(BuildContext context, String? status) {
     final l10n = AppLocalizations.of(context)!;
-    switch (status?.toLowerCase()) {
+    switch (status?.toLowerCase().trim()) {
       case 'available':
         return l10n.statusAvailable;
       case 'rented':
@@ -49,7 +48,7 @@ class VehicleDetailsScreen extends StatelessWidget {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          vehicle['name'] ?? l10n.vehicleDetails, // Localized default title
+          vehicle['name'] ?? l10n.vehicleDetails,
           style: const TextStyle(
             fontFamily: 'Manrope',
             color: Color(0xFF2D3748),
@@ -57,22 +56,30 @@ class VehicleDetailsScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          // EDIT
+          // EDIT BUTTON
           IconButton(
             icon: const Icon(Icons.edit, color: Color(0xFF007BFF)),
             onPressed: () async {
-              final updatedVehicleData = await showVehicleDialog(context);
+              // Pass the current vehicle data to pre-fill the dialog
+              final updatedVehicleData = await showVehicleDialog(
+                context,
+                existingVehicle: vehicle, // Pass existing data!
+              );
+
+              // If data returned, UPDATE the vehicle
               if (updatedVehicleData != null && context.mounted) {
                 final Map<String, dynamic> finalUpdateData = Map.from(
                   updatedVehicleData,
                 );
+                // Ensure we keep the same ID for updates
                 finalUpdateData['id'] = vehicle['id'];
+
                 context.read<CarsCubit>().updateVehicle(finalUpdateData);
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Go back to list after edit
               }
             },
           ),
-          // DELETE
+          // DELETE BUTTON
           IconButton(
             icon: const Icon(Icons.delete, color: Color(0xFFE53E3E)),
             onPressed: () {
@@ -101,7 +108,7 @@ class VehicleDetailsScreen extends StatelessWidget {
                 ],
               ),
               child: Text(
-                vehicle['name'] ?? l10n.unknownName, // Localized
+                vehicle['name'] ?? l10n.unknownName,
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 20,
@@ -117,19 +124,21 @@ class VehicleDetailsScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.circle,
-                  color: _getStatusColor(vehicle['status']),
+                  color: _getStatusColor(vehicle['state'] ?? vehicle['status']),
                   size: 14,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   _getLocalizedStatus(
                     context,
-                    vehicle['status'],
-                  ), // Localized status
+                    vehicle['state'] ?? vehicle['status'],
+                  ),
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
-                    color: _getStatusColor(vehicle['status']),
+                    color: _getStatusColor(
+                      vehicle['state'] ?? vehicle['status'],
+                    ),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -138,24 +147,39 @@ class VehicleDetailsScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             _buildDetail(l10n.plateNumber, vehicle['plate']),
-            _buildDetail("Price / Day", "${vehicle['price'] ?? 0}"),
+            _buildDetail(l10n.rentPricePerDay, "${vehicle['price'] ?? 0}"),
 
             const Divider(color: Color(0xFFE2E8F0)),
 
-            if (vehicle['status'].toString().toLowerCase() == 'rented' &&
-                vehicle['return_from_maintenance'] != null)
-              _buildDetail(l10n.returnDate, vehicle['return_from_maintenance']),
+            // Check status safely
+            Builder(
+              builder: (context) {
+                final status = (vehicle['state'] ?? vehicle['status'])
+                    .toString()
+                    .toLowerCase()
+                    .trim();
 
-            if (vehicle['status'].toString().toLowerCase() == 'maintenance' &&
-                vehicle['return_from_maintenance'] != null)
-              _buildDetail(
-                l10n.availableOn,
-                vehicle['return_from_maintenance'],
-              ),
+                if (status == 'rented' &&
+                    vehicle['return_from_maintenance'] != null) {
+                  return _buildDetail(
+                    l10n.returnDate,
+                    vehicle['return_from_maintenance'],
+                  );
+                }
+                if (status == 'maintenance' &&
+                    vehicle['return_from_maintenance'] != null) {
+                  return _buildDetail(
+                    l10n.availableOn,
+                    vehicle['return_from_maintenance'],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
 
             _buildDetail(
               l10n.nextMaintenance,
-              vehicle['next_maintenance_date'],
+              vehicle['maintenance'] ?? vehicle['next_maintenance_date'],
             ),
 
             const Divider(color: Color(0xFFE2E8F0)),
@@ -209,62 +233,52 @@ class VehicleDetailsScreen extends StatelessWidget {
         title: Text(
           l10n.deleteVehicleTitle,
           style: const TextStyle(
-            fontFamily: 'Manrope',
             fontWeight: FontWeight.bold,
-            fontSize: 18,
             color: Color(0xFF2D3748),
           ),
         ),
         content: Text(
-          l10n.deleteVehicleConfirm(
-            vehicle['name'] ?? '',
-          ), // Localized with param
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 14,
-            color: Color(0xFF4A5568),
-          ),
+          l10n.deleteVehicleConfirm(vehicle['name'] ?? ''),
+          style: const TextStyle(color: Color(0xFF4A5568)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(
-                color: Color(0xFF718096),
-                fontFamily: 'Manrope',
-              ),
+              style: const TextStyle(color: Color(0xFF718096)),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE53E3E),
               foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
             ),
             onPressed: () {
               Navigator.of(dialogContext).pop(true);
             },
-            child: Text(l10n.delete), // "Delete"
+            child: Text(l10n.delete),
           ),
         ],
       ),
     );
 
     if (confirmed == true && context.mounted) {
-      context.read<CarsCubit>().deleteVehicle(vehicle['id']);
+      // ✅ FIX: Ensure ID is an int and not null
+      final int id = vehicle['id'] is int
+          ? vehicle['id']
+          : int.parse(vehicle['id'].toString());
+
+      // ✅ FIX: Correctly call deleteVehicle on the Cubit
+      context.read<CarsCubit>().deleteVehicle({'id': id});
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            l10n.deletedVehicle(vehicle['name'] ?? ''),
-          ), // "Deleted 'Car'"
+          content: Text(l10n.deletedVehicle(vehicle['name'] ?? '')),
           backgroundColor: const Color(0xFFE53E3E),
         ),
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(); // Return to previous screen
     }
   }
 }

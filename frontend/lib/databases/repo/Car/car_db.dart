@@ -3,8 +3,6 @@ import 'car_abstract.dart';
 import '../../dbhelper.dart';
 
 class CarDB extends AbstractCarRepo {
-  // ✅ ALL QUERIES USE 'car' (Singular)
-
   @override
   Future<List<Map<String, dynamic>>> getData() async {
     final database = await DBHelper.getDatabase();
@@ -69,5 +67,17 @@ class CarDB extends AbstractCarRepo {
       where: 'id = ?',
       whereArgs: [carId],
     );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCarsMaintenanceOn(
+    String dateIsoString,
+  ) async {
+    final db = await DBHelper.getDatabase();
+    // Ensure your column name matches your DB ('maintenance' or 'next_maintenance_date')
+    return await db.rawQuery('''
+    SELECT * FROM car 
+    WHERE maintenance LIKE '$dateIsoString%'
+  ''');
   }
 }
