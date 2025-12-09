@@ -1,12 +1,23 @@
-import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
-import 'package:auto_manager/l10n/app_localizations.dart';
-import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Localization
+import 'package:auto_manager/l10n/app_localizations.dart';
+
+// Cubits
+
+import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
+
+// Screens
+import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
+import 'package:auto_manager/features/auth/presentation/login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  // --- 1. Helper for Coming Soon ---
   void _navigateToComingSoon(BuildContext context, String title) {
     Navigator.push(
       context,
@@ -14,6 +25,38 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  // --- 2. Helper for Logout Logic (Merged from First Version) ---
+  void _handleLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.logout),
+        content: Text(
+          AppLocalizations.of(context)!.logoutConfirmation,
+        ), // Ensure you add this key to your arb files, or hardcode string if needed
+        // fallback: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // Close dialog
+              // Call logout from AuthCubit
+              context.read<AuthCubit>().logout();
+            },
+            child: Text(
+              AppLocalizations.of(context)!.logout,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- 3. Helper for Language Dialog (Merged from Second Version) ---
   void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -25,19 +68,11 @@ class SettingsScreen extends StatelessWidget {
               content: DropdownButton<String>(
                 value: locale.languageCode,
                 isExpanded: true,
+                underline: Container(height: 2, color: const Color(0xFF007BFF)),
                 items: const [
-                  DropdownMenuItem(
-                    value: 'en',
-                    child: Text('English'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'ar',
-                    child: Text('العربية'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'fr',
-                    child: Text('Français'),
-                  ),
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                  DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                  DropdownMenuItem(value: 'fr', child: Text('Français')),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -61,6 +96,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -72,33 +109,58 @@ class SettingsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          AppLocalizations.of(context)!.settingsTitle,
-          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          l10n.settingsTitle,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildTile(
+      // --- 4. BlocListener for Logout Navigation (Merged from First Version) ---
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthUnauthenticated) {
+            // Navigate to Login screen after logout, removing all previous routes
+            Navigator.pushAndRemoveUntil(
               context,
-              icon: Icons.business_center,
-              title: AppLocalizations.of(context)!.agencyInfo,
-              subtitle: AppLocalizations.of(context)!.agencyInfoSubtitle,
-              onTap: () => _navigateToComingSoon(context, AppLocalizations.of(context)!.agencyInfo),
-            ),
-            _buildTile(
-              context,
-              icon: Icons.language,
-              title: AppLocalizations.of(context)!.appLanguage,
-              subtitle: AppLocalizations.of(context)!.appLanguageSubtitle,
-              onTap: () => _showLanguageDialog(context),
-            ),
-            const SizedBox(height: 12),
-            _buildSubscriptionCard(context),
-            const Spacer(),
-            _buildLogoutButton(context),
-          ],
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // Agency Info Tile
+              _buildTile(
+                context,
+                icon: Icons.business_center,
+                title: l10n.agencyInfo,
+                subtitle: l10n.agencyInfoSubtitle,
+                onTap: () => _navigateToComingSoon(context, l10n.agencyInfo),
+              ),
+
+              // Language Tile
+              _buildTile(
+                context,
+                icon: Icons.language,
+                title: l10n.appLanguage,
+                subtitle: l10n.appLanguageSubtitle,
+                onTap: () => _showLanguageDialog(context),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Subscription Card
+              _buildSubscriptionCard(context, l10n),
+
+              const Spacer(),
+
+              // Logout Button
+              _buildLogoutButton(context, l10n),
+            ],
+          ),
         ),
       ),
     );
@@ -116,12 +178,8 @@ class SettingsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: ListTile(
@@ -151,7 +209,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSubscriptionCard(BuildContext context) {
+  Widget _buildSubscriptionCard(BuildContext context, AppLocalizations l10n) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
@@ -194,7 +252,7 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context)!.subscription,
+                    l10n.subscription,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -202,7 +260,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    AppLocalizations.of(context)!.subscriptionPlan,
+                    l10n.subscriptionPlan,
                     style: const TextStyle(color: Colors.white70),
                   ),
                 ],
@@ -215,17 +273,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context) {
+  Widget _buildLogoutButton(BuildContext context, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: ElevatedButton.icon(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.logout)),
-          );
-        },
+        // Use the handler that includes the Dialog and AuthCubit logic
+        onPressed: () => _handleLogout(context),
         icon: const Icon(Icons.logout),
-        label: Text(AppLocalizations.of(context)!.logout),
+        label: Text(l10n.logout),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.redAccent,
           foregroundColor: Colors.white,

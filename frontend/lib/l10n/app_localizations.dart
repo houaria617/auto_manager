@@ -1191,6 +1191,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Price'**
   String get labelTotalPrice;
+
+  /// No description provided for @logoutConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirmation;
 }
 
 class _AppLocalizationsDelegate

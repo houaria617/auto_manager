@@ -282,5 +282,6 @@
     "selectDate": "Choisir une date",
     "selectClient": "Choisir le client",
     "selectCar": "Choisir la voiture",
-    "saveRental": "Enregistrer la location"
+    "saveRental": "Enregistrer la location",
+    "logoutConfirmation": "Êtes-vous sûr de vouloir vous déconnecter ?"
 }

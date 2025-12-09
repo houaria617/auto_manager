@@ -583,4 +583,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get labelTotalPrice => 'Prix Total';
+
+  @override
+  String get logoutConfirmation =>
+      'Êtes-vous sûr de vouloir vous déconnecter ?';
 }

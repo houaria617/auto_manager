@@ -282,5 +282,6 @@
     "selectDate": "اختر التاريخ",
     "selectClient": "اختر العميل",
     "selectCar": "اختر السيارة",
-    "saveRental": "حفظ التأجير"
+    "saveRental": "حفظ التأجير",
+    "logoutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟"
 }

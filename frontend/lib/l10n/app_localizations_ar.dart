@@ -579,4 +579,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get labelTotalPrice => 'السعر الإجمالي';
+
+  @override
+  String get logoutConfirmation => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
 }

@@ -296,5 +296,6 @@
     "selectDate": "Select Date",
     "selectClient": "Select Client",
     "selectCar": "Select Car",
-    "saveRental": "Save Rental"
+    "saveRental": "Save Rental",
+    "logoutConfirmation": "Are you sure you want to logout?"
 }
