@@ -1,37 +1,43 @@
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// ============================================================================
-// Widget Components: rental_period_card.dart
-// ============================================================================
 class RentalPeriodCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final Map<String, dynamic> rental;
 
-  const RentalPeriodCard({super.key, required this.viewModel});
+  const RentalPeriodCard({super.key, required this.rental});
 
   @override
   Widget build(BuildContext context) {
+    final startDate = DateTime.parse(rental['date_from']);
+    final endDate = DateTime.parse(rental['date_to']);
+    final totalDays = endDate.difference(startDate).inDays;
+    final daysLeft = endDate
+        .difference(DateTime.now())
+        .inDays
+        .clamp(0, totalDays);
+
+    final progress = totalDays > 0 ? (totalDays - daysLeft) / totalDays : 0.0;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(daysLeft),
             const SizedBox(height: 12),
-            _buildProgressBar(),
+            _buildProgressBar(progress),
             const SizedBox(height: 12),
-            _buildDateRange(),
+            _buildDateRange(startDate, endDate),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(int daysLeft) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -40,19 +46,14 @@ class RentalPeriodCard extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Text(
-          '${viewModel.daysLeft} days left',
+          '$daysLeft days left',
           style: TextStyle(color: Colors.blue.shade700),
         ),
       ],
     );
   }
 
-  Widget _buildProgressBar() {
-    final progress = viewModel.totalRentalDays > 0
-        ? (viewModel.totalRentalDays - viewModel.daysLeft) /
-              viewModel.totalRentalDays
-        : 0.0;
-
+  Widget _buildProgressBar(double progress) {
     return LinearProgressIndicator(
       value: progress,
       backgroundColor: Colors.grey.shade300,
@@ -62,21 +63,14 @@ class RentalPeriodCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateRange() {
+  Widget _buildDateRange(DateTime start, DateTime end) {
     final formatter = DateFormat('MMM dd, yyyy');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _DateColumn(
-          label: 'Start',
-          date: formatter.format(viewModel.startDate),
-        ),
-        _DateColumn(
-          label: 'End',
-          date: formatter.format(viewModel.endDate),
-          isEnd: true,
-        ),
+        _DateColumn(label: 'Start', date: formatter.format(start)),
+        _DateColumn(label: 'End', date: formatter.format(end), isEnd: true),
       ],
     );
   }

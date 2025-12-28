@@ -1,0 +1,5 @@
+- Authentication
+- analytics is static
+- cars filter
+- localization for all screens
+- Serverless storage

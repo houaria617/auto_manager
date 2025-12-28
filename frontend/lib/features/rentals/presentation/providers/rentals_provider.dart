@@ -1,5 +1,4 @@
 import 'package:auto_manager/cubit/rental_cubit.dart';
-import 'package:auto_manager/databases/repo/Rental/rental_db.dart';
 
 import 'package:flutter/material.dart';
 
@@ -19,8 +18,9 @@ class RentalsProvider extends ChangeNotifier {
     final allRentals = await rentalCubit.getAllRentalsWithDetails();
 
     _rentals = allRentals.where((r) {
-      if (showCompleted)
+      if (showCompleted) {
         return r['state'] == 'overdue' || r['state'] == 'returned';
+      }
       return r['state'] == 'ongoing';
     }).toList();
 

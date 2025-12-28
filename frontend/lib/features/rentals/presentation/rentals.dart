@@ -1,43 +1,47 @@
-// lib/features/rentals/presentation/screens/rentals_screen.dart
-
 import 'package:auto_manager/cubit/rental_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../Dashboard/navigation_bar.dart';
 import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
-import 'package:auto_manager/features/rentals/presentation/providers/rentals_provider.dart';
 import 'package:auto_manager/features/rentals/presentation/rental_details.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/rental_card.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/tab_button.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class RentalsScreen extends StatelessWidget {
   const RentalsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => RentalsProvider(context.read<RentalCubit>()),
-      child: _RentalsScreenContent(), // not const
-    );
+    return const _RentalsScreenContent();
   }
 }
 
-class _RentalsScreenContent extends StatelessWidget {
+class _RentalsScreenContent extends StatefulWidget {
   const _RentalsScreenContent();
 
   @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<RentalsProvider>(context);
+  State<_RentalsScreenContent> createState() => _RentalsScreenContentState();
+}
 
+class _RentalsScreenContentState extends State<_RentalsScreenContent> {
+  bool showCompleted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<RentalCubit>().getAllRentalsWithDetails();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context, provider),
-            _buildRentalsList(provider),
-          ],
+        child: BlocBuilder<RentalCubit, RentalState>(
+          builder: (context, state) {
+            return Column(children: [_buildHeader(), _buildRentalsList(state)]);
+          },
         ),
       ),
       bottomNavigationBar: const NavBar(),
@@ -49,62 +53,46 @@ class _RentalsScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, RentalsProvider provider) {
+  Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      color: Colors.white,
+      child: Row(
         children: [
-          const Text(
-            'AutoManager Rentals',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1a1a1a),
-            ),
+          TabButton(
+            label: 'Ongoing',
+            isSelected: !showCompleted,
+            onTap: () => setState(() => showCompleted = false),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              TabButton(
-                label: 'Ongoing',
-                isSelected: !provider.showCompleted,
-                onTap: () => provider.toggleView(false),
-              ),
-              const SizedBox(width: 8),
-              TabButton(
-                label: 'Completed',
-                isSelected: provider.showCompleted,
-                onTap: () => provider.toggleView(true),
-              ),
-            ],
+          const SizedBox(width: 8),
+          TabButton(
+            label: 'Completed',
+            isSelected: showCompleted,
+            onTap: () => setState(() => showCompleted = true),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRentalsList(RentalsProvider provider) {
-    final rentals = provider.rentals;
+  Widget _buildRentalsList(RentalState state) {
+    if (state.isLoading) {
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
+    }
 
-    if (rentals.isEmpty) {
+    final filteredRentals = state.rentals.where((rental) {
+      if (showCompleted) {
+        return rental['state'] != 'ongoing';
+      } else {
+        return rental['state'] == 'ongoing';
+      }
+    }).toList();
+
+    if (filteredRentals.isEmpty) {
       return Expanded(
         child: Center(
           child: Text(
-            provider.showCompleted
-                ? 'No completed rentals'
-                : 'No ongoing rentals',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            showCompleted ? 'No completed rentals' : 'No ongoing rentals',
           ),
         ),
       );
@@ -113,18 +101,19 @@ class _RentalsScreenContent extends StatelessWidget {
     return Expanded(
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: rentals.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemCount: filteredRentals.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           return RentalCard(
-            rental: rentals[index], // Map<String, dynamic> now works
-            isOngoingView: !provider.showCompleted,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => RentalDetailsScreen()),
-              );
-            },
+            rental: filteredRentals[index],
+            isOngoingView: !showCompleted,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    RentalDetailsScreen(rental: filteredRentals[index]),
+              ),
+            ),
           );
         },
       ),
@@ -132,10 +121,9 @@ class _RentalsScreenContent extends StatelessWidget {
   }
 
   void _handleAddRental(BuildContext context) {
-    //  Navigate to add rental screen
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddRentalScreen()),
+      MaterialPageRoute(builder: (_) => const AddRentalScreen()),
     );
   }
 }

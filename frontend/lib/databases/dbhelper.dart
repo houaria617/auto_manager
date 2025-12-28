@@ -23,7 +23,7 @@ class DBHelper {
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                full_name TEXT,
                phone TEXT,
-               state TEXT DEFAULT 'idle'
+               state TEXT DEFAULT 'active'
                )
          ''');
         await database.execute('''

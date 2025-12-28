@@ -57,12 +57,25 @@ class RentalDB extends AbstractRentalRepo {
       'rental',
       where: 'client_id = ?',
       whereArgs: [clientID],
+      orderBy: 'id DESC',
     );
+  }
+
+  @override
+  Future<bool> updateRentalState(int rentalID, String newState) async {
+    final db = await DBHelper.getDatabase();
+    await db.update(
+      'rental',
+      {'state': newState},
+      where: 'id = ?',
+      whereArgs: [rentalID],
+    );
+    return true;
   }
 
   @override
   Future<List<Map<String, dynamic>>> getAllRentals() async {
     final database = await DBHelper.getDatabase();
-    return await database.query('rental');
+    return await database.query('rental', orderBy: 'id DESC');
   }
 }

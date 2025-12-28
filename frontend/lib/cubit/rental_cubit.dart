@@ -1,4 +1,5 @@
 import 'package:auto_manager/cubit/client_cubit.dart';
+import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:bloc/bloc.dart';
@@ -7,46 +8,33 @@ import './dashboard_cubit.dart';
 
 // Proper state class
 class RentalState {
+  final List<Map<String, dynamic>> rentals;
   final bool isLoading;
-  final String? error;
 
-  RentalState({this.isLoading = false, this.error});
+  RentalState(this.rentals, this.isLoading);
 }
 
 class RentalCubit extends Cubit<RentalState> {
-  RentalCubit({required this.dashboardCubit, required this.clientCubit})
-    : super(RentalState());
+  RentalCubit({
+    required this.dashboardCubit,
+    required this.clientCubit,
+    required this.vehicleCubit,
+  }) : super(RentalState(<Map<String, dynamic>>[], false));
 
   final _rentalRepo = AbstractRentalRepo.getInstance();
   final _clientRepo = AbstractClientRepo.getInstance();
   final _carRepo = AbstractCarRepo.getInstance();
   final DashboardCubit dashboardCubit;
   final ClientCubit clientCubit;
+  final VehicleCubit vehicleCubit;
 
   void addRental(Map<String, dynamic> rental) async {
-    print('inside add rental');
-    //emit(RentalState(isLoading: true)); // Start loading
-
-    // // see if client exists or not
-    // final client = await _clientRepo.getClient(rental['client_id']);
-
-    // if (client.isEmpty) {
-    //   print('calling add client inside add rental...');
-    //   final clientID = await clientCubit.addClient({
-    //     'full_name': client['full_name'],
-    //     'phone': client['phone'],
-    //     'state': 'active',
-    //   });
-    // }
-
     String state;
     if (DateTime.parse(rental['date_to']).isAfter(DateTime.now())) {
       state = 'ongoing';
     } else {
       state = 'overdue';
     }
-
-    print('#' * 100 + 'insereting rental...');
 
     try {
       await _rentalRepo.insertRental({
@@ -58,39 +46,37 @@ class RentalCubit extends Cubit<RentalState> {
         'payment_state': rental['payment_state'],
         'state': state,
       });
-      print('rental inserted successfully');
 
       final car = await _carRepo.getCar(rental['car_id']);
-      print('got car, $car');
       final client = await _clientRepo.getClient(rental['client_id']);
-      print('got client, $client');
 
-      print('#' * 1000 + 'rental inserted');
+      await _carRepo.updateCarState(rental['car_id'], 'rented');
+      vehicleCubit.getVehicles();
 
       dashboardCubit.countOngoingRentals();
-      print('#' * 1000 + '****** called countOngRentals ******');
       dashboardCubit.countAvailableCars();
-      print('#' * 1000 + "****** available cars count called ****");
-      dashboardCubit.checkDueToday(car?['name'], rental['client_id']);
-      print('#' * 1000 + '****** called due today check ******');
+      dashboardCubit.checkDueToday(car, rental['client_id']);
       dashboardCubit.countDueToday();
-      print('#' * 1000 + '****** called due today count ******');
       dashboardCubit.addActivity({
         'description':
-            '${client['full_name']} Rented ${car?['name']}(${car?['plate']})',
+            '${client['full_name']} Rented ${car?['name']} (${car?['plate']})',
         'date': DateTime.now().toIso8601String(),
       });
-      print('#' * 100 + '****** Added activity ******');
-
-      //emit(RentalState()); // Success
-      print('#' * 100 + 'passed succ');
     } catch (e) {
       print('problem occured when calling insertRental');
-      //emit(RentalState(error: e.toString())); // Error
     }
   }
 
+  Future<bool> updateRentalState(int rentalId, String newState) async {
+    emit(RentalState(state.rentals, true));
+    await _rentalRepo.updateRentalState(rentalId, newState);
+    // Refresh rentals list after update
+    getAllRentalsWithDetails();
+    return true;
+  }
+
   Future<List<Map<String, dynamic>>> getAllRentalsWithDetails() async {
+    emit(RentalState(state.rentals, true));
     final rentals = await _rentalRepo.getAllRentals();
 
     List<Map<String, dynamic>> enrichedRentals = [];
@@ -103,9 +89,10 @@ class RentalCubit extends Cubit<RentalState> {
         ...rental,
         'car_name': car?['name'] ?? 'Unknown Car',
         'car_model': car?['model'] ?? 'Unknown Model',
-        'customer_name': client?['full_name'] ?? 'Unknown Customer',
+        'customer_name': client['full_name'] ?? 'Unknown Customer',
       });
     }
+    emit(RentalState(enrichedRentals, false));
 
     return enrichedRentals;
   }

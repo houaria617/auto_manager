@@ -16,19 +16,21 @@ class DashboardStatistics {
   final int availableCars;
   final int dueToday;
   final List<Map<String, dynamic>> recentActivities;
+  final bool isLoading;
 
   DashboardStatistics(
     this.ongoingRentals,
     this.availableCars,
     this.dueToday,
     this.recentActivities,
+    this.isLoading,
   );
 }
 
 class DashboardCubit extends Cubit<DashboardStatistics> {
   DateTime? _lastDueNotification;
   DashboardCubit()
-    : super(DashboardStatistics(0, 0, 0, <Map<String, dynamic>>[]));
+    : super(DashboardStatistics(0, 0, 0, <Map<String, dynamic>>[], false));
 
   final _rentalRepo = AbstractRentalRepo.getInstance();
   final _carRepo = AbstractCarRepo.getInstance();
@@ -43,12 +45,13 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
         state.availableCars,
         state.dueToday,
         state.recentActivities,
+        true,
       ),
     );
-    print('!' * 1000);
+    print('Counted Ongoing Rentals Successfully');
   }
 
-  void checkDueToday(String carModel, int clientID) async {
+  void checkDueToday(Map<String, dynamic>? car, int clientID) async {
     final int dueTodayCount = await _rentalRepo.countDueToday();
 
     bool isSameDay(DateTime instanceDate, DateTime today) {
@@ -68,7 +71,7 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
       final lastNotified = _lastDueNotification;
       if (lastNotified == null || !isSameDay(lastNotified, today)) {
         addActivity({
-          'description': '${client['full_name']} Returns $carModel Today',
+          'description': '${client['full_name']} Returns ${car?['name']} Today',
           'date': DateTime.now(),
         });
         _lastDueNotification = today;
@@ -84,6 +87,7 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
         avCarsCount,
         state.dueToday,
         state.recentActivities,
+        false,
       ),
     );
   }
@@ -96,36 +100,58 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
         state.availableCars,
         dueTodayCount,
         state.recentActivities,
+        false,
       ),
     );
   }
 
-  void addActivity(Map<String, dynamic> activity) async {
-    final recentActivities = await _activityRepo.getActivities();
-    print('activities fetched from DB, $recentActivities');
-    if (activity['description'] == '') {
-      emit(
-        DashboardStatistics(
-          state.ongoingRentals,
-          state.availableCars,
-          state.dueToday,
-          recentActivities,
-        ),
-      );
-      return;
-    }
-    await _activityRepo.insertActivity(activity);
-    List<Map<String, dynamic>> updated = [activity, ...recentActivities];
-    if (updated.length > 3) {
-      updated = updated.sublist(0, 3);
-    }
+  void getRecentActivities() async {
+    emit(
+      DashboardStatistics(
+        state.ongoingRentals,
+        state.availableCars,
+        state.dueToday,
+        [],
+        true,
+      ),
+    );
+    final recentActivities = await _activityRepo.getRecentActivities();
 
     emit(
       DashboardStatistics(
         state.ongoingRentals,
         state.availableCars,
         state.dueToday,
+        recentActivities,
+        false,
+      ),
+    );
+  }
+
+  void addActivity(Map<String, dynamic> activity) async {
+    emit(
+      DashboardStatistics(
+        state.ongoingRentals,
+        state.availableCars,
+        state.dueToday,
+        state.recentActivities,
+        true,
+      ),
+    );
+    final recentActivities = await _activityRepo.getRecentActivities();
+    print('recent activities fetched from DB: $recentActivities');
+    await _activityRepo.insertActivity(activity);
+    List<Map<String, dynamic>> updated = [activity, ...recentActivities];
+    if (updated.length > 3) {
+      updated = updated.sublist(0, 3);
+    }
+    emit(
+      DashboardStatistics(
+        state.ongoingRentals,
+        state.availableCars,
+        state.dueToday,
         updated,
+        false,
       ),
     );
   }

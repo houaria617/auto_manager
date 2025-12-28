@@ -1,23 +1,35 @@
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:auto_manager/cubit/rental_cubit.dart';
 
-// ============================================================================
-// Widget Components: action_buttons.dart
-// ============================================================================
 class ActionButtons extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final Map<String, dynamic> rental;
 
-  const ActionButtons({super.key, required this.viewModel});
+  const ActionButtons({super.key, required this.rental});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           _PrimaryButton(
-            label: 'Renew Rental',
-            onPressed: () => viewModel.renewRental(context),
+            label: 'Mark as Complete',
+            onPressed: () async {
+              // Update state locally
+              rental['state'] = 'completed';
+
+              // Call cubit to update in DB and refresh state
+              await context.read<RentalCubit>().updateRentalState(
+                rental['id'],
+                'completed',
+              );
+
+              // Optionally show a snackbar
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Rental marked as completed')),
+              );
+            },
           ),
           const SizedBox(height: 12),
         ],

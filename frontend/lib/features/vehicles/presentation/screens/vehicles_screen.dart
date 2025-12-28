@@ -2,7 +2,6 @@
 import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'vehicle_details_screen.dart';
 import '../widgets/vehicle_card.dart';
 import '../widgets/filter_chip_row.dart';
@@ -22,7 +21,6 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   static const Color bgLight = Color(0xFFF6F7F8);
   static const Color cardBg = Colors.white;
   static const Color textDark = Color(0xFF1A1A1A);
-  static const Color textGray = Color(0xFF6B7280);
 
   String selectedFilter = 'All';
 
@@ -30,7 +28,6 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
   void initState() {
     super.initState();
     context.read<VehicleCubit>().getVehicles();
-    print('*************got vehicles inside init if vehicles_screen');
   }
 
   @override

@@ -1,36 +1,37 @@
-import 'package:auto_manager/features/rentals/domain/rental_details_viewmodel.dart';
 import 'package:flutter/material.dart';
 
-// ============================================================================
-// Widget Components: rental_summary_card.dart
-// ============================================================================
 class RentalSummaryCard extends StatelessWidget {
-  final RentalDetailsViewModel viewModel;
+  final Map<String, dynamic> rental;
 
-  const RentalSummaryCard({super.key, required this.viewModel});
+  const RentalSummaryCard({super.key, required this.rental});
 
   @override
   Widget build(BuildContext context) {
+    final paymentStatus = rental['payment_state'] ?? 'unknown';
+    final rentalId = rental['id']?.toString() ?? '-';
+    final amount = (rental['total_amount'] ?? 0).toDouble();
+    final days = _rentalDays(rental['date_from'], rental['date_to']);
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(paymentStatus),
             const SizedBox(height: 8),
-            _buildRentalInfo(),
+            _buildRentalInfo(rentalId, days),
             const SizedBox(height: 8),
-            _buildAmountInfo(),
+            _buildAmountInfo(amount, paymentStatus),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(String paymentStatus) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -38,39 +39,42 @@ class RentalSummaryCard extends StatelessWidget {
           'Rental Summary',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        _StatusBadge(status: viewModel.paymentStatus),
+        _StatusBadge(status: paymentStatus),
       ],
     );
   }
 
-  Widget _buildRentalInfo() {
+  Widget _buildRentalInfo(String rentalId, int days) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Rental ID: ${viewModel.rentalId}'),
+        Text('Rental ID: $rentalId'),
         const SizedBox(height: 4),
-        Text('${viewModel.totalRentalDays} days'),
+        Text('$days days'),
       ],
     );
   }
 
-  Widget _buildAmountInfo() {
+  Widget _buildAmountInfo(double amount, String status) {
     return Align(
       alignment: Alignment.centerRight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            '\$${viewModel.rentalAmount.toStringAsFixed(2)}',
+            '\$${amount.toStringAsFixed(2)}',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          Text(
-            viewModel.paymentStatus,
-            style: TextStyle(color: Colors.grey.shade600),
-          ),
+          Text(status, style: TextStyle(color: Colors.grey.shade600)),
         ],
       ),
     );
+  }
+
+  int _rentalDays(String from, String to) {
+    final start = DateTime.parse(from);
+    final end = DateTime.parse(to);
+    return end.difference(start).inDays;
   }
 }
 

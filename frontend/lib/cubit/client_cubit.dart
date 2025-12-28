@@ -9,15 +9,21 @@ import '../databases/repo/Client/client_abstract.dart';
 //   ClientState({this.isLoading = false, this.error});
 // }
 
-class ClientCubit extends Cubit<List<Map<String, dynamic>>> {
-  ClientCubit() : super(<Map<String, dynamic>>[]);
+class ClientsState {
+  final List<Map<String, dynamic>> clients;
+  final bool isLoading;
+
+  ClientsState(this.clients, this.isLoading);
+}
+
+class ClientCubit extends Cubit<ClientsState> {
+  ClientCubit() : super(ClientsState(<Map<String, dynamic>>[], false));
 
   final AbstractClientRepo _clientRepo = AbstractClientRepo.getInstance();
 
   Future<int> addClient(Map<String, dynamic> client) async {
-    print('inside addClient in client cubit');
+    emit(ClientsState(state.clients, true));
     final clients = await _clientRepo.getAllClients();
-    print('got all clients');
     for (int i = 0; i < clients.length; i++) {
       if (client['phone'] == clients[i]['phone']) {
         print('client already exists');
@@ -28,17 +34,20 @@ class ClientCubit extends Cubit<List<Map<String, dynamic>>> {
     final clientID = await _clientRepo.insertClient(client);
     print(('new client has id: $clientID'));
     client = {'id': clientID, ...client};
-    emit([client, ...state]);
+    emit(ClientsState([client, ...state.clients], false));
     print('emitted state successfully');
     return clientID;
   }
 
   void getClients() async {
-    emit(await _clientRepo.getAllClients());
+    emit(ClientsState(state.clients, true));
+    final clients = await _clientRepo.getAllClients();
+    emit(ClientsState(clients, false));
     print('got all clients successfully');
   }
 
   void clientsSearch(String searchText) async {
+    emit(ClientsState(state.clients, true));
     final clients = await _clientRepo.getAllClients();
     List<Map<String, dynamic>> filteredClients = [];
     for (int i = 0; i < clients.length; i++) {
@@ -47,7 +56,7 @@ class ClientCubit extends Cubit<List<Map<String, dynamic>>> {
         filteredClients.add(clients[i]);
       }
     }
-    emit(filteredClients);
+    emit(ClientsState(filteredClients, false));
     print('clients searched containing $searchText');
   }
 }

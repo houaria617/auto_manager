@@ -1,4 +1,3 @@
-import 'package:auto_manager/cubit/dashboard_cubit.dart';
 import 'package:auto_manager/cubit/vehicle_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

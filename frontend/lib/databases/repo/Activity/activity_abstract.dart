@@ -6,7 +6,7 @@
 import 'activity_db.dart';
 
 abstract class AbstractActivityRepo {
-  Future<List<Map<String, dynamic>>> getActivities();
+  Future<List<Map<String, dynamic>>> getRecentActivities();
   Future<bool> insertActivity(Map<String, dynamic> activity);
 
   static AbstractActivityRepo? _carInstance;

@@ -21,8 +21,8 @@ class _DashboardState extends State<Dashboard> {
       cubit.countOngoingRentals(); // these function calls
       cubit.countAvailableCars(); // trigger cubit functions to
       cubit.countDueToday(); // fetch data and emit new states.
-      cubit.addActivity({'description': '', 'date': DateTime.now()});
-      print('#' * 1000);
+      cubit.getRecentActivities();
+      print('Executed Init State Of Dashboard Successfully');
     });
   }
 
@@ -287,6 +287,9 @@ class _DashboardState extends State<Dashboard> {
                 Expanded(
                   child: BlocBuilder<DashboardCubit, DashboardStatistics>(
                     builder: (context, state) {
+                      if (state.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                       if (state.recentActivities.isEmpty) {
                         return const Center(
                           child: Text('No recent activities'),
@@ -480,58 +483,4 @@ class _DashboardState extends State<Dashboard> {
       bottomNavigationBar: const NavBar(),
     );
   }
-
-  // Widget _buildStatCard({
-  //   required IconData icon,
-  //   required String title,
-  //   required String value,
-  //   required Gradient gradient,
-  // }) {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-  //     decoration: BoxDecoration(
-  //       gradient: gradient,
-  //       borderRadius: BorderRadius.circular(14),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.08),
-  //           blurRadius: 8,
-  //           offset: const Offset(0, 3),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           padding: const EdgeInsets.all(8),
-  //           decoration: BoxDecoration(
-  //             color: Colors.white.withOpacity(0.2),
-  //             borderRadius: BorderRadius.circular(10),
-  //           ),
-  //           child: Icon(icon, size: 22, color: Colors.white),
-  //         ),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: Text(
-  //             title,
-  //             style: const TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 14,
-  //               fontWeight: FontWeight.w600,
-  //             ),
-  //           ),
-  //         ),
-  //         // BLOC BUILDER
-  //         Text(
-  //           value,
-  //           style: const TextStyle(
-  //             fontSize: 24,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.white,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

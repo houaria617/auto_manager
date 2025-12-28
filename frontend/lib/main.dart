@@ -21,15 +21,16 @@ class MainApp extends StatelessWidget {
         BlocProvider<DashboardCubit>(create: (_) => DashboardCubit()),
         BlocProvider<ProfileCubit>(create: (context) => ProfileCubit()),
         BlocProvider<ClientCubit>(create: (context) => ClientCubit()),
+        BlocProvider<VehicleCubit>(
+          create: (context) =>
+              VehicleCubit(dashboardCubit: context.read<DashboardCubit>()),
+        ),
         BlocProvider<RentalCubit>(
           create: (context) => RentalCubit(
             dashboardCubit: context.read<DashboardCubit>(),
             clientCubit: context.read<ClientCubit>(),
+            vehicleCubit: context.read<VehicleCubit>(),
           ),
-        ),
-        BlocProvider<VehicleCubit>(
-          create: (context) =>
-              VehicleCubit(dashboardCubit: context.read<DashboardCubit>()),
         ),
       ],
       child: MaterialApp(

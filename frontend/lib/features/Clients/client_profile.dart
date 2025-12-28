@@ -40,10 +40,13 @@ class _ClientProfileState extends State<ClientProfile> {
           },
         ),
       ),
-      body: BlocBuilder<ProfileCubit, List<Map<String, dynamic>>>(
+      body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          if (state.isEmpty) {
-            return const Center(child: Text('No recent activities'));
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state.rentals.isEmpty) {
+            return const Center(child: Text('No rent history'));
           }
           return Container(
             padding: const EdgeInsets.all(16),
@@ -154,33 +157,16 @@ class _ClientProfileState extends State<ClientProfile> {
                                   width: 1.5,
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    widget.client['state']
-                                        .toString()
-                                        .toUpperCase(),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      letterSpacing: 0.5,
-                                      color: widget.client['state'] == 'active'
-                                          ? const Color(0xFF16A34A)
-                                          : const Color(0xFF475569),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '3 Days',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: widget.client['state'] == 'active'
-                                          ? const Color(0xFF15803D)
-                                          : const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                widget.client['state'].toString().toUpperCase(),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  letterSpacing: 0.5,
+                                  color: widget.client['state'] == 'active'
+                                      ? const Color(0xFF16A34A)
+                                      : const Color(0xFF475569),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -217,7 +203,7 @@ class _ClientProfileState extends State<ClientProfile> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${state.length}',
+                                    '${state.rentals.length}',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -248,7 +234,7 @@ class _ClientProfileState extends State<ClientProfile> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: state.length,
+                    itemCount: state.rentals.length,
                     itemBuilder: (context, index) {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -299,7 +285,8 @@ class _ClientProfileState extends State<ClientProfile> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          state[index]['name'].toUpperCase(),
+                                          state.rentals[index]['name']
+                                              .toUpperCase(),
                                           style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,
@@ -308,7 +295,7 @@ class _ClientProfileState extends State<ClientProfile> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'from ${DateTime.parse(state[index]['date_from']).toString().split(' ')[0]} to ${DateTime.parse(state[index]['date_to']).toString().split(' ')[0]}',
+                                          'from ${DateTime.parse(state.rentals[index]['date_from']).toString().split(' ')[0]} to ${DateTime.parse(state.rentals[index]['date_to']).toString().split(' ')[0]}',
                                           style: const TextStyle(
                                             fontSize: 14,
                                             color: Color(0xFF64748B),
@@ -317,7 +304,7 @@ class _ClientProfileState extends State<ClientProfile> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Total is: \$${state[index]['total_amount']}',
+                                          'Total is: \$${state.rentals[index]['total_amount']}',
                                           style: const TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
@@ -335,30 +322,36 @@ class _ClientProfileState extends State<ClientProfile> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
                                       color:
-                                          state[index]['state'] == 'completed'
+                                          state.rentals[index]['state'] ==
+                                              'completed'
                                           ? const Color(0xFFF1F5F9)
-                                          : state[index]['state'] == 'ongoing'
+                                          : state.rentals[index]['state'] ==
+                                                'ongoing'
                                           ? const Color(0xFFDCFCE7)
                                           : const Color(0xFFFEE2E2),
                                       border: Border.all(
                                         color:
-                                            state[index]['state'] == 'completed'
+                                            state.rentals[index]['state'] ==
+                                                'completed'
                                             ? const Color(0xFF94A3B8)
-                                            : state[index]['state'] == 'ongoing'
+                                            : state.rentals[index]['state'] ==
+                                                  'ongoing'
                                             ? const Color(0xFF16A34A)
                                             : const Color(0xFFDC2626),
                                         width: 1.5,
                                       ),
                                     ),
                                     child: Text(
-                                      state[index]['state'],
+                                      state.rentals[index]['state'],
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
                                         color:
-                                            state[index]['state'] == 'completed'
+                                            state.rentals[index]['state'] ==
+                                                'completed'
                                             ? const Color(0xFF475569)
-                                            : state[index]['state'] == 'ongoing'
+                                            : state.rentals[index]['state'] ==
+                                                  'ongoing'
                                             ? const Color(0xFF16A34A)
                                             : const Color(0xFFDC2626),
                                       ),

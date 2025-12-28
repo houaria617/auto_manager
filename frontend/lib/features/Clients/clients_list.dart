@@ -35,9 +35,12 @@ class _ClientsListState extends State<ClientsList> {
         ),
         iconTheme: const IconThemeData(color: Color(0xFF2D3748)),
       ),
-      body: BlocBuilder<ClientCubit, List<Map<String, dynamic>>>(
+      body: BlocBuilder<ClientCubit, ClientsState>(
         builder: (context, state) {
-          if (state.isEmpty) {
+          if (state.isLoading) {
+            return const CircularProgressIndicator();
+          }
+          if (state.clients.isEmpty) {
             return const Center(child: Text('No Client Found'));
           }
           return Center(
@@ -114,7 +117,7 @@ class _ClientsListState extends State<ClientsList> {
                         const SizedBox(height: 20),
                         Expanded(
                           child: ListView.builder(
-                            itemCount: state.length,
+                            itemCount: state.clients.length,
                             itemBuilder: (context, i) {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
@@ -141,8 +144,9 @@ class _ClientsListState extends State<ClientsList> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                              ClientProfile(client: state[i]),
+                                          builder: (context) => ClientProfile(
+                                            client: state.clients[i],
+                                          ),
                                         ),
                                       );
                                     },
@@ -195,7 +199,7 @@ class _ClientsListState extends State<ClientsList> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  state[i]['full_name'],
+                                                  state.clients[i]['full_name'],
                                                   style: const TextStyle(
                                                     fontSize: 17,
                                                     fontWeight: FontWeight.w600,
@@ -204,7 +208,7 @@ class _ClientsListState extends State<ClientsList> {
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  state[i]['phone'],
+                                                  state.clients[i]['phone'],
                                                   style: const TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w400,
@@ -220,10 +224,6 @@ class _ClientsListState extends State<ClientsList> {
                                               vertical: 6,
                                             ),
                                             decoration: BoxDecoration(
-                                              color:
-                                                  state[i]['state'] == 'active'
-                                                  ? const Color(0xFFDCFCE7)
-                                                  : const Color(0xFFF1F5F9),
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                             ),
@@ -233,7 +233,7 @@ class _ClientsListState extends State<ClientsList> {
                                                 CircleAvatar(
                                                   radius: 4,
                                                   backgroundColor:
-                                                      state[i]['state'] ==
+                                                      state.clients[i]['state'] ==
                                                           'active'
                                                       ? const Color(0xFF16A34A)
                                                       : const Color(0xFF64748B),

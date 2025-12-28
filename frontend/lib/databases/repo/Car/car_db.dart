@@ -9,14 +9,13 @@ import '../../dbhelper.dart';
 @override
 class CarDB extends AbstractCarRepo {
   @override
-  @override
   Future<int> countAvailableCars() async {
     final database = await DBHelper.getDatabase();
     final results = await database.rawQuery(
       '''SELECT COUNT(*) as count FROM cars WHERE state=?''',
       ['available'],
     );
-    return results.first['count'] as int;
+    return Sqflite.firstIntValue(results) ?? 0;
   }
 
   @override
@@ -45,6 +44,18 @@ class CarDB extends AbstractCarRepo {
       [id],
     );
     return result.isNotEmpty ? result.first : null;
+  }
+
+  @override
+  Future<bool> updateCarState(int carId, String newState) async {
+    final db = await DBHelper.getDatabase();
+    await db.update(
+      'cars',
+      {'state': newState},
+      where: 'id = ?',
+      whereArgs: [carId],
+    );
+    return true;
   }
 
   @override
