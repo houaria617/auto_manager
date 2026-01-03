@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import '../databases/repo/Client/client_abstract.dart';
+import '../../../databases/repo/Client/client_abstract.dart';
 
 // // Proper state class
 // class ClientState {

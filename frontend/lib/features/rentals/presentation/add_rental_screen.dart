@@ -1,6 +1,6 @@
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
-import 'package:auto_manager/cubit/client_cubit.dart';
+import 'package:auto_manager/logic/cubits/clients/client_cubit.dart';
 import '../../../databases/repo/Car/car_abstract.dart';
 import '../../../databases/repo/Client/client_abstract.dart';
 import 'package:flutter/material.dart';
@@ -389,7 +389,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
-                              value: _selectedClientId,
+                              initialValue: _selectedClientId,
                               hint: Text(
                                 AppLocalizations.of(context)!.selectClient,
                               ),
@@ -428,7 +428,7 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
-                              value: _selectedCarId,
+                              initialValue: _selectedCarId,
                               hint: Text(
                                 AppLocalizations.of(context)!.selectCar,
                               ),

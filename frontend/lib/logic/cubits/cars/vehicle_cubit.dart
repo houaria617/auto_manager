@@ -1,6 +1,6 @@
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:bloc/bloc.dart';
-import '../../../cubit/dashboard_cubit.dart';
+import '../dashboard/dashboard_cubit.dart';
 
 // Proper state class
 class VehicleState {

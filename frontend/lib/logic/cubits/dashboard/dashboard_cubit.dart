@@ -1,8 +1,8 @@
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
 import 'package:bloc/bloc.dart';
-import '../databases/repo/Rental/rental_abstract.dart';
-import '../databases/repo/Car/car_abstract.dart';
-import '../databases/repo/Activity/activity_abstract.dart';
+import '../../../databases/repo/Rental/rental_abstract.dart';
+import '../../../databases/repo/Car/car_abstract.dart';
+import '../../../databases/repo/Activity/activity_abstract.dart';
 
 class DashboardStatistics {
   final int ongoingRentals;

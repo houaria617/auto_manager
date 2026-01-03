@@ -1,4 +1,4 @@
-import 'package:auto_manager/cubit/dashboard_cubit.dart';
+import 'package:auto_manager/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
 import 'package:auto_manager/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';

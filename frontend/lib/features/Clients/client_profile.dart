@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Cubits
-import 'package:auto_manager/cubit/profile_cubit.dart';
+import 'package:auto_manager/logic/cubits/clients/profile_cubit.dart';
 
 // Localization
 import 'package:auto_manager/l10n/app_localizations.dart';

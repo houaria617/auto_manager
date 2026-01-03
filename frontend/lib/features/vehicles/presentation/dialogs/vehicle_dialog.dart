@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_manager/logic/cubits/cars/cars_cubit.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
-import 'package:intl/intl.dart'; // Add intl package for date formatting if you haven't
+// Add intl package for date formatting if you haven't
 
 Future<Map<String, dynamic>?> showVehicleDialog(
   BuildContext context, {
@@ -43,7 +43,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(
   Map<String, dynamic>? finalData;
 
   // Helper for Date Picker
-  Future<void> _selectDate(
+  Future<void> selectDate(
     BuildContext ctx,
     TextEditingController controller,
   ) async {
@@ -165,8 +165,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(
                   TextField(
                     controller: nextMaintenanceController,
                     readOnly: true, // Prevent manual typing
-                    onTap: () =>
-                        _selectDate(context, nextMaintenanceController),
+                    onTap: () => selectDate(context, nextMaintenanceController),
                     decoration: InputDecoration(
                       labelText: l10n.nextMaintenanceOptional,
                       suffixIcon: const Icon(
@@ -184,7 +183,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(
 
                   // Status Dropdown
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     items: [
                       DropdownMenuItem(
                         value: 'available',
@@ -217,7 +216,7 @@ Future<Map<String, dynamic>?> showVehicleDialog(
                     TextField(
                       controller: returnDateController,
                       readOnly: true,
-                      onTap: () => _selectDate(context, returnDateController),
+                      onTap: () => selectDate(context, returnDateController),
                       decoration: InputDecoration(
                         labelText: status == 'rented'
                             ? l10n.returnDate
