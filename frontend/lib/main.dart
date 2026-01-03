@@ -18,9 +18,9 @@ import 'package:auto_manager/features/Dashboard/dashboard.dart';
 import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/cars/cars_cubit.dart';
-import 'package:auto_manager/cubit/client_cubit.dart';
-import 'package:auto_manager/cubit/dashboard_cubit.dart';
-import 'package:auto_manager/cubit/profile_cubit.dart';
+import 'package:auto_manager/logic/cubits/clients/client_cubit.dart';
+import 'package:auto_manager/logic/cubits/dashboard/dashboard_cubit.dart';
+import 'package:auto_manager/logic/cubits/clients/profile_cubit.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
