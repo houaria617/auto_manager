@@ -6,6 +6,17 @@ import 'payment_abstract.dart';
 
 class PaymentDB extends AbstractPaymentRepo {
   @override
+  Future<List<Map<String, dynamic>>> getData() async {
+    final database = await DBHelper.getDatabase();
+    return database.rawQuery('SELECT * FROM payment');
+  }
+
+  @override
+  Future<void> insertData(Map<String, dynamic> data) async {
+    await addPayment(data);
+  }
+
+  @override
   Future<List<Map>> getPaymentsForRental(int rentalId) async {
     final database = await DBHelper.getDatabase();
     return database.rawQuery(
@@ -21,9 +32,13 @@ class PaymentDB extends AbstractPaymentRepo {
   @override
   Future<bool> addPayment(Map<String, dynamic> payment) async {
     final database = await DBHelper.getDatabase();
+    final filtered = Map<String, dynamic>.from(payment)
+      ..removeWhere(
+        (key, value) => !['rental_id', 'date', 'paid_amount'].contains(key),
+      );
     await database.insert(
       "payment",
-      payment,
+      filtered,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     return true;

@@ -22,9 +22,21 @@ class RentalDB extends AbstractRentalRepo {
   @override
   Future<bool> insertRental(Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
+    final filtered = Map<String, dynamic>.from(rental)
+      ..removeWhere(
+        (key, value) => ![
+          'client_id',
+          'car_id',
+          'date_from',
+          'date_to',
+          'total_amount',
+          'payment_state',
+          'state',
+        ].contains(key),
+      );
     await database.insert(
       "rental",
-      rental,
+      filtered,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     return true;
@@ -33,9 +45,21 @@ class RentalDB extends AbstractRentalRepo {
   @override
   Future<bool> updateRental(int index, Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
+    final filtered = Map<String, dynamic>.from(rental)
+      ..removeWhere(
+        (key, value) => ![
+          'client_id',
+          'car_id',
+          'date_from',
+          'date_to',
+          'total_amount',
+          'payment_state',
+          'state',
+        ].contains(key),
+      );
     await database.update(
       "rental",
-      rental,
+      filtered,
       where: "id = ?",
       whereArgs: [index],
     );

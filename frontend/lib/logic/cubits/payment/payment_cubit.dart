@@ -1,13 +1,13 @@
-// lib/features/payments/business_logic/payment_cubit.dart
-
 import 'package:auto_manager/databases/repo/payment/payment_abstract.dart';
+import 'package:auto_manager/databases/repo/payments/payment_hybrid_repo.dart';
 import 'package:auto_manager/databases/repo/rentals/rental_repository.dart';
+import 'package:auto_manager/databases/repo/rentals/rental_hybrid_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'payment_state.dart';
 
 class PaymentCubit extends Cubit<PaymentState> {
-  final AbstractPaymentRepo _paymentRepo = AbstractPaymentRepo.getInstance();
-  final AbstractRentalRepo _rentalRepo = AbstractRentalRepo.getInstance();
+  final AbstractPaymentRepo _paymentRepo = PaymentHybridRepo();
+  final AbstractRentalRepo _rentalRepo = RentalHybridRepo();
 
   PaymentCubit() : super(PaymentInitial());
 

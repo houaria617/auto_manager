@@ -1,12 +1,10 @@
-// lib/features/rentals/business_logic/rental_cubit.dart
-
 import 'package:auto_manager/databases/repo/rentals/rental_repository.dart';
+import 'package:auto_manager/databases/repo/rentals/rental_hybrid_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'rental_state.dart';
 
 class RentalCubit extends Cubit<RentalState> {
-  // Get the instance of the repository
-  final AbstractRentalRepo _repo = AbstractRentalRepo.getInstance();
+  final AbstractRentalRepo _repo = RentalHybridRepo();
 
   RentalCubit() : super(RentalInitial());
 

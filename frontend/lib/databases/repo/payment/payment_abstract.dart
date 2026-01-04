@@ -3,6 +3,8 @@
 import 'payment_db.dart';
 
 abstract class AbstractPaymentRepo {
+  Future<List<Map<String, dynamic>>> getData();
+  Future<void> insertData(Map<String, dynamic> data);
   // We need to fetch payments specific to a rental ID
   Future<List<Map>> getPaymentsForRental(int rentalId);
 
