@@ -198,10 +198,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         controller: _usernameController,
                                         enabled: !isLoading,
                                         decoration: const InputDecoration(
-                                          hintText: 'Enter your username',
+                                          hintText: 'Enter your email',
                                         ),
                                         validator: (value) {
-                                          if (value == null || value.isEmpty) {
+                                          if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.') ) {
                                             return 'Please enter your username';
                                           }
                                           if (value.length < 4) {

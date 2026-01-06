@@ -14,27 +14,41 @@ class AuthDbRepo implements AuthAbstractRepo {
     required String password,
   }) async {
     try {
-      // Simple validation - just check if fields are not empty
+      // Validate that fields are not empty
       if (username.isEmpty || password.isEmpty) {
+        print('❌ Email and password cannot be empty');
         return null;
       }
 
-      // In a real app, you'd check credentials against a backend API
-      // For now, we just accept any non-empty credentials
+      // In offline mode, we cannot validate credentials without a password database
+      // We can only check if the provided email matches a previously stored email
+      // If no user is stored locally, we cannot authenticate in offline mode
+      
+      // Try to get stored user data
+      final storedUserId = await _prefsManager.getUserId();
+      final storedUsername = await _prefsManager.getUsername();
+      final storedUserData = await _prefsManager.getFullUserData();
 
-      // Generate a simple user ID (you can use timestamp or random)
-      final userId = DateTime.now().millisecondsSinceEpoch;
+      // If no user is stored, we cannot authenticate in offline mode
+      if (storedUserId == null || storedUsername == null) {
+        print('❌ No stored user found. Cannot login in offline mode without previous login.');
+        print('💡 Please connect to the internet and login to your account first.');
+        return null;
+      }
 
-      // Create user model
-      final user = UserModel(id: userId, username: username);
+      // Check if the email matches the stored user (case-insensitive)
+      if (storedUserData?.email != null && 
+          storedUserData!.email!.toLowerCase() != username.toLowerCase()) {
+        print('❌ Invalid email or password');
+        return null;
+      }
 
-      // Save to SharedPreferences
-      await _prefsManager.saveUserData(
-        userId: user.id,
-        username: user.username,
-      );
-
-      return user;
+      // Alternative: Allow login with stored username for offline mode
+      // This assumes the username/email stored matches what they're trying to login with
+      print('⚠️  Offline mode: Limited verification (no password check available)');
+      print('✅ Offline login successful using stored user data');
+      
+      return storedUserData;
     } catch (e) {
       print('Login error: $e');
       return null;

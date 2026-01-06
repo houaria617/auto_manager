@@ -2,12 +2,11 @@ import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:auto_manager/features/settings/agency_info_screen.dart';
 // Localization
 import 'package:auto_manager/l10n/app_localizations.dart';
 
 // Cubits
-
 import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
 
 // Screens
@@ -17,24 +16,23 @@ import 'package:auto_manager/features/auth/presentation/login_screen.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  // --- 1. Helper for Coming Soon ---
-  void _navigateToComingSoon(BuildContext context, String title) {
+  // --- Helper for navigating to Agency Info ---
+  void _navigateToAgencyInfo(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ComingSoonScreen(title: title)),
+      MaterialPageRoute(
+        builder: (context) => const AgencyInfoScreen(),
+      ),
     );
   }
 
-  // --- 2. Helper for Logout Logic (Merged from First Version) ---
+  // --- Helper for Logout Logic ---
   void _handleLogout(BuildContext context) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.logout),
-        content: Text(
-          AppLocalizations.of(context)!.logoutConfirmation,
-        ), // Ensure you add this key to your arb files, or hardcode string if needed
-        // fallback: const Text('Are you sure you want to logout?'),
+        content: Text(AppLocalizations.of(context)!.logoutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -56,7 +54,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // --- 3. Helper for Language Dialog (Merged from Second Version) ---
+  // --- Helper for Language Dialog ---
   void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -116,11 +114,9 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ),
-      // --- 4. BlocListener for Logout Navigation (Merged from First Version) ---
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthUnauthenticated) {
-            // Navigate to Login screen after logout, removing all previous routes
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -138,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.business_center,
                 title: l10n.agencyInfo,
                 subtitle: l10n.agencyInfoSubtitle,
-                onTap: () => _navigateToComingSoon(context, l10n.agencyInfo),
+                onTap: () => _navigateToAgencyInfo(context),
               ),
 
               // Language Tile
@@ -277,7 +273,6 @@ class SettingsScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: ElevatedButton.icon(
-        // Use the handler that includes the Dialog and AuthCubit logic
         onPressed: () => _handleLogout(context),
         icon: const Icon(Icons.logout),
         label: Text(l10n.logout),
@@ -294,6 +289,7 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+// Optional Coming Soon Screen
 class ComingSoonScreen extends StatelessWidget {
   final String title;
   const ComingSoonScreen({super.key, required this.title});

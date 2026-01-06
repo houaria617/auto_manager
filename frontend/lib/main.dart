@@ -58,7 +58,7 @@ class MainApp extends StatelessWidget {
 
         // --- 2. Auth Provider (Source 1) ---
         BlocProvider<AuthCubit>(
-          create: (_) => AuthCubit(AuthDbRepo())..checkAuthStatus(),
+          create: (_) => AuthCubit()..checkAuthStatus(),
         ),
       ],
       // Listen to Locale changes
