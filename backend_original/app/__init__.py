@@ -9,6 +9,8 @@ from firebase_admin import credentials, firestore
 def create_app():
     app = Flask(__name__)
     CORS(app)
+    # Allow both with/without trailing slash without redirects
+    app.url_map.strict_slashes = False
     
     # Load environment variables
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-default-secret-key-change-in-production')

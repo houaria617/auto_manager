@@ -2,16 +2,16 @@
 /// Location: lib/core/config/api_config.dart
 class ApiConfig {
   // Change this based on where you're testing:
-  
+
   // For Android Emulator:
-  static const String baseUrl = 'http://172.20.10.3:5000';
-  
+  static const String baseUrl = 'http://10.239.151.246:5000';
+
   // For iOS Simulator:
   // static const String baseUrl = 'http://127.0.0.1:5000';
-  
+
   // For Real Device (replace with your computer's IP):
   // static const String baseUrl = 'http://192.168.1.100:5000';
-  
+
   // Auth endpoints
   static const String authBase = '$baseUrl/auth';
   static const String loginUrl = '$authBase/login';
@@ -21,4 +21,5 @@ class ApiConfig {
   static const String verifyTokenUrl = '$authBase/verify-token';
   static const String updateProfileUrl = '$authBase/update-profile';
   static const String changePasswordUrl = '$authBase/change-password';
+  static const String clientsUrl = '$baseUrl/clients'; // Add the trailing slash
 }

@@ -11,7 +11,7 @@ import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart
 /// Tries backend first, falls back to local SharedPreferences
 /// Location: lib/databases/repo/auth/auth_hybrid_repo.dart
 class AuthHybridRepo implements AuthAbstractRepo {
-  final String baseUrl = '10.239.151.246'; // your local ip or localhost
+  final String baseUrl = ApiConfig.baseUrl; // your local ip or localhost
   final AuthDbRepo _localRepo = AuthDbRepo();
   final SharedPrefsManager _prefsManager = SharedPrefsManager();
 

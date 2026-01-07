@@ -3,7 +3,9 @@
 // ABSTRACT REPOSITORY DESIGN PATTERN.
 
 // import 'client_dummy.dart';
-import 'client_db.dart';
+import 'package:auto_manager/databases/repo/Client/client_hybrid_repo.dart';
+
+// import 'client_db.dart';
 
 abstract class AbstractClientRepo {
   Future<List<Map<String, dynamic>>> getAllClients();
@@ -15,8 +17,8 @@ abstract class AbstractClientRepo {
   static AbstractClientRepo? _clientInstance;
 
   static AbstractClientRepo getInstance() {
-    // later, ClientDB will replace ClientDummy here:
-    _clientInstance ??= ClientDB();
+    // Change this to use the Hybrid version
+    _clientInstance ??= ClientHybridRepo();
     return _clientInstance!;
   }
 }

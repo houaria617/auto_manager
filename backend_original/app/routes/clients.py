@@ -2,42 +2,56 @@ from flask import Blueprint, request, jsonify
 from firebase_admin import firestore
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from typing import cast
-from werkzeug.security import generate_password_hash
+
+from app import get_db
 
 client_bp = Blueprint('client_bp', __name__)
 
 @client_bp.route('/', methods=['POST'])
 def create_client():
-    db = firestore.client() # This will point to Emulator during tests
     data = request.json
-    if data is None or not isinstance(data, dict):
-        return jsonify({"error": "Invalid or missing JSON data"}), 400
+    if not data:
+        return jsonify({"error": "No data received"}), 400
 
-    required = ["full_name", "phone", "password"]
-    for field in required:
-        if field not in data:
-            return jsonify({"error": f"{field} is required"}), 400
+    db = get_db()
+    
+    # Use .get() to accept both 'full_name' (Flutter) and 'name' (Firebase)
+    client_name = data.get('full_name') or data.get('name')
+    phone = data.get('phone')
+    agency_id = data.get('agency_id')
 
-    # Hash the password before storing
-    data["password"] = generate_password_hash(data["password"])
-    # Logic to save to 'clients' collection
-    doc_ref = db.collection('clients').document()
-    doc_ref.set(data)
+    if not phone:
+        return jsonify({"error": "phone is required"}), 400
+    if not client_name:
+        return jsonify({"error": "full_name is required"}), 400
 
-    return jsonify({"id": doc_ref.id}), 201
+    # Add to Firestore - this will create the 'clients' collection automatically
+    _, doc_ref = db.collection('clients').add({
+        'full_name': client_name,
+        'phone': phone,
+        'agency_id': agency_id,
+    })
+
+    return jsonify({"id": doc_ref.id, "message": "Success"}), 201
 
 @client_bp.route('/', methods=['GET'])
 def get_all_clients():
     db = firestore.client()
-    # Fetch all documents in the 'clients' collection
-    docs = db.collection('clients').stream()
+    agency_id = request.args.get('agency_id')
+    query = db.collection('clients')
+    if agency_id:
+        query = query.where('agency_id', '==', agency_id)
+    # Fetch all documents in the 'clients' collection (optionally filtered)
+    docs = query.stream()
     
     clients = []
     for doc in docs:
         client_data = doc.to_dict() or {}
         safe_client = {
+            "id": doc.id,
             "full_name": client_data.get("full_name"),
             "phone": client_data.get("phone"),
+            "agency_id": client_data.get("agency_id"),
         }
         clients.append(safe_client)
         
@@ -56,7 +70,9 @@ def get_client(client_id):
     # Now Pylance knows .to_dict() and .id exist
     client_data = doc.to_dict() or {}
     safe_client = {
+        "id": doc.id,
         "full_name": client_data.get("full_name"),
         "phone": client_data.get("phone"),
+        "agency_id": client_data.get("agency_id"),
     }
     return jsonify(safe_client), 200

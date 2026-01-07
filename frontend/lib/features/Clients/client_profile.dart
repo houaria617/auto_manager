@@ -1,3 +1,4 @@
+import 'package:auto_manager/features/rentals/presentation/rental_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -300,7 +301,18 @@ class _ClientProfileState extends State<ClientProfile> {
                                 color: Colors.transparent,
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(16),
-                                  onTap: () {},
+                                  onTap: () {
+                                    // route to rental details
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            RentalDetailsScreen(
+                                              rental: state[index],
+                                            ),
+                                      ),
+                                    );
+                                  },
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Row(
