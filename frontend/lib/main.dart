@@ -1,6 +1,5 @@
 import 'dart:io'; // For Platform check
 
-import 'package:auto_manager/databases/repo/auth/auth_db_repo.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -57,9 +56,7 @@ class MainApp extends StatelessWidget {
         BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),
 
         // --- 2. Auth Provider (Source 1) ---
-        BlocProvider<AuthCubit>(
-          create: (_) => AuthCubit()..checkAuthStatus(),
-        ),
+        BlocProvider<AuthCubit>(create: (_) => AuthCubit()..checkAuthStatus()),
       ],
       // Listen to Locale changes
       child: BlocBuilder<LocaleCubit, Locale>(

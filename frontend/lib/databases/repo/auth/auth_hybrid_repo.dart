@@ -11,161 +11,145 @@ import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart
 /// Tries backend first, falls back to local SharedPreferences
 /// Location: lib/databases/repo/auth/auth_hybrid_repo.dart
 class AuthHybridRepo implements AuthAbstractRepo {
-  final String baseUrl = '172.20.10.3'; // your local ip or localhost
+  final String baseUrl = '10.239.151.246'; // your local ip or localhost
   final AuthDbRepo _localRepo = AuthDbRepo();
   final SharedPrefsManager _prefsManager = SharedPrefsManager();
 
-/// Change user password/////////////////////////////////////////////////////////////////////////
-Future<Map<String, dynamic>> changePassword({
-  required String oldPassword,
-  required String newPassword,
-}) async {
-  // Try online first
-  if (await ConnectivityService.isOnline()) {
-    try {
-      print('🌐 Attempting to change password online...');
-      
-      final token = await _prefsManager.getAuthToken();
-      
-      if (token == null) {
-        return {
-          'success': false,
-          'message': 'No authentication token found',
-        };
-      }
+  /// Change user password/////////////////////////////////////////////////////////////////////////
+  Future<Map<String, dynamic>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    // Try online first
+    if (await ConnectivityService.isOnline()) {
+      try {
+        print('🌐 Attempting to change password online...');
 
-      final response = await http.put(
-        Uri.parse(ApiConfig.changePasswordUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'old_password': oldPassword,
-          'new_password': newPassword,
-        }),
-      );
+        final token = await _prefsManager.getAuthToken();
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+        if (token == null) {
+          return {'success': false, 'message': 'No authentication token found'};
+        }
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        print('✅ Password changed successfully');
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Password changed successfully',
-        };
-      } else if (response.statusCode == 401) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        return {
-          'success': false,
-          'message': data['error'] ?? 'Old password is incorrect',
-        };
-      } else {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        return {
-          'success': false,
-          'message': data['error'] ?? 'Failed to change password',
-        };
-      }
-    } catch (e) {
-      print('❌ Online password change error: $e');
-      return {
-        'success': false,
-        'message': 'Network error: ${e.toString()}',
-      };
-    }
-  }
-
-  // Offline mode - cannot change password
-  return {
-    'success': false,
-    'message': 'No internet connection. Please connect to the internet to change your password.',
-  };
-}
-/// Update user profile (name and phone)/////////////////////////////////////////////////////////////////////////
-Future<Map<String, dynamic>> updateProfile({
-  String? name,
-  String? phone,
-}) async {
-  // Try online update first
-  if (await ConnectivityService.isOnline()) {
-    try {
-      print('🌐 Attempting online profile update...');
-      
-      final token = await _prefsManager.getAuthToken();
-      
-      if (token == null) {
-        return {
-          'success': false,
-          'message': 'No authentication token found',
-        };
-      }
-
-      final body = <String, dynamic>{};
-      if (name != null) body['name'] = name;
-      if (phone != null) body['phone'] = phone;
-
-      final response = await http.put(
-        Uri.parse(ApiConfig.updateProfileUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
-
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        
-        // Extract updated user data
-        final userData = data['user'] as Map<String, dynamic>;
-        
-        // Create user model from backend response
-        final user = UserModel.fromBackendJson(userData);
-        
-        // Update SharedPreferences
-        await _prefsManager.saveUserData(
-          userId: user.id,
-          username: user.username,
-          token: token,
-          fullUser: user,
+        final response = await http.put(
+          Uri.parse(ApiConfig.changePasswordUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'old_password': oldPassword,
+            'new_password': newPassword,
+          }),
         );
-        
-        print('✅ Online profile update successful');
-        return {
-          'success': true,
-          'message': data['message'],
-          'user': user,
-        };
-      } else {
-        print('❌ Backend update failed: ${response.body}');
-        return {
-          'success': false,
-          'message': 'Update failed',
-        };
+
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          print('✅ Password changed successfully');
+          return {
+            'success': true,
+            'message': data['message'] ?? 'Password changed successfully',
+          };
+        } else if (response.statusCode == 401) {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          return {
+            'success': false,
+            'message': data['error'] ?? 'Old password is incorrect',
+          };
+        } else {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          return {
+            'success': false,
+            'message': data['error'] ?? 'Failed to change password',
+          };
+        }
+      } catch (e) {
+        print('❌ Online password change error: $e');
+        return {'success': false, 'message': 'Network error: ${e.toString()}'};
       }
-    } catch (e) {
-      print('❌ Online update error: $e');
-      return {
-        'success': false,
-        'message': 'Network error: ${e.toString()}',
-      };
     }
+
+    // Offline mode - cannot change password
+    return {
+      'success': false,
+      'message':
+          'No internet connection. Please connect to the internet to change your password.',
+    };
   }
 
-  // Offline: Can't update on backend, but can update local data
-  print('📱 Offline - cannot update profile on server');
-  return {
-    'success': false,
-    'message': 'No internet connection. Please try again when online.',
-  };
-}
-/////////////////////////////////////////////////////////////////////////////////////////
+  /// Update user profile (name and phone)/////////////////////////////////////////////////////////////////////////
+  Future<Map<String, dynamic>> updateProfile({
+    String? name,
+    String? phone,
+  }) async {
+    // Try online update first
+    if (await ConnectivityService.isOnline()) {
+      try {
+        print('🌐 Attempting online profile update...');
+
+        final token = await _prefsManager.getAuthToken();
+
+        if (token == null) {
+          return {'success': false, 'message': 'No authentication token found'};
+        }
+
+        final body = <String, dynamic>{};
+        if (name != null) body['name'] = name;
+        if (phone != null) body['phone'] = phone;
+
+        final response = await http.put(
+          Uri.parse(ApiConfig.updateProfileUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode(body),
+        );
+
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+          // Extract updated user data
+          final userData = data['user'] as Map<String, dynamic>;
+
+          // Create user model from backend response
+          final user = UserModel.fromBackendJson(userData);
+
+          // Update SharedPreferences
+          await _prefsManager.saveUserData(
+            userId: user.id,
+            username: user.username,
+            token: token,
+            fullUser: user,
+          );
+
+          print('✅ Online profile update successful');
+          return {'success': true, 'message': data['message'], 'user': user};
+        } else {
+          print('❌ Backend update failed: ${response.body}');
+          return {'success': false, 'message': 'Update failed'};
+        }
+      } catch (e) {
+        print('❌ Online update error: $e');
+        return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      }
+    }
+
+    // Offline: Can't update on backend, but can update local data
+    print('📱 Offline - cannot update profile on server');
+    return {
+      'success': false,
+      'message': 'No internet connection. Please try again when online.',
+    };
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
   @override
   Future<UserModel?> login({
     required String username,
@@ -175,7 +159,7 @@ Future<Map<String, dynamic>> updateProfile({
     if (await ConnectivityService.isOnline()) {
       try {
         print('🌐 Attempting online login...');
-        
+
         final response = await http.post(
           Uri.parse(ApiConfig.loginUrl),
           headers: {'Content-Type': 'application/json'},
@@ -190,14 +174,14 @@ Future<Map<String, dynamic>> updateProfile({
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-          
+
           // Extract token and user data
           final token = data['token'] as String;
           final userData = data['user'] as Map<String, dynamic>;
-          
+
           // Create user model from backend response
           final user = UserModel.fromBackendJson(userData);
-          
+
           // Save to SharedPreferences
           await _prefsManager.saveUserData(
             userId: user.id,
@@ -205,7 +189,7 @@ Future<Map<String, dynamic>> updateProfile({
             token: token,
             fullUser: user,
           );
-          
+
           print('✅ Online login successful');
           return user;
         } else if (response.statusCode == 401) {
@@ -243,7 +227,7 @@ Future<Map<String, dynamic>> updateProfile({
     if (await ConnectivityService.isOnline()) {
       try {
         print('🌐 Attempting online signup...');
-        
+
         final response = await http.post(
           Uri.parse(ApiConfig.signupUrl),
           headers: {'Content-Type': 'application/json'},
@@ -260,14 +244,14 @@ Future<Map<String, dynamic>> updateProfile({
 
         if (response.statusCode == 201) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-          
+
           // Extract token and user data
           final token = data['token'] as String;
           final userData = data['user'] as Map<String, dynamic>;
-          
+
           // Create user model from backend response
           final user = UserModel.fromBackendJson(userData);
-          
+
           // Save to SharedPreferences
           await _prefsManager.saveUserData(
             userId: user.id,
@@ -275,7 +259,7 @@ Future<Map<String, dynamic>> updateProfile({
             token: token,
             fullUser: user,
           );
-          
+
           print('✅ Online signup successful');
           return user;
         } else {
@@ -303,9 +287,9 @@ Future<Map<String, dynamic>> updateProfile({
     if (await ConnectivityService.isOnline()) {
       try {
         print('🌐 Attempting online logout...');
-        
+
         final token = await _prefsManager.getAuthToken();
-        
+
         if (token != null) {
           final response = await http.post(
             Uri.parse(ApiConfig.logoutUrl),
@@ -339,7 +323,7 @@ Future<Map<String, dynamic>> updateProfile({
     if (fullUser != null) {
       return fullUser;
     }
-    
+
     // Fall back to basic user data
     return await _localRepo.getCurrentUser();
   }
@@ -364,7 +348,7 @@ Future<Map<String, dynamic>> updateProfile({
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         return data['valid'] == true;
       }
-      
+
       return false;
     } catch (e) {
       print('Token verification error: $e');
