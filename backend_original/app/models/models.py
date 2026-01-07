@@ -84,3 +84,12 @@ class RecentActivity:
     description: str
     activity_date: date
     id: Optional[int] = None
+# notifications 
+@dataclass
+class FCMToken:
+    user_id: int  # This is your agency_id
+    token: str
+    id: Optional[str] = None  # Firestore document ID
+    
+    def to_dict(self):
+        return asdict(self)

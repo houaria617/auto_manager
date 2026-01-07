@@ -187,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        'Username',
+                                        'Email',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.') ) {
-                                            return 'Please enter your username';
+                                            return 'Please enter your email';
                                           }
                                           if (value.length < 4) {
                                             return 'Username must be at least 4 characters';
