@@ -264,10 +264,8 @@ class VehicleDetailsScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      // ✅ FIX: Ensure ID is an int and not null
-      final int id = vehicle['id'] is int
-          ? vehicle['id']
-          : int.parse(vehicle['id'].toString());
+      // ✅ FIX: Use dynamic ID
+      final dynamic id = vehicle['id'];
 
       // ✅ FIX: Correctly call deleteVehicle on the Cubit
       context.read<CarsCubit>().deleteVehicle({'id': id});

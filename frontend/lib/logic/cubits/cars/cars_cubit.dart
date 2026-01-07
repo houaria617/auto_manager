@@ -63,8 +63,8 @@ class CarsCubit extends Cubit<CarsState> {
       await loadVehicles();
       print('passed succ');
     } catch (e) {
-      print('problem occured when calling insertRental');
-      //emit(VehicleState(error: e.toString())); // Error
+      print('problem occured when calling insertRental: $e');
+      emit(CarsError('Failed to add vehicle: ${e.toString()}'));
     }
   }
 

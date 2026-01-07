@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:auto_manager/core/services/connectivity_service.dart';
+import 'package:auto_manager/core/config/api_config.dart';
 import 'rental_repository.dart';
 import 'rental_repository_impl.dart';
 
 class RentalHybridRepo implements AbstractRentalRepo {
-  final String baseUrl = 'http://localhost:5000';
+  final String baseUrl = ApiConfig.baseUrl; // Updated to use centralized config
   final AbstractRentalRepo _localRepo = RentalDB();
 
   @override

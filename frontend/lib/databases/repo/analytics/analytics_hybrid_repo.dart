@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:auto_manager/databases/repo/rentals/rental_repository.dart';
 import 'package:http/http.dart' as http;
 import 'package:auto_manager/core/services/connectivity_service.dart';
+import 'package:auto_manager/core/config/api_config.dart';
 import 'package:auto_manager/databases/repo/analytics/analytics_abstract.dart';
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
 
 class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
-  final String baseUrl = 'http://localhost:5000';
+  final String baseUrl = ApiConfig.baseUrl;
   final AbstractRentalRepo rentalRepo;
   final AbstractCarRepo carRepo;
   final AbstractClientRepo clientRepo;

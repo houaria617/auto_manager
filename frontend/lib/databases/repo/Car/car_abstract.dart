@@ -1,11 +1,12 @@
 // lib/databases/repo/Car/car_abstract.dart
 import 'car_db.dart';
+import 'car_hybrid_repo.dart';
 
 abstract class AbstractCarRepo {
   // Singleton Logic
   static AbstractCarRepo? _instance;
   static AbstractCarRepo getInstance() {
-    _instance ??= CarDB();
+    _instance ??= CarHybridRepo();
     return _instance!;
   }
 
@@ -15,19 +16,19 @@ abstract class AbstractCarRepo {
   Future<List<Map<String, dynamic>>> getData();
 
   // Gets a specific car by ID (✅ The missing contract)
-  Future<Map<String, dynamic>?> getCar(int id);
+  Future<Map<String, dynamic>?> getCar(dynamic id);
 
   // Inserts a new car
   Future<int> insertCar(Map<String, dynamic> car);
 
   // Updates an existing car object completely
-  Future<void> updateCar(int id, Map<String, dynamic> car);
+  Future<void> updateCar(dynamic id, Map<String, dynamic> car);
 
   // Updates specifically the status (Available/Rented)
-  Future<void> updateCarStatus(int carId, String status);
+  Future<void> updateCarStatus(dynamic carId, String status);
 
   // Deletes a car
-  Future<void> deleteCar(int id);
+  Future<void> deleteCar(dynamic id);
 
   // Statistics
   Future<int> countAvailableCars();
