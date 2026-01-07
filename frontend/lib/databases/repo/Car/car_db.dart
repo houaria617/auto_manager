@@ -15,7 +15,7 @@ class CarDB extends AbstractCarRepo {
   }
 
   @override
-  Future<Map<String, dynamic>?> getCar(int id) async {
+  Future<Map<String, dynamic>?> getCar(dynamic id) async {
     final database = await DBHelper.getDatabase();
     final results = await database.query(
       'car',
@@ -37,13 +37,13 @@ class CarDB extends AbstractCarRepo {
   }
 
   @override
-  Future<void> updateCar(int id, Map<String, dynamic> car) async {
+  Future<void> updateCar(dynamic id, Map<String, dynamic> car) async {
     final database = await DBHelper.getDatabase();
     await database.update("car", car, where: "id = ?", whereArgs: [id]);
   }
 
   @override
-  Future<void> deleteCar(int id) async {
+  Future<void> deleteCar(dynamic id) async {
     final database = await DBHelper.getDatabase();
     await database.delete("car", where: "id = ?", whereArgs: [id]);
   }
@@ -59,7 +59,7 @@ class CarDB extends AbstractCarRepo {
   }
 
   @override
-  Future<void> updateCarStatus(int carId, String status) async {
+  Future<void> updateCarStatus(dynamic carId, String status) async {
     final database = await DBHelper.getDatabase();
     await database.update(
       'car',

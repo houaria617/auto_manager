@@ -30,8 +30,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
   List<Map<String, dynamic>> _cars = [];
 
   // Selections
-  int? _selectedClientId;
-  int? _selectedCarId;
+  dynamic _selectedClientId;
+  dynamic _selectedCarId;
 
   bool _isLoading = true;
 
@@ -212,14 +212,9 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
 
                 // Select the new car automatically (simplest logic: last added)
                 if (_cars.isNotEmpty && mounted) {
-                  // Assuming ID increments, pick largest ID
-                  final newest = _cars.reduce((curr, next) {
-                    final currId = curr['id'] as int;
-                    final nextId = next['id'] as int;
-                    return currId > nextId ? curr : next;
-                  });
+                  final newest = _cars.last;
                   setState(() {
-                    _selectedCarId = newest['id'] as int;
+                    _selectedCarId = newest['id'];
                     _calculateTotalPrice();
                   });
                 }
@@ -388,8 +383,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: DropdownButtonFormField<int>(
-                              initialValue: _selectedClientId,
+                            child: DropdownButtonFormField<dynamic>(
+                              value: _selectedClientId,
                               hint: Text(
                                 AppLocalizations.of(context)!.selectClient,
                               ),
@@ -398,8 +393,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                               ),
                               items: _clients.map((client) {
                                 final name = "${client['full_name']}";
-                                return DropdownMenuItem<int>(
-                                  value: client['id'] as int,
+                                return DropdownMenuItem<dynamic>(
+                                  value: client['id'],
                                   child: Text(
                                     name,
                                     overflow: TextOverflow.ellipsis,
@@ -427,8 +422,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: DropdownButtonFormField<int>(
-                              initialValue: _selectedCarId,
+                            child: DropdownButtonFormField<dynamic>(
+                              value: _selectedCarId,
                               hint: Text(
                                 AppLocalizations.of(context)!.selectCar,
                               ),
@@ -438,8 +433,8 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
                               items: _cars.map((car) {
                                 final name = car['name'] ?? 'Unknown';
                                 final plate = car['plate'] ?? '';
-                                return DropdownMenuItem<int>(
-                                  value: car['id'] as int,
+                                return DropdownMenuItem<dynamic>(
+                                  value: car['id'],
                                   child: Text(
                                     "$name ($plate)",
                                     overflow: TextOverflow.ellipsis,

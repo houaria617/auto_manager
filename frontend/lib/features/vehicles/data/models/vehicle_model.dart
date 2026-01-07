@@ -1,6 +1,7 @@
 // vehicle_model.dart
 class Vehicle {
-  final int? id; // NEW: Database ID
+  final dynamic
+  id; // Changed from int? to dynamic to support String IDs from Backend
   final String name; // Custom name given by user
   final String plate; // Plate number of the vehicle
   final String status; // "Available", "Rented", "Maintenance"
@@ -23,7 +24,7 @@ class Vehicle {
   //NEW: Factory constructor to create Vehicle from a database map (List<Map> from getData())
   factory Vehicle.fromMap(Map<String, dynamic> map) {
     return Vehicle(
-      id: map['id'] as int?,
+      id: map['id'],
       name: map['name']?.toString() ?? 'Unknown',
       plate: map['plate']?.toString() ?? '',
       // Mapping DB field 'state' to Model field 'status'
