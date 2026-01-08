@@ -135,8 +135,8 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
     if (filteredList.isEmpty) {
       return Center(
         child: Text(
-          _showCompleted 
-              ? AppLocalizations.of(context)!.noRentalsCompleted 
+          _showCompleted
+              ? AppLocalizations.of(context)!.noRentalsCompleted
               : AppLocalizations.of(context)!.noRentalsOngoing,
           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
         ),

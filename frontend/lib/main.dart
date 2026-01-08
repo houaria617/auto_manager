@@ -1,10 +1,13 @@
 import 'dart:io'; // For Platform check
-
-import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
-import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:workmanager/workmanager.dart'; // <--- NEW IMPORT
+
+// Core/Service Imports
+import 'package:auto_manager/core/services/sync_service.dart'; // <--- NEW IMPORT
+import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
+import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 
 // Localization Imports
 import 'package:auto_manager/l10n/app_localizations.dart';
@@ -21,10 +24,45 @@ import 'package:auto_manager/logic/cubits/clients/client_cubit.dart';
 import 'package:auto_manager/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:auto_manager/logic/cubits/clients/profile_cubit.dart';
 
-void main() {
+// --- NEW WORKMANAGER DISPATCHER ---
+@pragma('vm:entry-point') // Mandatory for background tasks
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      // This calls the logic that pushes pending SQLite rows to Flask
+      await SyncService.performSync();
+    } catch (e) {
+      print("Background sync failed: $e");
+    }
+    return Future.value(true);
+  });
+}
+
+void main() async {
+  // Added async
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Database Factory for Desktop (Linux/Windows/MacOS)
+  // --- NEW WORKMANAGER INITIALIZATION ---
+  // Background tasks don't work on Desktop, so we only init on Mobile
+  if (Platform.isAndroid || Platform.isIOS) {
+    Workmanager().initialize(
+      callbackDispatcher,
+      isInDebugMode: true, // Set to false when you publish the app
+    );
+
+    // Register a task to run every 15 minutes automatically
+    Workmanager().registerPeriodicTask(
+      "periodic-sync-task",
+      "syncDataTask",
+      frequency: const Duration(minutes: 15),
+      constraints: Constraints(
+        networkType:
+            NetworkType.connected, // Only runs if internet is available
+      ),
+    );
+  }
+
+  // Existing Database Factory for Desktop (Linux/Windows/MacOS)
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -33,6 +71,7 @@ void main() {
   runApp(const MainApp());
 }
 
+// ... rest of your MainApp and AuthChecker classes remain identical ...
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -40,7 +79,6 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // --- 1. Global App Providers (Source 2) ---
         BlocProvider<DashboardCubit>(create: (_) => DashboardCubit()),
         BlocProvider<ProfileCubit>(create: (_) => ProfileCubit()),
         BlocProvider<ClientCubit>(create: (_) => ClientCubit()),
@@ -48,28 +86,20 @@ class MainApp extends StatelessWidget {
         BlocProvider<CarsCubit>(
           create: (context) {
             final cubit = CarsCubit();
-            // Inject Dashboard dependency into CarsCubit
             cubit.dashboardCubit = context.read<DashboardCubit>();
             return cubit;
           },
         ),
         BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),
-
-        // --- 2. Auth Provider (Source 1) ---
         BlocProvider<AuthCubit>(create: (_) => AuthCubit()..checkAuthStatus()),
       ],
-      // Listen to Locale changes
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-
-            // Localization Setup
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             locale: locale,
-
-            // Navigation Logic: Use AuthChecker instead of hardcoded LoginScreen
             home: const AuthChecker(),
           );
         },
@@ -78,7 +108,6 @@ class MainApp extends StatelessWidget {
   }
 }
 
-/// Checks authentication status and routes to appropriate screen
 class AuthChecker extends StatelessWidget {
   const AuthChecker({super.key});
 
@@ -86,19 +115,14 @@ class AuthChecker extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        // Show loading spinner while checking authentication
         if (state is AuthLoading || state is AuthInitial) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-
-        // If user is authenticated, go to Dashboard
         if (state is AuthAuthenticated) {
           return const Dashboard();
         }
-
-        // Otherwise (AuthUnauthenticated or Error), show Login screen
         return const LoginScreen();
       },
     );

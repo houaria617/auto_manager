@@ -4,11 +4,16 @@ import 'package:sqflite/sqflite.dart';
 import '../../dbhelper.dart';
 import 'payment_abstract.dart';
 
+// lib/databases/repo/payment/payment_db.dart
+
 class PaymentDB extends AbstractPaymentRepo {
   @override
   Future<List<Map<String, dynamic>>> getData() async {
     final database = await DBHelper.getDatabase();
-    return database.rawQuery('SELECT * FROM payment');
+    final List<Map<String, dynamic>> result = await database.rawQuery(
+      'SELECT * FROM payment',
+    );
+    return result.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
   @override
@@ -17,30 +22,25 @@ class PaymentDB extends AbstractPaymentRepo {
   }
 
   @override
-  Future<List<Map>> getPaymentsForRental(int rentalId) async {
+  Future<List<Map<String, dynamic>>> getPaymentsForRental(int rentalId) async {
     final database = await DBHelper.getDatabase();
-    return database.rawQuery(
-      '''
-      SELECT * FROM payment 
-      WHERE rental_id = ? 
-      ORDER BY date DESC
-    ''',
+    final List<Map<String, dynamic>> result = await database.rawQuery(
+      'SELECT * FROM payment WHERE rental_id = ? ORDER BY date DESC',
       [rentalId],
     );
+    // Ensure we return the correct type
+    return result.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
   @override
   Future<bool> addPayment(Map<String, dynamic> payment) async {
     final database = await DBHelper.getDatabase();
-    final filtered = Map<String, dynamic>.from(payment)
-      ..removeWhere(
-        (key, value) => !['rental_id', 'date', 'paid_amount'].contains(key),
-      );
-    await database.insert(
-      "payment",
-      filtered,
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await database.insert("payment", {
+      'remote_id': payment['remote_id'],
+      'rental_id': payment['rental_id'],
+      'date': payment['date'] ?? payment['payment_date'],
+      'paid_amount': payment['paid_amount'],
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     return true;
   }
 
@@ -48,11 +48,7 @@ class PaymentDB extends AbstractPaymentRepo {
   Future<double> getTotalPaid(int rentalId) async {
     final database = await DBHelper.getDatabase();
     final result = await database.rawQuery(
-      '''
-      SELECT SUM(paid_amount) as total 
-      FROM payment 
-      WHERE rental_id = ?
-    ''',
+      'SELECT SUM(paid_amount) as total FROM payment WHERE rental_id = ?',
       [rentalId],
     );
 

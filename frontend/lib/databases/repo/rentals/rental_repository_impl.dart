@@ -6,10 +6,23 @@ import '../../dbhelper.dart'; // <--- ADD THIS IMPORT
 
 class RentalDB extends AbstractRentalRepo {
   @override
-  Future<List<Map>> getData() async {
-    final database =
-        await DBHelper.getDatabase(); // This needs the import above
-    return database.rawQuery('SELECT * FROM rental');
+  Future<List<Map<String, dynamic>>> getData() async {
+    final database = await DBHelper.getDatabase();
+
+    // We use a LEFT JOIN to get the names from other tables
+    // without changing the 'rental' table structure.
+    final List<Map<String, dynamic>> result = await database.rawQuery('''
+      SELECT 
+        rental.*, 
+        client.full_name AS client_name, 
+        car.name AS car_model
+      FROM rental
+      LEFT JOIN client ON rental.client_id = client.id
+      LEFT JOIN car ON rental.car_id = car.id
+      ORDER BY rental.id DESC
+    ''');
+
+    return result;
   }
 
   @override
@@ -22,44 +35,44 @@ class RentalDB extends AbstractRentalRepo {
   @override
   Future<bool> insertRental(Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
-    final filtered = Map<String, dynamic>.from(rental)
-      ..removeWhere(
-        (key, value) => ![
-          'client_id',
-          'car_id',
-          'date_from',
-          'date_to',
-          'total_amount',
-          'payment_state',
-          'state',
-        ].contains(key),
-      );
+
+    // Make sure remote_id is included in the map
+    final filtered = {
+      'remote_id': rental['remote_id'], // MUST BE HERE
+      'client_id': rental['client_id'],
+      'car_id': rental['car_id'],
+      'date_from': rental['date_from'],
+      'date_to': rental['date_to'],
+      'total_amount': rental['total_amount'],
+      'payment_state': rental['payment_state'] ?? 'unpaid',
+      'state': rental['state'] ?? 'ongoing',
+    };
+
     await database.insert(
       "rental",
       filtered,
+      // This now works because remote_id is marked as UNIQUE in step 1
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     return true;
   }
 
+  // lib/databases/repo/rentals/rental_repository_impl.dart
+
   @override
   Future<bool> updateRental(int index, Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
-    final filtered = Map<String, dynamic>.from(rental)
-      ..removeWhere(
-        (key, value) => ![
-          'client_id',
-          'car_id',
-          'date_from',
-          'date_to',
-          'total_amount',
-          'payment_state',
-          'state',
-        ].contains(key),
-      );
+
+    // Ensure we include 'pending_sync' in the update
+    final dataToUpdate = {
+      'payment_state': rental['payment_state'],
+      'state': rental['state'],
+      'pending_sync': rental['pending_sync'] ?? 1,
+    };
+
     await database.update(
       "rental",
-      filtered,
+      dataToUpdate,
       where: "id = ?",
       whereArgs: [index],
     );

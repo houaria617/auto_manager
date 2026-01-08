@@ -53,30 +53,24 @@ class DBHelper {
 
         // 4. Rental (References car singular)
         await database.execute('''
-          CREATE TABLE rental (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            client_id INTEGER,
-            car_id INTEGER,
-            date_from TEXT,
-            date_to TEXT,
-            total_amount REAL,
-            payment_state TEXT,
-            state TEXT,
-            FOREIGN KEY (client_id) REFERENCES client (id),
-            FOREIGN KEY (car_id) REFERENCES car (id)
-          )
-        ''');
+  CREATE TABLE rental (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    remote_id TEXT UNIQUE,
+    pending_sync INTEGER DEFAULT 0, -- 1 = Needs to be sent to Flask
+    client_id INTEGER, car_id INTEGER, date_from TEXT, date_to TEXT,
+    total_amount REAL, payment_state TEXT, state TEXT
+  )
+''');
 
-        // 5. Payment
         await database.execute('''
-          CREATE TABLE payment (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            rental_id INTEGER,
-            date TEXT,
-            paid_amount REAL,
-            FOREIGN KEY (rental_id) REFERENCES rental (id)
-          )
-        ''');
+  CREATE TABLE payment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    remote_id TEXT UNIQUE,
+    pending_sync INTEGER DEFAULT 0, -- 1 = Needs to be sent to Flask
+    rental_id INTEGER, -- Local SQLite ID
+    date TEXT, paid_amount REAL
+  )
+''');
       },
       onUpgrade: (database, oldVersion, newVersion) async {
         // Handle database migration

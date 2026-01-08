@@ -36,7 +36,7 @@ class PaymentCubit extends Cubit<PaymentState> {
     double totalRentalCost,
   ) async {
     try {
-      // 1. Add Payment
+      // 1. Add Payment (This is now fast and offline-first)
       final newPayment = {
         'rental_id': rentalId,
         'date': DateTime.now().toIso8601String(),
@@ -48,26 +48,26 @@ class PaymentCubit extends Cubit<PaymentState> {
       final totalPaid = await _paymentRepo.getTotalPaid(rentalId);
 
       if (totalPaid >= totalRentalCost) {
-        // Update Rental Table to 'Paid'
-        // We fetch the rental, update payment_state, and save.
-        // Note: For simplicity, we just update the specific field if your repo allows,
-        // or we do a full update. Here I assume a full update is safer with your current structure.
         final rentals = await _rentalRepo.getData();
-        final rental = rentals.firstWhere(
-          (element) => element['id'] == rentalId,
-        );
 
-        final updatedRental = Map<String, dynamic>.from(rental);
-        updatedRental['payment_state'] = 'Paid';
+        // SAFE SEARCH: Instead of firstWhere, use where().toList()
+        final matches = rentals
+            .where((element) => element['id'] == rentalId)
+            .toList();
 
-        await _rentalRepo.updateRental(rentalId, updatedRental);
-      } else if (totalPaid > 0) {
-        // Optionally set to 'Partial'
+        if (matches.isNotEmpty) {
+          final updatedRental = Map<String, dynamic>.from(matches.first);
+          updatedRental['payment_state'] = 'Paid';
+
+          // This will now update locally and trigger background sync
+          await _rentalRepo.updateRental(rentalId, updatedRental);
+        }
       }
 
-      // 3. Reload UI
+      // 3. Reload UI (Loads from local DB immediately)
       await loadPayments(rentalId, totalRentalCost);
     } catch (e) {
+      print("Cubit Error: $e");
       emit(PaymentError(message: "Failed to add payment: $e"));
     }
   }

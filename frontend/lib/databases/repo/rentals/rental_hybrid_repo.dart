@@ -1,45 +1,46 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:auto_manager/core/config/api_config.dart';
 import 'package:auto_manager/core/services/connectivity_service.dart';
 import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart';
+import 'package:workmanager/workmanager.dart';
 import 'rental_repository.dart';
 import 'rental_repository_impl.dart';
 
 class RentalHybridRepo implements AbstractRentalRepo {
-  final String baseUrl = 'http://localhost:5000';
   final AbstractRentalRepo _localRepo = RentalDB();
   final SharedPrefsManager _prefs = SharedPrefsManager();
+
+  // Helper to get headers with JWT (matching your AuthHybridRepo)
+  Future<Map<String, String>> _getHeaders() async {
+    final token = await _prefs.getAuthToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   @override
   Future<List<Map>> getData() async {
     if (await ConnectivityService.isOnline()) {
       try {
-        final userId = await _prefs.getUserId();
         final response = await http.get(
-          Uri.parse('$baseUrl/rentals/?agency_id=$userId'),
+          Uri.parse('${ApiConfig.baseUrl}/rentals/'),
+          headers: await _getHeaders(),
         );
         if (response.statusCode == 200) {
-          final data = json.decode(response.body) as List;
-          // Sync to local
+          final List data = json.decode(response.body);
           for (var item in data) {
-            final map = item as Map<String, dynamic>;
-            final local = {
-              'client_id': map['client_id'],
-              'car_id': map['car_id'],
-              'date_from': map['date_from'],
-              'date_to': map['date_to'],
-              'total_amount': map['total_amount'],
-              'payment_state': map['payment_state'] ?? 'unpaid',
-              // Backend uses rental_state; map to local 'state'
-              'state': map['state'] ?? map['rental_state'] ?? 'ongoing',
-            };
-            await _localRepo.insertRental(local);
+            await _localRepo.insertRental({
+              ...item,
+              'remote_id': item['remote_id'], // Map the Firestore ID
+              'state': item['rental_state'] ?? item['state'],
+            });
           }
-          // Return authoritative local rows (with integer ids)
-          return (await _localRepo.getData()).map((e) => e as Map).toList();
         }
       } catch (e) {
-        // Fall back to local
+        print("Sync Error: $e");
       }
     }
     return _localRepo.getData();
@@ -47,75 +48,50 @@ class RentalHybridRepo implements AbstractRentalRepo {
 
   @override
   Future<bool> insertRental(Map<String, dynamic> rental) async {
-    final userId = await _prefs.getUserId();
-    final payload = {
+    // 1. Save locally IMMEDIATELY (with pending_sync: 1)
+    await _localRepo.insertRental({...rental, 'pending_sync': 1});
+
+    // 2. Trigger sync in background
+    if (Platform.isAndroid || Platform.isIOS) {
+      Workmanager().registerOneOffTask("sync-now", "sync-task");
+    }
+
+    return true; // <--- Add this to satisfy the Abstract class
+  }
+
+  @override
+  Future<bool> updateRental(int localId, Map<String, dynamic> rental) async {
+    // 1. Update locally immediately
+    await _localRepo.updateRental(localId, {
       ...rental,
-      'agency_id': userId,
-      'rental_state': rental['state'] ?? 'ongoing',
-    };
-    final local = {
-      'client_id': rental['client_id'],
-      'car_id': rental['car_id'],
-      'date_from': rental['date_from'],
-      'date_to': rental['date_to'],
-      'total_amount': rental['total_amount'],
-      'payment_state': rental['payment_state'] ?? 'unpaid',
-      'state': rental['state'] ?? 'ongoing',
-    };
-    if (await ConnectivityService.isOnline()) {
-      try {
-        final response = await http.post(
-          Uri.parse('$baseUrl/rentals/'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode(payload),
-        );
-        if (response.statusCode == 201) {
-          await _localRepo.insertRental(local);
-          return true;
-        }
-      } catch (e) {
-        // Queue for sync
-      }
+      'pending_sync': 1, // Mark for background job
+    });
+
+    // 2. Trigger background sync
+    if (Platform.isAndroid || Platform.isIOS) {
+      Workmanager().registerOneOffTask("sync-task-update", "sync-task");
     }
-    await _localRepo.insertRental({...local, 'pending_sync': true});
+
     return true;
   }
 
   @override
-  Future<bool> deleteRental(int index) async {
-    if (await ConnectivityService.isOnline()) {
-      try {
-        final response = await http.delete(
-          Uri.parse('$baseUrl/rentals/$index'),
-        );
-        if (response.statusCode == 204) {
-          await _localRepo.deleteRental(index);
-          return true;
-        }
-      } catch (e) {}
-    }
-    // Mark for sync or delete locally
-    await _localRepo.deleteRental(index);
-    return true;
-  }
+  Future<bool> deleteRental(int localId) async {
+    final localData = await _localRepo.getData();
+    final record = localData.firstWhere(
+      (e) => e['id'] == localId,
+      orElse: () => {},
+    );
+    final String? remoteId = record['remote_id'];
 
-  @override
-  Future<bool> updateRental(int index, Map<String, dynamic> rental) async {
-    final data = {...rental, 'agency_id': rental['agency_id'] ?? 1};
-    if (await ConnectivityService.isOnline()) {
+    if (await ConnectivityService.isOnline() && remoteId != null) {
       try {
-        final response = await http.put(
-          Uri.parse('$baseUrl/rentals/$index'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode(data),
+        await http.delete(
+          Uri.parse('${ApiConfig.baseUrl}/rentals/$remoteId'),
+          headers: await _getHeaders(),
         );
-        if (response.statusCode == 200) {
-          await _localRepo.updateRental(index, data);
-          return true;
-        }
       } catch (e) {}
     }
-    await _localRepo.updateRental(index, {...data, 'pending_sync': true});
-    return true;
+    return await _localRepo.deleteRental(localId);
   }
 }
