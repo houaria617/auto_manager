@@ -170,23 +170,28 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                         child: GridView.builder(
                           itemCount: filteredVehicles.length,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
+                            crossAxisCount:
+                                1, // Nacer: Changed to 1 column per row as requested
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            // ✅ CHANGE: 0.85 makes them taller to fit text in narrow columns
-                            childAspectRatio: 0.85,
+                            childAspectRatio:
+                                1.8, // Adjusted aspect ratio for single column
                           ),
                           itemBuilder: (context, index) {
                             final vehicleObj = filteredVehicles[index];
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
+                              onTap: () async {
+                                // Nacer: Wait for return and refresh (Task 4)
+                                await Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => VehicleDetailsScreen(
                                       vehicle: vehicleObj.toMap(),
                                     ),
                                   ),
                                 );
+                                if (context.mounted) {
+                                  context.read<CarsCubit>().loadVehicles();
+                                }
                               },
                               child: VehicleCard(vehicle: vehicleObj),
                             );

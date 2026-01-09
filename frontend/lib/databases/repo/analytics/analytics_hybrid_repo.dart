@@ -6,12 +6,14 @@ import 'package:auto_manager/core/config/api_config.dart';
 import 'package:auto_manager/databases/repo/analytics/analytics_abstract.dart';
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
+import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart';
 
 class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
   final String baseUrl = ApiConfig.baseUrl;
   final AbstractRentalRepo rentalRepo;
   final AbstractCarRepo carRepo;
   final AbstractClientRepo clientRepo;
+  final SharedPrefsManager _prefs = SharedPrefsManager();
 
   AnalyticsHybridRepo(this.rentalRepo, this.carRepo, this.clientRepo);
 
@@ -19,9 +21,10 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
   Future<Map<String, dynamic>> getStats(String timeframe) async {
     if (await ConnectivityService.isOnline()) {
       try {
+        final userId = await _prefs.getUserId();
         final response = await http.get(
           Uri.parse(
-            '$baseUrl/analytics/stats?agency_id=1&timeframe=$timeframe',
+            '$baseUrl/analytics/stats?agency_id=$userId&timeframe=$timeframe', // Nacer: Fixed dynamic agency_id
           ),
         );
         if (response.statusCode == 200) {

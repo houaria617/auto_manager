@@ -45,7 +45,14 @@ class MainApp extends StatelessWidget {
         BlocProvider<DashboardCubit>(create: (_) => DashboardCubit()),
         BlocProvider<ProfileCubit>(create: (_) => ProfileCubit()),
         BlocProvider<ClientCubit>(create: (_) => ClientCubit()),
-        BlocProvider<RentalCubit>(create: (_) => RentalCubit()..loadRentals()),
+        BlocProvider<RentalCubit>(
+          create: (context) {
+            final cubit = RentalCubit()..loadRentals();
+            cubit.dashboardCubit = context
+                .read<DashboardCubit>(); // Nacer: Inject DashboardCubit
+            return cubit;
+          },
+        ),
         BlocProvider<CarsCubit>(
           create: (context) {
             final cubit = CarsCubit();

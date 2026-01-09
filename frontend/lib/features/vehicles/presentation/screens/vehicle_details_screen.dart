@@ -147,7 +147,10 @@ class VehicleDetailsScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             _buildDetail(l10n.plateNumber, vehicle['plate']),
-            _buildDetail(l10n.rentPricePerDay, "${vehicle['price'] ?? 0}"),
+            _buildDetail(
+              l10n.rentPricePerDay,
+              "${vehicle['price'] != null ? vehicle['price'] : 0}",
+            ), // Nacer: Fixed null price display
 
             const Divider(color: Color(0xFFE2E8F0)),
 
@@ -159,28 +162,45 @@ class VehicleDetailsScreen extends StatelessWidget {
                     .toLowerCase()
                     .trim();
 
+                // Nacer: Show maintenance dates if status is maintenance or rented
                 if (status == 'rented' &&
-                    vehicle['return_from_maintenance'] != null) {
+                    vehicle['return_from_maintenance'] != null &&
+                    vehicle['return_from_maintenance'].toString().isNotEmpty) {
                   return _buildDetail(
                     l10n.returnDate,
                     vehicle['return_from_maintenance'],
                   );
                 }
+                // Nacer: Fixed status logic for maintenance
                 if (status == 'maintenance' &&
-                    vehicle['return_from_maintenance'] != null) {
-                  return _buildDetail(
-                    l10n.availableOn,
-                    vehicle['return_from_maintenance'],
+                    (vehicle['return_from_maintenance'] != null ||
+                        vehicle['maintenance'] != null)) {
+                  return Column(
+                    children: [
+                      if (vehicle['maintenance'] != null)
+                        _buildDetail(
+                          l10n.nextMaintenance,
+                          vehicle['maintenance'],
+                        ),
+                      if (vehicle['return_from_maintenance'] != null)
+                        _buildDetail(
+                          l10n.availableOn,
+                          vehicle['return_from_maintenance'],
+                        ),
+                    ],
                   );
                 }
                 return const SizedBox.shrink();
               },
             ),
 
-            _buildDetail(
-              l10n.nextMaintenance,
-              vehicle['maintenance'] ?? vehicle['next_maintenance_date'],
-            ),
+            if (vehicle['maintenance'] != null &&
+                vehicle['maintenance'].toString().isNotEmpty &&
+                (vehicle['state'] ?? vehicle['status']) != 'maintenance')
+              _buildDetail(
+                l10n.nextMaintenance,
+                vehicle['maintenance'] ?? vehicle['next_maintenance_date'],
+              ),
 
             const Divider(color: Color(0xFFE2E8F0)),
           ],

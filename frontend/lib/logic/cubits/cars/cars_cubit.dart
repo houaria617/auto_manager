@@ -52,7 +52,8 @@ class CarsCubit extends Cubit<CarsState> {
       });
       print('added car successfully');
 
-      dashboardCubit.countAvailableCars();
+      // Nacer: Update entire dashboard metrics
+      dashboardCubit.loadDashboardData();
       dashboardCubit.addActivity({
         'description':
             'New Car ${vehicle['name'] ?? vehicle['carModel'] ?? 'Unknown'} Added',
@@ -80,6 +81,7 @@ class CarsCubit extends Cubit<CarsState> {
       await _carRepo.updateCar(vehicle['id']!, vehicle);
 
       await loadVehicles();
+      dashboardCubit.loadDashboardData(); // Nacer: Refresh dashboard on update
     } catch (e) {
       print('Error updating vehicle: $e');
     }
@@ -96,6 +98,7 @@ class CarsCubit extends Cubit<CarsState> {
       await _carRepo.deleteCar(vehicle['id']!);
 
       await loadVehicles();
+      dashboardCubit.loadDashboardData(); // Nacer: Refresh dashboard on delete
     } catch (e) {
       print('Error deleting vehicle: $e');
     }

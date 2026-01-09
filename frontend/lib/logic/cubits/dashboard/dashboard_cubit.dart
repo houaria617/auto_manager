@@ -33,6 +33,20 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
     return DateTime.now().toIso8601String().split('T')[0];
   }
 
+  // Nacer: Consolidated load function for full refresh
+  Future<void> loadDashboardData() async {
+    try {
+      final ongoing = await _rentalRepo.countOngoingRentals();
+      final available = await _carRepo.countAvailableCars();
+      final due = await _rentalRepo.countDueToday();
+      final activities = await _activityRepo.getActivities();
+
+      emit(DashboardStatistics(ongoing, available, due, activities));
+    } catch (e) {
+      print("Dashboard load failed: $e");
+    }
+  }
+
   void loadActivities() async {
     final recentActivities = await _activityRepo.getActivities();
     emit(

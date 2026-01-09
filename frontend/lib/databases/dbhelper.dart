@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 2;
+  static const _database_version = 4;
 
   static Database? _database;
 
@@ -33,6 +33,8 @@ class DBHelper {
         await database.execute('''
            CREATE TABLE car (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
+               remote_id TEXT UNIQUE,
+               pending_sync INTEGER DEFAULT 0,
                name TEXT,
                plate TEXT,
                price REAL,
@@ -117,9 +119,46 @@ class DBHelper {
               print('No old data to migrate: $e');
             }
 
-            // Drop old table and rename new one
             await database.execute('DROP TABLE IF EXISTS client');
             await database.execute('ALTER TABLE client_new RENAME TO client');
+          }
+        }
+
+        if (oldVersion < 3) {
+          try {
+            await database.execute(
+              'ALTER TABLE car ADD COLUMN remote_id TEXT UNIQUE',
+            );
+            await database.execute(
+              'ALTER TABLE car ADD COLUMN pending_sync INTEGER DEFAULT 0',
+            );
+          } catch (e) {
+            print("Error upgrading car table: $e");
+          }
+        }
+
+        if (oldVersion < 4) {
+          // Fix for potential broken v3 migration
+          try {
+            // Check if columns exist
+            final tableInfo = await database.rawQuery('PRAGMA table_info(car)');
+            final hasRemoteId = tableInfo.any((c) => c['name'] == 'remote_id');
+            final hasPendingSync = tableInfo.any(
+              (c) => c['name'] == 'pending_sync',
+            );
+
+            if (!hasRemoteId) {
+              await database.execute(
+                'ALTER TABLE car ADD COLUMN remote_id TEXT UNIQUE',
+              );
+            }
+            if (!hasPendingSync) {
+              await database.execute(
+                'ALTER TABLE car ADD COLUMN pending_sync INTEGER DEFAULT 0',
+              );
+            }
+          } catch (e) {
+            print("Error fixing car table in v4: $e");
           }
         }
       },
