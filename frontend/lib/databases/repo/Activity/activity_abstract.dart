@@ -3,7 +3,9 @@
 // ABSTRACT REPOSITORY DESIGN PATTERN.
 
 // import 'vehicle_dummy.dart';
-import 'activity_db.dart';
+import 'package:auto_manager/databases/repo/Activity/activity_hybrid_repo.dart';
+
+// import 'activity_db.dart';
 
 abstract class AbstractActivityRepo {
   Future<List<Map<String, dynamic>>> getActivities();
@@ -13,7 +15,7 @@ abstract class AbstractActivityRepo {
 
   static AbstractActivityRepo getInstance() {
     // later, ClientDB will replace ClientDummy here:
-    _carInstance ??= ActivityDB();
+    _carInstance ??= ActivityHybridRepo();
     return _carInstance!;
   }
 }
