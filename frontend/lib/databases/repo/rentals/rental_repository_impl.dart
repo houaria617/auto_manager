@@ -63,36 +63,12 @@ class RentalDB extends AbstractRentalRepo {
   Future<bool> updateRental(int index, Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
 
-    // Build update map with all provided fields
-    final dataToUpdate = <String, dynamic>{};
-
-    if (rental.containsKey('client_id')) {
-      dataToUpdate['client_id'] = rental['client_id'];
-    }
-    if (rental.containsKey('car_id')) {
-      dataToUpdate['car_id'] = rental['car_id'];
-    }
-    if (rental.containsKey('date_from')) {
-      dataToUpdate['date_from'] = rental['date_from'];
-    }
-    if (rental.containsKey('date_to')) {
-      dataToUpdate['date_to'] = rental['date_to'];
-    }
-    if (rental.containsKey('total_amount')) {
-      dataToUpdate['total_amount'] = rental['total_amount'];
-    }
-    if (rental.containsKey('payment_state')) {
-      dataToUpdate['payment_state'] = rental['payment_state'];
-    }
-    if (rental.containsKey('state')) {
-      dataToUpdate['state'] = rental['state'];
-    }
-    if (rental.containsKey('remote_id')) {
-      dataToUpdate['remote_id'] = rental['remote_id'];
-    }
-    if (rental.containsKey('pending_sync')) {
-      dataToUpdate['pending_sync'] = rental['pending_sync'];
-    }
+    // Ensure we include 'pending_sync' in the update
+    final dataToUpdate = {
+      'payment_state': rental['payment_state'],
+      'state': rental['state'],
+      'pending_sync': rental['pending_sync'] ?? 1,
+    };
 
     await database.update(
       "rental",

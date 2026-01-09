@@ -1,7 +1,6 @@
 import 'package:auto_manager/features/payment/presentation/payment_screen.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
-import 'package:auto_manager/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,11 +52,9 @@ class ActionButtons extends StatelessWidget {
                 });
               },
               icon: Icon(isPaid ? Icons.check_circle : Icons.attach_money),
-              label: Text(
-                isPaid
-                    ? AppLocalizations.of(context)!.viewPaymentHistory
-                    : AppLocalizations.of(context)!.managePayments,
-              ),
+              label: Text(isPaid 
+                  ? AppLocalizations.of(context)!.viewPaymentHistory 
+                  : AppLocalizations.of(context)!.managePayments),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isPaid
                     ? Colors.green
@@ -124,12 +121,8 @@ class ActionButtons extends StatelessWidget {
 
   void _handleReturn(BuildContext context) {
     final Map<String, dynamic> updatedRental = Map.from(rentalData);
-    updatedRental['state'] = 'completed'; // Use lowercase to match backend
+    updatedRental['state'] = 'Completed';
     context.read<RentalCubit>().updateRental(rentalId, updatedRental);
-
-    // Refresh dashboard stats after marking as completed
-    context.read<DashboardCubit>().countDueToday();
-
     Navigator.pop(context);
   }
 
@@ -197,9 +190,7 @@ class ActionButtons extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              AppLocalizations.of(context)!.estimatedDailyRate,
-                            ),
+                            Text(AppLocalizations.of(context)!.estimatedDailyRate),
                             Text("\$${dailyPrice.toStringAsFixed(2)}"),
                           ],
                         ),
@@ -209,9 +200,7 @@ class ActionButtons extends StatelessWidget {
                           children: [
                             Text(
                               AppLocalizations.of(context)!.extraCost,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
                               "+\$${extraCost.toStringAsFixed(2)}",
@@ -282,20 +271,19 @@ class ActionButtons extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            )!.renewedSuccess(days, '\$${extraCost.toStringAsFixed(2)}'),
+            AppLocalizations.of(context)!.renewedSuccess(
+              days,
+              '\$${extraCost.toStringAsFixed(2)}',
+            ),
           ),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.errorRenewing(e.toString()),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context)!.errorRenewing(e.toString())),
+      ));
     }
   }
 }

@@ -24,11 +24,10 @@ def get_dashboard_stats():
         .where('agency_id', '==', agency_id)
         .where('state', '==', 'available').get())
 
-    # 3. Due Today (date_to == today AND rental_state is 'ongoing')
+    # 3. Due Today (date_to == today)
     due_today = len(db.collection('rental')
         .where('agency_id', '==', agency_id)
-        .where('date_to', '==', today)
-        .where('rental_state', '==', 'ongoing').get())
+        .where('date_to', '==', today).get())
 
     # 4. Recent Activities (limit to 3, ordered by date)
     activities_docs = db.collection('activity')\
