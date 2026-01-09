@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 from firebase_admin import firestore
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from collections import defaultdict
+from .auth import token_required
+from google.cloud.firestore import Query
 
 analytics_bp = Blueprint('analytics_bp', __name__)
 
@@ -132,3 +134,107 @@ def get_analytics_stats():
     }
 
     return jsonify(response), 200
+
+
+@analytics_bp.route('/activities', methods=['GET'])
+@token_required
+def get_activities():
+    """Return recent activities for the authenticated agency.
+
+    Also ensures that "due today" rental activities are recorded exactly once per day.
+    """
+    db = firestore.client()
+
+    # Prefer user_id from token for security
+    user_id = request.current_user.get('user_id')
+    # Fallback to query param only if token does not include user_id (shouldn't happen)
+    agency_id = user_id or request.args.get('agency_id')
+
+    if not agency_id:
+        return jsonify({"error": "agency_id is required"}), 400
+
+    today_str = date.today().isoformat()
+
+    # 1) Find rentals due today and create an activity if not already present
+    due_docs = db.collection('rental') \
+        .where('agency_id', '==', agency_id) \
+        .where('date_to', '==', today_str) \
+        .stream()
+
+    for rental_doc in due_docs:
+        rental_id = rental_doc.id
+        # Check if activity already exists to avoid duplicates
+        existing = db.collection('activity') \
+            .where('agency_id', '==', agency_id) \
+            .where('type', '==', 'due_today') \
+            .where('rental_id', '==', rental_id) \
+            .where('activity_date', '==', today_str) \
+            .get()
+
+        if len(existing) == 0:
+            # Create a concise description; avoid heavy lookups
+            description = f"Rental due today (ID: {rental_id})"
+            db.collection('activity').add({
+                'agency_id': agency_id,
+                'description': description,
+                'activity_date': today_str,
+                'type': 'due_today',
+                'rental_id': rental_id,
+            })
+
+    # 2) Fetch recent activities for the agency (limit reasonable size)
+    activity_query = db.collection('activity') \
+        .where('agency_id', '==', agency_id) \
+        .order_by('activity_date', direction=Query.DESCENDING) \
+        .limit(50)
+
+    docs = activity_query.stream()
+    items = []
+    for doc in docs:
+        data = doc.to_dict() or {}
+        # Map to frontend expectation: description + date
+        items.append({
+            'description': data.get('description', ''),
+            'date': data.get('activity_date'),
+            'remote_id': doc.id,
+        })
+
+    return jsonify(items), 200
+
+
+@analytics_bp.route('/activities', methods=['POST'])
+@token_required
+def add_activity():
+    """Insert a new activity for the authenticated agency."""
+    try:
+        payload = request.get_json(silent=True) or {}
+        if not payload:
+            return jsonify({"error": "Invalid or missing JSON data"}), 400
+
+        agency_id = request.current_user.get('user_id')
+        description = (payload.get('description') or '').strip()
+        date_value = payload.get('date') or payload.get('activity_date')
+
+        if not description:
+            return jsonify({"error": "description is required"}), 400
+
+        # Normalize date to YYYY-MM-DD if possible
+        activity_date = None
+        if isinstance(date_value, str) and len(date_value) >= 10:
+            # Accept ISO 8601 and just take the date part
+            activity_date = date_value[:10]
+        else:
+            activity_date = date.today().isoformat()
+
+        db = firestore.client()
+        _, doc_ref = db.collection('activity').add({
+            'agency_id': agency_id,
+            'description': description,
+            'activity_date': activity_date,
+            'type': payload.get('type'),
+            'rental_id': payload.get('rental_id'),
+        })
+
+        return jsonify({"id": doc_ref.id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500

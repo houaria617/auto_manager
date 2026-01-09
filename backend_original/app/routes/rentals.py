@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from firebase_admin import firestore
+from datetime import date
 from app.models.models import Rental
 # Adjust this import based on where your decorator is
 from .auth import token_required
@@ -17,6 +18,33 @@ def create_rental():
     db = firestore.client()
     # Add to firestore
     _, doc_ref = db.collection('rental').add(data)
+
+    # Record an activity for the new rental
+    try:
+        agency_id = data.get('agency_id')
+        today_str = date.today().isoformat()
+        description = "New rental created"
+        # Optionally include some context if available
+        car_id = data.get('car_id')
+        client_id = data.get('client_id')
+        if car_id or client_id:
+            extras = []
+            if car_id:
+                extras.append(f"car:{car_id}")
+            if client_id:
+                extras.append(f"client:{client_id}")
+            description = f"New rental created ({', '.join(extras)})"
+
+        db.collection('activity').add({
+            'agency_id': agency_id,
+            'description': description,
+            'activity_date': today_str,
+            'type': 'rental_created',
+            'rental_id': doc_ref.id,
+        })
+    except Exception:
+        # Do not fail the rental creation if activity logging fails
+        pass
 
     return jsonify({"id": doc_ref.id}), 201
 
