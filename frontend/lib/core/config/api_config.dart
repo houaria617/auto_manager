@@ -4,7 +4,7 @@ class ApiConfig {
   // Change this based on where you're testing:
 
   // For Android Emulator:
-  static const String baseUrl = 'http://10.239.151.246:5000';
+  static const String baseUrl = 'http://10.175.6.168:5000';
 
   // For iOS Simulator:
   // static const String baseUrl = 'http://127.0.0.1:5000';

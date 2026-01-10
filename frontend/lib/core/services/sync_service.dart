@@ -24,6 +24,11 @@ class SyncService {
     };
 
     // ---------------------------------------------------------
+    // STEP 1: SYNC PENDING VEHICLES
+    // ---------------------------------------------------------
+    await _syncVehicles(db, headers);
+
+    // ---------------------------------------------------------
     // STEP 2: SYNC PENDING RENTALS
     // ---------------------------------------------------------
     final List<Map<String, dynamic>> pendingRentals = await db.query(
@@ -137,5 +142,73 @@ class SyncService {
     }
 
     print("SyncService: Sync process finished.");
+  }
+
+  /// Syncs pending vehicles (cars) to the Flask backend
+  static Future<void> _syncVehicles(
+    dynamic db,
+    Map<String, String> headers,
+  ) async {
+    final List<Map<String, dynamic>> pendingCars = await db.query(
+      'car',
+      where: 'pending_sync = ?',
+      whereArgs: [1],
+    );
+
+    print("SyncService: Found ${pendingCars.length} vehicles to sync.");
+
+    for (var car in pendingCars) {
+      try {
+        http.Response response;
+
+        // Prepare payload for API
+        final payload = {
+          'name': car['name'],
+          'plate': car['plate'],
+          'rent_price': car['price'],
+          'state': car['state'] ?? 'available',
+          'maintenance_date': car['maintenance'],
+          'return_from_maintenance': car['return_from_maintenance'],
+        };
+
+        // If remote_id is null, it's a NEW vehicle (POST)
+        // If remote_id exists, it's an UPDATE (PUT)
+        if (car['remote_id'] == null) {
+          response = await http.post(
+            Uri.parse('${ApiConfig.baseUrl}/vehicles/'),
+            headers: headers,
+            body: jsonEncode(payload),
+          );
+        } else {
+          response = await http.put(
+            Uri.parse('${ApiConfig.baseUrl}/vehicles/${car['remote_id']}'),
+            headers: headers,
+            body: jsonEncode(payload),
+          );
+        }
+
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final remoteId = data['id'] ?? car['remote_id'];
+
+          // Reconciliation: Update local DB with remote_id and mark as synced
+          await db.update(
+            'car',
+            {'pending_sync': 0, 'remote_id': remoteId},
+            where: 'id = ?',
+            whereArgs: [car['id']],
+          );
+          print(
+            "SyncService: Vehicle ${car['id']} synced successfully with remote_id: $remoteId",
+          );
+        } else {
+          print(
+            "SyncService: Failed to sync vehicle ${car['id']}. Status: ${response.statusCode}",
+          );
+        }
+      } catch (e) {
+        print("SyncService: Error syncing vehicle ${car['id']}: $e");
+      }
+    }
   }
 }

@@ -247,4 +247,21 @@ class CarHybridRepo extends AbstractCarRepo {
   ) async {
     return _localRepo.getCarsMaintenanceOn(dateIsoString);
   }
+
+  // --- Sync Support Methods ---
+
+  @override
+  Future<List<Map<String, dynamic>>> getUnsyncedCars() async {
+    return _localRepo.getUnsyncedCars();
+  }
+
+  @override
+  Future<void> updateCarRemoteId(int localId, String remoteId) async {
+    await _localRepo.updateCarRemoteId(localId, remoteId);
+  }
+
+  @override
+  Future<void> markCarForSync(int localId) async {
+    await _localRepo.markCarForSync(localId);
+  }
 }

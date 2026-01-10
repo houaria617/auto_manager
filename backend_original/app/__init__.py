@@ -35,7 +35,7 @@ def create_app():
                     "Warning: serviceAccountKey.json not found. Firestore will not work.")
 
     # Register blueprints
-    from .routes import clients, dashboard, rentals, payments, analytics, auth, notifications
+    from .routes import clients, dashboard, rentals, payments, analytics, auth, notifications, vehicles
     
     app.register_blueprint(auth.auth_bp, url_prefix='/auth')
     app.register_blueprint(clients.client_bp, url_prefix='/clients')
@@ -44,6 +44,7 @@ def create_app():
     app.register_blueprint(payments.payment_bp, url_prefix='/payments')
     app.register_blueprint(analytics.analytics_bp, url_prefix='/analytics')
     app.register_blueprint(notifications.notifications_bp, url_prefix='/notifications')
+    app.register_blueprint(vehicles.vehicle_bp, url_prefix='/vehicles')
 
     print(app.url_map)
     return app

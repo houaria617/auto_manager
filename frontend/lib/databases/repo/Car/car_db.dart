@@ -80,4 +80,38 @@ class CarDB extends AbstractCarRepo {
     WHERE maintenance LIKE '$dateIsoString%'
   ''');
   }
+
+  // --- Sync Support Methods ---
+
+  @override
+  Future<List<Map<String, dynamic>>> getUnsyncedCars() async {
+    final database = await DBHelper.getDatabase();
+    return await database.query(
+      'car',
+      where: 'pending_sync = ?',
+      whereArgs: [1],
+    );
+  }
+
+  @override
+  Future<void> updateCarRemoteId(int localId, String remoteId) async {
+    final database = await DBHelper.getDatabase();
+    await database.update(
+      'car',
+      {'remote_id': remoteId, 'pending_sync': 0},
+      where: 'id = ?',
+      whereArgs: [localId],
+    );
+  }
+
+  @override
+  Future<void> markCarForSync(int localId) async {
+    final database = await DBHelper.getDatabase();
+    await database.update(
+      'car',
+      {'pending_sync': 1},
+      where: 'id = ?',
+      whereArgs: [localId],
+    );
+  }
 }

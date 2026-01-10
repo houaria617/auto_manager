@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 2;
+  static const _database_version = 3; // Bumped for car sync columns
 
   static Database? _database;
 
@@ -29,14 +29,16 @@ class DBHelper {
            )
          ''');
 
-        // 2. Car (Singular)
+        // 2. Car (Singular) - with sync columns for offline-first
         await database.execute('''
            CREATE TABLE car (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
+               remote_id TEXT UNIQUE,
+               pending_sync INTEGER DEFAULT 1,
                name TEXT,
                plate TEXT,
                price REAL,
-               state TEXT,
+               state TEXT DEFAULT 'available',
                maintenance TEXT,
                return_from_maintenance TEXT
            )
@@ -114,6 +116,28 @@ class DBHelper {
             // Drop old table and rename new one
             await database.execute('DROP TABLE IF EXISTS client');
             await database.execute('ALTER TABLE client_new RENAME TO client');
+          }
+        }
+
+        // Migration for version 3: Add sync columns to car table
+        if (oldVersion < 3) {
+          // Check if remote_id column exists in car table
+          final carTableInfo = await database.rawQuery(
+            'PRAGMA table_info(car)',
+          );
+          final hasRemoteId = carTableInfo.any(
+            (column) => column['name'] == 'remote_id',
+          );
+
+          if (!hasRemoteId) {
+            // Add sync columns to existing car table
+            await database.execute(
+              'ALTER TABLE car ADD COLUMN remote_id TEXT UNIQUE',
+            );
+            await database.execute(
+              'ALTER TABLE car ADD COLUMN pending_sync INTEGER DEFAULT 0',
+            );
+            print('DBHelper: Added sync columns to car table');
           }
         }
       },

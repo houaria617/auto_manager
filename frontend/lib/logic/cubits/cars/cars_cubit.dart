@@ -30,7 +30,7 @@ class CarsCubit extends Cubit<CarsState> {
     }
   }
 
-  // 3. Add Vehicle Method
+  // 3. Add Vehicle Method - Offline-First: saves locally first, syncs later
   void addVehicle(Map<String, dynamic> vehicle) async {
     print('inside add vehicle');
     emit(CarsLoading());
@@ -44,11 +44,13 @@ class CarsCubit extends Cubit<CarsState> {
         'maintenance':
             vehicle['nextMaintenanceDate'] ??
             vehicle['next_maintenance_date'] ??
+            vehicle['maintenance'] ??
             '',
         'return_from_maintenance':
             vehicle['return_from_maintenance'] ??
             vehicle['returnFromMaintenance'] ??
             '',
+        'pending_sync': 1, // Mark as dirty - needs to be synced
       });
       print('added car successfully');
 
@@ -59,12 +61,12 @@ class CarsCubit extends Cubit<CarsState> {
         'date': DateTime.now(),
       });
 
-      // emit(VehicleState()); // Success
+      // Reload vehicles immediately (Offline-First: UI updates instantly)
       await loadVehicles();
       print('passed succ');
     } catch (e) {
-      print('problem occured when calling insertRental');
-      //emit(VehicleState(error: e.toString())); // Error
+      print('problem occurred when calling insertCar: $e');
+      emit(CarsError('Failed to add vehicle: ${e.toString()}'));
     }
   }
 

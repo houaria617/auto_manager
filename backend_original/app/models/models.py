@@ -27,6 +27,47 @@ class Car:
         return asdict(self)
 
 @dataclass
+class Vehicle:
+    """Vehicle model for the Vehicles feature (alias of Car with enhanced fields)"""
+    agency_id: str  # Firestore uses string IDs
+    name: str
+    plate: str
+    rent_price: float = 0.0
+    state: str = 'available'  # available, rented, maintenance
+    maintenance_date: Optional[str] = None
+    return_from_maintenance: Optional[str] = None
+    id: Optional[str] = None  # Firestore document ID
+
+    def to_dict(self):
+        """Convert to dict for Firestore storage"""
+        data = {
+            'agency_id': self.agency_id,
+            'name': self.name,
+            'plate': self.plate,
+            'rent_price': self.rent_price,
+            'state': self.state,
+        }
+        if self.maintenance_date:
+            data['maintenance_date'] = self.maintenance_date
+        if self.return_from_maintenance:
+            data['return_from_maintenance'] = self.return_from_maintenance
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict, doc_id: Optional[str] = None):
+        """Create Vehicle from Firestore document"""
+        return cls(
+            id=doc_id,
+            agency_id=data.get('agency_id', ''),
+            name=data.get('name', ''),
+            plate=data.get('plate', ''),
+            rent_price=data.get('rent_price', 0.0),
+            state=data.get('state', 'available'),
+            maintenance_date=data.get('maintenance_date'),
+            return_from_maintenance=data.get('return_from_maintenance'),
+        )
+
+@dataclass
 class Agency:
     name: str
     password: str
