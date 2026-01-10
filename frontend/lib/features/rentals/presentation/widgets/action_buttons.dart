@@ -2,6 +2,7 @@ import 'package:auto_manager/features/payment/presentation/payment_screen.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/dashboard/dashboard_cubit.dart';
+import 'package:auto_manager/databases/repo/Car/car_hybrid_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -122,10 +123,31 @@ class ActionButtons extends StatelessWidget {
     );
   }
 
-  void _handleReturn(BuildContext context) {
+  Future<void> _handleReturn(BuildContext context) async {
     final Map<String, dynamic> updatedRental = Map.from(rentalData);
     updatedRental['state'] = 'completed'; // Use lowercase to match backend
     context.read<RentalCubit>().updateRental(rentalId, updatedRental);
+
+    // Immediately reflect car availability locally and in cloud
+    try {
+      final repo = CarHybridRepo();
+      final dynamic carIdValue = rentalData['car_id'];
+      if (carIdValue is int) {
+        await repo.updateCarStatus(carIdValue, 'available');
+      } else if (carIdValue is String) {
+        // Resolve local car by remote_id then update status
+        final cars = await repo.getAllCars();
+        final match = cars.firstWhere(
+          (c) => c['remote_id'] == carIdValue,
+          orElse: () => {},
+        );
+        if (match.isNotEmpty && match['id'] is int) {
+          await repo.updateCarStatus(match['id'] as int, 'available');
+        }
+      }
+    } catch (e) {
+      // Ignore errors here; rental completion should not fail
+    }
 
     // Refresh dashboard stats after marking as completed
     context.read<DashboardCubit>().countDueToday();

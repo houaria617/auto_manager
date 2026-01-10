@@ -5,6 +5,7 @@ import 'package:auto_manager/core/config/api_config.dart';
 import 'package:auto_manager/core/services/connectivity_service.dart';
 import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:auto_manager/databases/repo/Car/car_db.dart';
 import 'rental_repository.dart';
 import 'rental_repository_impl.dart';
 
@@ -86,12 +87,21 @@ class RentalHybridRepo implements AbstractRentalRepo {
     // 2. Try to sync immediately if online
     if (await ConnectivityService.isOnline()) {
       try {
+        // Map local car id to remote id if available
+        String? carRemoteId;
+        try {
+          final car = await CarDB().getCar(rental['car_id']);
+          if (car != null && car['remote_id'] is String) {
+            carRemoteId = car['remote_id'] as String;
+          }
+        } catch (_) {}
+
         final response = await http.post(
           Uri.parse('${ApiConfig.baseUrl}/rentals/'),
           headers: await _getHeaders(),
           body: json.encode({
             'client_id': rental['client_id'],
-            'car_id': rental['car_id'],
+            'car_id': carRemoteId ?? rental['car_id'],
             'date_from': rental['date_from'],
             'date_to': rental['date_to'],
             'total_amount': rental['total_amount'],

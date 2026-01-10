@@ -79,6 +79,38 @@ def handle_rental(rental_id):
         return jsonify({"message": "Deleted"}), 204
 
     if request.method == 'PUT':
+        # Load existing rental
+        doc = doc_ref.get()
+        if not doc.exists:
+            return jsonify({"error": "Rental not found"}), 404
+
+        rental_data = doc.to_dict() or {}
+
+        # Enforce ownership
+        agency_id = request.current_user.get('user_id')
+        if rental_data.get('agency_id') != agency_id:
+            return jsonify({"error": "Forbidden"}), 403
+
         # Update Firestore with the new data
-        doc_ref.update(request.json)
-        return jsonify({"message": "Updated"}), 200
+        payload = dict(request.json or {})
+        doc_ref.update(payload)
+
+        # If completed, set car to available
+        try:
+            new_state = payload.get('rental_state')
+            if new_state == 'completed':
+                car_id = rental_data.get('car_id')
+                if car_id is not None:
+                        try:
+                            db.collection('cars').document(str(car_id)).update({'state': 'available'})
+                        except Exception:
+                            # Fallback to singular collection name if used elsewhere
+                            try:
+                                db.collection('car').document(str(car_id)).update({'state': 'available'})
+                            except Exception:
+                                pass
+        except Exception:
+            # Ignore errors to not block rental update
+            pass
+
+        return jsonify({"message": "Rental updated"}), 200
