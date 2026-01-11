@@ -1,12 +1,10 @@
-// lib/features/payments/data/payment_db.dart
-
 import 'package:sqflite/sqflite.dart';
 import '../../dbhelper.dart';
 import 'payment_abstract.dart';
 
-// lib/databases/repo/payment/payment_db.dart
-
+// sqlite implementation for payment storage
 class PaymentDB extends AbstractPaymentRepo {
+  // returns all payments from local database
   @override
   Future<List<Map<String, dynamic>>> getData() async {
     final database = await DBHelper.getDatabase();
@@ -16,11 +14,13 @@ class PaymentDB extends AbstractPaymentRepo {
     return result.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  // wrapper around addPayment for interface consistency
   @override
   Future<void> insertData(Map<String, dynamic> data) async {
     await addPayment(data);
   }
 
+  // fetches payments for a specific rental, newest first
   @override
   Future<List<Map<String, dynamic>>> getPaymentsForRental(int rentalId) async {
     final database = await DBHelper.getDatabase();
@@ -28,10 +28,10 @@ class PaymentDB extends AbstractPaymentRepo {
       'SELECT * FROM payment WHERE rental_id = ? ORDER BY date DESC',
       [rentalId],
     );
-    // Ensure we return the correct type
     return result.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  // saves a new payment record
   @override
   Future<bool> addPayment(Map<String, dynamic> payment) async {
     final database = await DBHelper.getDatabase();
@@ -44,6 +44,7 @@ class PaymentDB extends AbstractPaymentRepo {
     return true;
   }
 
+  // sums up all payments made for a rental
   @override
   Future<double> getTotalPaid(int rentalId) async {
     final database = await DBHelper.getDatabase();

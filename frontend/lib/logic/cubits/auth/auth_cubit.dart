@@ -1,16 +1,15 @@
+// handles authentication state and user login/signup/logout
+
 import 'package:auto_manager/databases/repo/auth/auth_hybrid_repo.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Manages authentication state and operations
-/// Location: lib/logic/cubits/auth/auth_cubit.dart
 class AuthCubit extends Cubit<AuthState> {
-  // Use hybrid repo instead of abstract repo
   final _authRepo = AuthHybridRepo();
 
   AuthCubit() : super(AuthInitial());
 
-  /// Check if user is already logged in on app start
+  // checks stored session on app startup
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
 
@@ -28,14 +27,14 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthUnauthenticated());
       }
     } catch (e) {
-      print('Auth check error: $e');
+      print('auth check error: $e');
       emit(AuthUnauthenticated());
     }
   }
 
-  /// Login with email and password
+  // authenticates user with email and password
   Future<void> login({
-    required String username, // This will be email for backend
+    required String username,
     required String password,
   }) async {
     emit(AuthLoading());
@@ -49,15 +48,15 @@ class AuthCubit extends Cubit<AuthState> {
       if (user != null) {
         emit(AuthAuthenticated(user));
       } else {
-        emit(AuthError('Invalid email or password'));
+        emit(AuthError('invalid email or password'));
       }
     } catch (e) {
-      print('Login error: $e');
-      emit(AuthError('Login failed: ${e.toString()}'));
+      print('login error: $e');
+      emit(AuthError('login failed: ${e.toString()}'));
     }
   }
 
-  /// Signup new user
+  // creates new user account
   Future<void> signup({
     required String username,
     required String password,
@@ -79,24 +78,24 @@ class AuthCubit extends Cubit<AuthState> {
       if (user != null) {
         emit(AuthAuthenticated(user));
       } else {
-        emit(AuthError('Email already exists or signup failed'));
+        emit(AuthError('email already exists or signup failed'));
       }
     } catch (e) {
-      print('Signup error: $e');
-      emit(AuthError('Signup failed: ${e.toString()}'));
+      print('signup error: $e');
+      emit(AuthError('signup failed: ${e.toString()}'));
     }
   }
 
-  /// Logout current user
+  // clears session and logs user out
   Future<void> logout() async {
     emit(AuthLoading());
-    
+
     try {
       await _authRepo.logout();
       emit(AuthUnauthenticated());
     } catch (e) {
-      print('Logout error: $e');
-      emit(AuthError('Logout failed: ${e.toString()}'));
+      print('logout error: $e');
+      emit(AuthError('logout failed: ${e.toString()}'));
     }
   }
 

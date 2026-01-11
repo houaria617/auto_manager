@@ -1,3 +1,5 @@
+// displays ranked list of most rented vehicles
+
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +23,7 @@ class TopRentedCarsCard extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
+            // list of cars with their rental counts
             ListView.separated(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -31,6 +34,7 @@ class TopRentedCarsCard extends StatelessWidget {
                 final car = cars[index];
                 return Row(
                   children: [
+                    // car icon
                     CircleAvatar(
                       backgroundColor: Colors.blue[50],
                       child: Icon(
@@ -39,6 +43,7 @@ class TopRentedCarsCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 15),
+                    // car name and rental count
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,6 +65,7 @@ class TopRentedCarsCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // rank badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,

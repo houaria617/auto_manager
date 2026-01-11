@@ -1,3 +1,5 @@
+// loads rental history for a specific client profile
+
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:bloc/bloc.dart';
 import '../../../databases/repo/Rental/rental_abstract.dart';
@@ -8,6 +10,7 @@ class ProfileCubit extends Cubit<List<Map<String, dynamic>>> {
   final _rentalRepo = AbstractRentalRepo.getInstance();
   final _carRepo = AbstractCarRepo.getInstance();
 
+  // fetches client rentals with car names joined
   void getRentals(int clientID) async {
     print('inside get rentals of profile cubit');
     final clientRentals = await _rentalRepo.getClientRentals(clientID);

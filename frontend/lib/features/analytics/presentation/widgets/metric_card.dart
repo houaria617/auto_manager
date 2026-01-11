@@ -1,6 +1,5 @@
-// ============================================================================
-// FILE: lib/features/reports/presentation/widgets/metric_card.dart
-// ============================================================================
+// reusable card for displaying a single metric with icon
+
 import 'package:flutter/material.dart';
 
 class MetricCard extends StatelessWidget {
@@ -24,11 +23,13 @@ class MetricCard extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
+            // icon in colored circle
             CircleAvatar(
               backgroundColor: Colors.blue[50],
               child: Icon(icon, color: Colors.blue[600]),
             ),
             const SizedBox(width: 15),
+            // title and value text
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

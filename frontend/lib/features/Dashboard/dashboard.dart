@@ -1,3 +1,5 @@
+// main dashboard screen with stats cards and recent activities
+
 import 'package:auto_manager/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
 import 'package:auto_manager/features/settings/presentation/screens/settings_screen.dart';
@@ -14,6 +16,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  // loads all dashboard data on first frame
   @override
   void initState() {
     super.initState();
@@ -138,8 +141,7 @@ class _DashboardState extends State<Dashboard> {
                         itemBuilder: (context, index) {
                           final activity = state.recentActivities[index];
 
-                          // SAFE DATE PARSING
-                          // We ensure the date is parsed correctly whether it's String or DateTime
+                          // parse date safely whether it's string or datetime
                           DateTime date;
                           try {
                             if (activity['date'] is DateTime) {
@@ -150,7 +152,7 @@ class _DashboardState extends State<Dashboard> {
                               );
                             }
                           } catch (e) {
-                            date = DateTime.now(); // Fallback if parsing fails
+                            date = DateTime.now();
                           }
 
                           return Container(
@@ -256,9 +258,8 @@ class _DashboardState extends State<Dashboard> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
 
-                  // ✅✅✅ THIS IS THE CRITICAL FIX ✅✅✅
+                  // handles new rental creation and refreshes dashboard after
                   onTap: () async {
-                    // 1. Wait for AddRentalScreen to finish
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -270,28 +271,22 @@ class _DashboardState extends State<Dashboard> {
 
                     final cubit = context.read<DashboardCubit>();
 
-                    // 2. If we got a car name back, add the activity
+                    // add activity if rental was created successfully
                     if (result != null && result is String) {
-                      print(
-                        "DEBUG: Adding Activity for $result",
-                      ); // Debug print
+                      print("adding activity for $result");
                       cubit.addActivity({
                         'description': 'Rented $result',
-                        // Store as String to match DateTime.parse in UI
                         'date': DateTime.now().toIso8601String(),
                       });
                     } else {
-                      // Just refresh if they backed out or result was null
                       cubit.loadActivities();
                     }
 
-                    // 3. Always refresh counters
+                    // refresh all dashboard stats
                     cubit.countOngoingRentals();
                     cubit.countAvailableCars();
                     cubit.countDueToday();
                   },
-
-                  // ✅✅✅ END CRITICAL FIX ✅✅✅
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -327,7 +322,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // Helper for cleaner code
+  // builds a gradient stat card with icon and value from cubit
   Widget _buildStatCard(
     String title,
     IconData icon,

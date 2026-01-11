@@ -2,9 +2,10 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 
+# tests successful rental creation with mocked firestore
 @patch('firebase_admin.firestore.client')
 def test_create_rental_success(mock_firestore, client):
-    # Mock the Firestore document creation
+    # setup mock db
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc_ref = MagicMock()
@@ -28,9 +29,10 @@ def test_create_rental_success(mock_firestore, client):
     assert response.json['id'] == "rental_id_123"
 
 
+# tests 404 response when rental not found
 @patch('firebase_admin.firestore.client')
 def test_get_rental_not_found(mock_firestore, client):
-    # Mock a document that does not exist
+    # mock a non-existent document
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()
@@ -43,9 +45,10 @@ def test_get_rental_not_found(mock_firestore, client):
     assert "Rental not found" in response.json['error']
 
 
+# tests fetching all rentals
 @patch('firebase_admin.firestore.client')
 def test_get_all_rentals(mock_firestore, client):
-    # Mock Firestore stream
+    # setup mock stream
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()
@@ -68,9 +71,10 @@ def test_get_all_rentals(mock_firestore, client):
     assert response.json[0]['client_id'] == 1
 
 
+# tests successful rental update
 @patch('firebase_admin.firestore.client')
 def test_update_rental_success(mock_firestore, client):
-    # Mock existing document
+    # mock existing document
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()
@@ -84,9 +88,10 @@ def test_update_rental_success(mock_firestore, client):
     assert "Rental updated" in response.json['message']
 
 
+# tests update failure when rental not found
 @patch('firebase_admin.firestore.client')
 def test_update_rental_not_found(mock_firestore, client):
-    # Mock non-existing document
+    # mock non-existing document
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()
@@ -100,9 +105,10 @@ def test_update_rental_not_found(mock_firestore, client):
     assert "Rental not found" in response.json['error']
 
 
+# tests successful rental deletion
 @patch('firebase_admin.firestore.client')
 def test_delete_rental_success(mock_firestore, client):
-    # Mock existing document
+    # mock existing document
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()
@@ -115,9 +121,10 @@ def test_delete_rental_success(mock_firestore, client):
     assert "Rental deleted" in response.json['message']
 
 
+# tests delete failure when rental not found
 @patch('firebase_admin.firestore.client')
 def test_delete_rental_not_found(mock_firestore, client):
-    # Mock non-existing document
+    # mock non-existing document
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()

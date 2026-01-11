@@ -7,35 +7,37 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
+
+# returns summary stats for the agency dashboard
 @dashboard_bp.route('/stats', methods=['GET'])
 def get_dashboard_stats():
     db = firestore.client()
-    # In the future, agency_id will come from your Auth token
-    agency_id = request.args.get('agency_id') 
+    agency_id = request.args.get('agency_id')
     today = date.today().isoformat()
 
-    # 1. Ongoing Rentals (rental_state is 'ongoing')
+    # count rentals that are currently ongoing
     ongoing_count = len(db.collection('rental')
         .where('agency_id', '==', agency_id)
         .where('rental_state', '==', 'ongoing').get())
 
-    # 2. Available Cars (state is 'available')
+    # count cars marked as available in the fleet
     available_cars = len(db.collection('car')
         .where('agency_id', '==', agency_id)
         .where('state', '==', 'available').get())
 
-    # 3. Due Today (date_to == today AND rental_state is 'ongoing')
+    # count ongoing rentals that need to be returned today
     due_today = len(db.collection('rental')
         .where('agency_id', '==', agency_id)
         .where('date_to', '==', today)
         .where('rental_state', '==', 'ongoing').get())
 
-    # 4. Recent Activities (limit to 3, ordered by date)
+    # grab the 3 most recent activities for the timeline
     activities_docs = db.collection('activity')\
         .where('agency_id', '==', agency_id)\
         .order_by('activity_date', direction=Query.DESCENDING)\
         .limit(3).get()
 
+    # transform activity docs into clean response objects
     activities = []
     for doc in activities_docs:
         data = doc.to_dict() or {}
@@ -45,6 +47,7 @@ def get_dashboard_stats():
             "id": doc.id
         })
 
+    # bundle everything into the response
     return jsonify({
         "ongoing_rentals": ongoing_count,
         "available_cars": available_cars,

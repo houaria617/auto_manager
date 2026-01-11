@@ -1,3 +1,5 @@
+// login screen with email and password form
+
 import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // form state and controllers
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -26,9 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // validates form and triggers login via cubit
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      // Call AuthCubit to login
       context.read<AuthCubit>().login(
         username: _usernameController.text.trim(),
         password: _passwordController.text,
@@ -201,7 +204,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                           hintText: 'Enter your email',
                                         ),
                                         validator: (value) {
-                                          if (value == null || value.isEmpty || !value.contains('@') || !value.contains('.') ) {
+                                          if (value == null ||
+                                              value.isEmpty ||
+                                              !value.contains('@') ||
+                                              !value.contains('.')) {
                                             return 'Please enter your email';
                                           }
                                           if (value.length < 4) {

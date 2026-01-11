@@ -1,3 +1,5 @@
+// action buttons for rental details screen - payment, return, renew, cancel
+
 import 'package:auto_manager/features/payment/presentation/payment_screen.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
@@ -18,6 +20,7 @@ class ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // extract current state values
     final state = (rentalData['state'] ?? '').toString().toLowerCase();
     final paymentState = (rentalData['payment_state'] ?? '')
         .toString()
@@ -26,7 +29,7 @@ class ActionButtons extends StatelessWidget {
     final isCompleted = state == 'completed' || state == 'returned';
     final isPaid = paymentState == 'paid';
 
-    // Safely get total amount
+    // safely convert total amount to double
     double totalAmount = (rentalData['total_amount'] is int)
         ? (rentalData['total_amount'] as int).toDouble()
         : (rentalData['total_amount'] ?? 0.0);

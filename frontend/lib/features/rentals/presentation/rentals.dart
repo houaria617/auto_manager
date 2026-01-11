@@ -1,14 +1,10 @@
-// lib/features/rentals/presentation/screens/rentals_screen.dart
+// main rentals screen with ongoing and completed tabs
 
-// Business Logic
-// Note: Ensure these paths match your actual project structure
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Widgets & Screens
 import '../../Dashboard/navigation_bar.dart';
 import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
 import 'package:auto_manager/features/rentals/presentation/rental_details.dart';
@@ -20,8 +16,7 @@ class RentalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // FIX 1: Removed BlocProvider(create:...).
-    // We now use the Global instance provided in main.dart.
+    // uses global cubit instance from main.dart
     return const _RentalsScreenContent();
   }
 }
@@ -34,7 +29,7 @@ class _RentalsScreenContent extends StatefulWidget {
 }
 
 class _RentalsScreenContentState extends State<_RentalsScreenContent> {
-  // Local state for the View Toggle (Ongoing vs Completed)
+  // tracks which tab is active
   bool _showCompleted = false;
 
   void _toggleView(bool showCompleted) {
@@ -123,8 +118,8 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
     );
   }
 
+  // builds filtered list based on ongoing or completed toggle
   Widget _buildRentalsList(List<Map> allRentals) {
-    // Filter the data locally based on the toggle state
     final filteredList = allRentals.where((rental) {
       final state = (rental['state'] ?? '').toString().toLowerCase();
       final isCompletedState = state == 'completed' || state == 'returned';
@@ -162,18 +157,16 @@ class _RentalsScreenContentState extends State<_RentalsScreenContent> {
     );
   }
 
+  // navigates to rental details screen
   void _handleRentalTap(BuildContext context, Map<String, dynamic> rental) {
-    // FIX 2: Simplified navigation.
-    // We don't need BlocProvider.value because the details screen
-    // will find the global Cubit in main.dart automatically.
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => RentalDetailsScreen(rental: rental)),
     );
   }
 
+  // navigates to add rental screen
   void _handleAddRental(BuildContext context) {
-    // FIX 3: Simplified navigation.
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddRentalScreen()),

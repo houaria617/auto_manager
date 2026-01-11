@@ -1,3 +1,5 @@
+// subscription plans comparison screen
+
 import 'package:auto_manager/features/subscription/presentation/screens/payment_screen.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,7 @@ class SubscriptionScreen extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            //free plan
+            // free plan card
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -82,7 +84,7 @@ class SubscriptionScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24),
-            //premium plan
+            // premium plan card with recommended badge
             Stack(
               children: [
                 // Premium plan container

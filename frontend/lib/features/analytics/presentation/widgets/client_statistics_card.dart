@@ -1,4 +1,4 @@
-// lib/features/analytics/presentation/widgets/client_statistics_card.dart
+// donut chart showing client breakdown between new and repeat
 
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 class ClientStatisticsCard extends StatelessWidget {
   final int totalClients;
-  final int activeClients; // We'll treat this as "New Clients" for the UI demo
+  final int activeClients;
 
   const ClientStatisticsCard({
     super.key,
@@ -16,8 +16,7 @@ class ClientStatisticsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate logic (Mock logic for the visual)
-    // Assuming activeClients = New Clients, remaining = Repeat Clients
+    // treat active clients as new clients for the chart
     final int newClients = activeClients;
     final int repeatClients = totalClients - newClients;
 
@@ -38,7 +37,7 @@ class ClientStatisticsCard extends StatelessWidget {
 
             Row(
               children: [
-                // DONUT CHART
+                // donut chart with center total
                 SizedBox(
                   width: 120,
                   height: 120,
@@ -47,17 +46,17 @@ class ClientStatisticsCard extends StatelessWidget {
                       PieChart(
                         PieChartData(
                           sectionsSpace: 0,
-                          centerSpaceRadius: 45, // Creates the hole
+                          centerSpaceRadius: 45,
                           startDegreeOffset: -90,
                           sections: [
-                            // New Clients Section (Blue)
+                            // new clients in blue
                             PieChartSectionData(
                               color: Colors.blue,
                               value: newClients.toDouble(),
                               title: '',
                               radius: 12,
                             ),
-                            // Repeat Clients Section (Green)
+                            // repeat clients in green
                             PieChartSectionData(
                               color: Colors.green,
                               value: repeatClients.toDouble(),
@@ -67,7 +66,7 @@ class ClientStatisticsCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Center Text
+                      // total count in center
                       Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -96,7 +95,7 @@ class ClientStatisticsCard extends StatelessWidget {
 
                 const SizedBox(width: 30),
 
-                // LEGEND
+                // legend showing breakdown percentages
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

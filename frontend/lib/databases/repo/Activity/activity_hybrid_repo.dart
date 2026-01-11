@@ -1,5 +1,3 @@
-// lib/databases/repo/Activity/activity_hybrid_repo.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:auto_manager/core/services/connectivity_service.dart';
@@ -9,6 +7,7 @@ import 'package:auto_manager/databases/dbhelper.dart';
 import 'activity_abstract.dart';
 import 'activity_db.dart';
 
+// syncs activities between local sqlite and flask api
 class ActivityHybridRepo extends AbstractActivityRepo {
   final String baseUrl = ApiConfig.baseUrl;
   final AbstractActivityRepo _localRepo = ActivityDB();
@@ -16,13 +15,12 @@ class ActivityHybridRepo extends AbstractActivityRepo {
 
   @override
   Future<List<Map<String, dynamic>>> getActivities() async {
-    // 1. Try to sync with cloud if online
+    // try to pull latest from server if online
     if (await ConnectivityService.isOnline()) {
       try {
         final userId = await _prefsManager.getUserId();
         final token = await _prefsManager.getAuthToken();
 
-        // Ensure we are hitting the correct analytics endpoint
         final response = await http
             .get(
               Uri.parse('$baseUrl/analytics/activities?agency_id=$userId'),
@@ -35,7 +33,8 @@ class ActivityHybridRepo extends AbstractActivityRepo {
 
         if (response.statusCode == 200) {
           final List data = json.decode(response.body);
-          // 2. Replace local SQLite activities with cloud data (avoid duplicates)
+
+          // replace local activities with fresh server data
           final db = await DBHelper.getDatabase();
           await db.delete('activity');
 
@@ -49,12 +48,10 @@ class ActivityHybridRepo extends AbstractActivityRepo {
         }
       } catch (e) {
         print("Activity Sync Error: $e");
-        // Fall back to local data on failure
       }
     }
 
-    // 3. Always return local data as the single source of truth for the UI
-    // This ensures sorting (ORDER BY date DESC) and limits are applied correctly
+    // always return local data as truth for ui
     return _localRepo.getActivities();
   }
 
@@ -63,7 +60,7 @@ class ActivityHybridRepo extends AbstractActivityRepo {
     final userId = await _prefsManager.getUserId();
     final token = await _prefsManager.getAuthToken();
 
-    // Prepare payload to match backend: description + date + agency_id
+    // build payload matching backend schema
     final payload = {
       'description': activity['description'] ?? activity['title'] ?? '',
       'date': activity['date'] is DateTime
@@ -72,10 +69,10 @@ class ActivityHybridRepo extends AbstractActivityRepo {
       'agency_id': userId,
     };
 
-    // 1. Save locally first (immediate UI feedback)
+    // save locally first for instant ui feedback
     bool localSuccess = await _localRepo.insertActivity(activity);
 
-    // 2. Try to save to cloud if online
+    // push to server if online
     if (await ConnectivityService.isOnline()) {
       try {
         final response = await http

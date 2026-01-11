@@ -1,26 +1,26 @@
+// authentication state classes for auth cubit
+
 import 'package:auto_manager/features/auth/data/models/user_model.dart';
 
-/// Authentication states for AuthCubit
-/// Location: lib/logic/cubits/auth_state.dart
 abstract class AuthState {}
 
-/// Initial state when app starts
+// initial state before any auth check
 class AuthInitial extends AuthState {}
 
-/// Loading state during login/signup/logout
+// loading during auth operations
 class AuthLoading extends AuthState {}
 
-/// User is authenticated
+// user successfully authenticated with user data
 class AuthAuthenticated extends AuthState {
   final UserModel user;
 
   AuthAuthenticated(this.user);
 }
 
-/// User is not authenticated
+// no active user session
 class AuthUnauthenticated extends AuthState {}
 
-/// Error occurred during authentication
+// auth operation failed with error message
 class AuthError extends AuthState {
   final String message;
 

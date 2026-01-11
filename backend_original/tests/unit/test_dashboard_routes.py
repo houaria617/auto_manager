@@ -1,17 +1,19 @@
 from unittest.mock import MagicMock, patch
 
+
+# tests the dashboard stats endpoint with mocked firestore data
 @patch('firebase_admin.firestore.client')
 def test_get_dashboard_stats_logic(mock_firestore, client):
-    # 1. Setup Mock DB
+    # setup mock db
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
 
-    # 2. Create "Fake" data snapshots
-    mock_ongoing = [MagicMock()] * 5  # Simulates 5 ongoing rentals
-    mock_available = [MagicMock()] * 10 # Simulates 10 available cars
-    mock_due = [MagicMock()] * 2      # Simulates 2 due today
-    
-    # Mocking Activity documents
+    # create fake data snapshots
+    mock_ongoing = [MagicMock()] * 5
+    mock_available = [MagicMock()] * 10
+    mock_due = [MagicMock()] * 2
+
+    # mock activity document
     mock_activity = MagicMock()
     mock_activity.to_dict.return_value = {
         "description": "New car added",
@@ -19,20 +21,18 @@ def test_get_dashboard_stats_logic(mock_firestore, client):
     }
     mock_activity.id = "act_1"
 
-    # 3. Chain the mocks for the specific call order in your route
-    # Note: .get() is called 4 times in the route. 
-    # side_effect returns these in order.
+    # chain the mocks for the specific call order in the route
     mock_db.collection().where().where().get.side_effect = [
-        mock_ongoing, 
-        mock_available, 
+        mock_ongoing,
+        mock_available,
         mock_due
     ]
     mock_db.collection().where().order_by().limit().get.return_value = [mock_activity]
 
-    # 4. Call the endpoint
+    # call the endpoint
     response = client.get('/dashboard/stats?agency_id=agency_001')
 
-    # 5. Assertions
+    # verify response
     assert response.status_code == 200
     data = response.json
     assert data['ongoing_rentals'] == 5

@@ -1,11 +1,11 @@
+// analytics dashboard with revenue, client stats, and top rented cars
+
 import 'package:auto_manager/core/services/pdf_export.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/analytics/analytics_cubit.dart';
 import 'package:auto_manager/logic/cubits/analytics/analytics_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Widgets
 import '../../Dashboard/navigation_bar.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/client_statistics_card.dart';
 import 'package:auto_manager/features/analytics/presentation/widgets/metric_card.dart';
@@ -18,7 +18,7 @@ class ReportsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Provide the Cubit and trigger initial load
+    // creates cubit and loads initial weekly stats
     return BlocProvider(
       create: (context) => AnalyticsCubit()..loadStats('This Week'),
       child: const _ReportsScreenContent(),
@@ -36,20 +36,19 @@ class _ReportsScreenContent extends StatefulWidget {
 class _ReportsScreenContentState extends State<_ReportsScreenContent> {
   String _selectedTimeframe = 'This Week';
 
+  // updates timeframe and reloads stats
   void _onTimeframeSelected(String timeframe) {
     setState(() {
       _selectedTimeframe = timeframe;
     });
-    // Trigger the Cubit to load new mock data based on selection
     context.read<AnalyticsCubit>().loadStats(timeframe);
   }
 
+  // generates pdf report and opens share dialog
   Future<void> _onExportPressed() async {
-    // 1. Get current state
     final state = context.read<AnalyticsCubit>().state;
 
     if (state is AnalyticsLoaded) {
-      // 2. Show loading feedback
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.generatingPdf),
@@ -58,23 +57,24 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
       );
 
       try {
-        // 3. Generate and Open PDF
         final pdfService = PdfExportService();
         await pdfService.generateAndPrintPdf(state, _selectedTimeframe);
-
-        // Note: The 'printing' package handles the native UI (Print/Share dialog)
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorGeneratingPdf(e.toString())),
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)!.errorGeneratingPdf(e.toString()),
+              ),
+            ),
+          );
         }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseWaitForData)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseWaitForData),
+        ),
       );
     }
   }
@@ -88,7 +88,10 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
         elevation: 0,
         title: Text(
           AppLocalizations.of(context)!.analyticsTitle,
-          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           Padding(
@@ -153,7 +156,8 @@ class _ReportsScreenContentState extends State<_ReportsScreenContent> {
                     MetricCard(
                       icon: Icons.access_time,
                       title: AppLocalizations.of(context)!.avgDuration,
-                      value: '${state.avgDurationDays} ${AppLocalizations.of(context)!.days}',
+                      value:
+                          '${state.avgDurationDays} ${AppLocalizations.of(context)!.days}',
                     ),
                     const SizedBox(height: 20),
 

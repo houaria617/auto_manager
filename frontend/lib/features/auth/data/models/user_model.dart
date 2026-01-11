@@ -1,9 +1,10 @@
-/// User Model for authentication
-/// Location: lib/features/auth/data/models/user_model.dart
+// represents a user/agency in the system
+
 class UserModel {
-  final dynamic id; // Can be int (local) or String (backend)
+  // id can be int from local db or string from backend
+  final dynamic id;
   final String username;
-  final String? companyName; // Optional for backwards compatibility
+  final String? companyName;
   final String? email;
   final String? phone;
   final String? joinDate;
@@ -17,12 +18,11 @@ class UserModel {
     this.joinDate,
   });
 
-  /// Create from backend JSON response
-  /// Backend returns: {id, name, email, phone, join_date}
+  // parses backend response where 'name' is used instead of 'username'
   factory UserModel.fromBackendJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'], // String from backend
-      username: json['name'] ?? json['username'] ?? '', // Backend uses 'name'
+      id: json['id'],
+      username: json['name'] ?? json['username'] ?? '',
       companyName: json['name'],
       email: json['email'],
       phone: json['phone'],
@@ -30,10 +30,10 @@ class UserModel {
     );
   }
 
-  /// Create from local JSON (SharedPreferences)
+  // parses local storage json format
   factory UserModel.fromLocalJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'], // int from local
+      id: json['id'],
       username: json['username'] ?? '',
       companyName: json['companyName'],
       email: json['email'],
@@ -42,7 +42,7 @@ class UserModel {
     );
   }
 
-  /// Convert to JSON for SharedPreferences
+  // converts to json for local storage
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -54,13 +54,9 @@ class UserModel {
     };
   }
 
-  /// Convert to JSON for backend requests
+  // converts to json format expected by backend
   Map<String, dynamic> toBackendJson() {
-    return {
-      'name': username, // Backend uses 'name' not 'username'
-      'email': email,
-      'phone': phone,
-    };
+    return {'name': username, 'email': email, 'phone': phone};
   }
 
   @override

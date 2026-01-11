@@ -1,3 +1,4 @@
+// card showing rental date range and progress bar
 
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -10,14 +11,14 @@ class RentalPeriodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Parse Dates
+    // parse date strings into datetime objects
     final start =
         DateTime.tryParse(rentalData['date_from'] ?? '') ?? DateTime.now();
     final end =
         DateTime.tryParse(rentalData['date_to'] ?? '') ?? DateTime.now();
     final now = DateTime.now();
 
-    // Calculations
+    // calculate rental duration stats
     final totalDays = end.difference(start).inDays;
     final daysPassed = now.difference(start).inDays;
     int daysLeft = end.difference(now).inDays;
@@ -82,8 +83,15 @@ class RentalPeriodCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _DateColumn(label: AppLocalizations.of(context)!.start, date: formatter.format(start)),
-        _DateColumn(label: AppLocalizations.of(context)!.end, date: formatter.format(end), isEnd: true),
+        _DateColumn(
+          label: AppLocalizations.of(context)!.start,
+          date: formatter.format(start),
+        ),
+        _DateColumn(
+          label: AppLocalizations.of(context)!.end,
+          date: formatter.format(end),
+          isEnd: true,
+        ),
       ],
     );
   }

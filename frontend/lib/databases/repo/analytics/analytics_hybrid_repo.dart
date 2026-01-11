@@ -6,6 +6,7 @@ import 'package:auto_manager/databases/repo/analytics/analytics_abstract.dart';
 import 'package:auto_manager/databases/repo/Car/car_abstract.dart';
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
 
+// calculates analytics stats from local data or server
 class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
   final String baseUrl = 'http://localhost:5000';
   final AbstractRentalRepo rentalRepo;
@@ -16,6 +17,7 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
 
   @override
   Future<Map<String, dynamic>> getStats(String timeframe) async {
+    // try server first if online
     if (await ConnectivityService.isOnline()) {
       try {
         final response = await http.get(
@@ -28,12 +30,12 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
         }
       } catch (e) {}
     }
-    // Offline: Compute locally
+    // fall back to local calculation when offline
     return await _computeStatsLocally(timeframe);
   }
 
+  // crunches the numbers from local sqlite data
   Future<Map<String, dynamic>> _computeStatsLocally(String timeframe) async {
-    // Fetch data from local repos
     final rawRentals = await rentalRepo.getData();
     final rawCars = await carRepo.getData();
     final rawClients = await clientRepo.getAllClients();
@@ -46,7 +48,7 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
     final List<Map<String, dynamic>> allClients =
         List<Map<String, dynamic>>.from(rawClients);
 
-    // Define Date Filters
+    // figure out the date range based on timeframe
     final now = DateTime.now();
     DateTime startDate;
 
@@ -59,7 +61,7 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
       startDate = DateTime(2000);
     }
 
-    // Filter Rentals
+    // filter rentals to selected timeframe
     List<Map<String, dynamic>> filteredRentals = allRentals.where((rental) {
       final dateStr = rental['date_from']?.toString() ?? '';
       final rentalDate = DateTime.tryParse(dateStr) ?? DateTime(1900);
@@ -67,7 +69,7 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
           rentalDate.isAtSameMomentAs(startDate);
     }).toList();
 
-    // Calculate Key Metrics
+    // calculate metrics from filtered rentals
     double totalRevenue = 0.0;
     int totalDuration = 0;
     Set<int> activeClientIds = {};
@@ -80,6 +82,7 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
           : (rental['total_amount'] as double? ?? 0.0);
       totalRevenue += amount;
 
+      // calculate rental duration in days
       final start =
           DateTime.tryParse(rental['date_from']?.toString() ?? '') ?? now;
       final end = DateTime.tryParse(rental['date_to']?.toString() ?? '') ?? now;
@@ -87,15 +90,18 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
       if (days < 1) days = 1;
       totalDuration += days;
 
+      // track which clients were active
       if (rental['client_id'] != null) {
         activeClientIds.add(rental['client_id'] as int);
       }
 
+      // count rentals per car for popularity ranking
       if (rental['car_id'] != null) {
         int cId = rental['car_id'] as int;
         carPopularity[cId] = (carPopularity[cId] ?? 0) + 1;
       }
 
+      // add to daily chart data
       if (timeframe == 'This Week') {
         int dayIndex = start.weekday - 1;
         if (dayIndex >= 0 && dayIndex < 7) {
@@ -113,7 +119,7 @@ class AnalyticsHybridRepo implements AbstractAnalyticsRepo {
         ? 0
         : (totalDuration / filteredRentals.length).round();
 
-    // Calculate Top Cars
+    // build top 3 most popular cars list
     List<Map<String, dynamic>> topCarsList = [];
 
     var sortedCarIds = carPopularity.keys.toList()

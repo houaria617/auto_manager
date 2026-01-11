@@ -1,6 +1,7 @@
+// reusable info card widgets for client and car details
+
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-// import 'package:auto_manager/features/Clients/clients_history.dart'; // Uncomment when needed
 
 class ClientInfoCard extends StatelessWidget {
   final int clientId;

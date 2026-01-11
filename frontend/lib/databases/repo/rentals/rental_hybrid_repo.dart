@@ -1,3 +1,5 @@
+// hybrid rental repo that syncs between local sqlite and remote api
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -13,7 +15,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
   final AbstractRentalRepo _localRepo = RentalDB();
   final SharedPrefsManager _prefs = SharedPrefsManager();
 
-  // Helper to get headers with JWT (matching your AuthHybridRepo)
+  // builds auth headers with jwt token for api calls
   Future<Map<String, String>> _getHeaders() async {
     final token = await _prefs.getAuthToken();
     return {
@@ -22,6 +24,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
     };
   }
 
+  // fetches rentals from server when online and merges with local data
   @override
   Future<List<Map>> getData() async {
     if (await ConnectivityService.isOnline()) {
@@ -34,17 +37,17 @@ class RentalHybridRepo implements AbstractRentalRepo {
           final List data = json.decode(response.body);
           final localData = await _localRepo.getData();
 
+          // sync each remote rental to local database
           for (var item in data) {
             final remoteId = item['remote_id'];
 
-            // Check if this rental already exists locally by remote_id
             final existingRental = localData.firstWhere(
               (local) => local['remote_id'] == remoteId,
               orElse: () => {},
             );
 
             if (existingRental.isNotEmpty) {
-              // Update existing rental
+              // update existing local record with server data
               await _localRepo.updateRental(existingRental['id'], {
                 'client_id': item['client_id'],
                 'car_id': item['car_id'],
@@ -57,7 +60,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
                 'pending_sync': 0,
               });
             } else {
-              // Insert new rental from server
+              // insert new rental from server
               await _localRepo.insertRental({
                 'client_id': item['client_id'],
                 'car_id': item['car_id'],
@@ -73,21 +76,22 @@ class RentalHybridRepo implements AbstractRentalRepo {
           }
         }
       } catch (e) {
-        print("Sync Error: $e");
+        print("sync error: $e");
       }
     }
     return _localRepo.getData();
   }
 
+  // saves rental locally first then tries immediate sync if online
   @override
   Future<bool> insertRental(Map<String, dynamic> rental) async {
-    // 1. Save locally IMMEDIATELY (initially with pending_sync: 1)
+    // save to local db immediately with pending sync flag
     await _localRepo.insertRental({...rental, 'pending_sync': 1});
 
-    // 2. Try to sync immediately if online
+    // attempt immediate sync when we have connectivity
     if (await ConnectivityService.isOnline()) {
       try {
-        // Map local car id to remote id if available
+        // get car remote id if available for proper server reference
         String? carRemoteId;
         try {
           final car = await CarDB().getCar(rental['car_id']);
@@ -114,7 +118,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
           final data = json.decode(response.body);
           final remoteId = data['id'];
 
-          // Update the local record to mark it as synced
+          // find local record and update with remote id to mark as synced
           final localData = await _localRepo.getData();
           final localRecord = localData.lastWhere(
             (e) =>
@@ -130,16 +134,14 @@ class RentalHybridRepo implements AbstractRentalRepo {
               'remote_id': remoteId,
             });
           }
-          print("RentalHybridRepo: New rental synced immediately to Firebase");
+          print("rental synced immediately to firebase");
         }
       } catch (e) {
-        print(
-          "RentalHybridRepo: Immediate sync failed, will retry in background: $e",
-        );
+        print("immediate sync failed, will retry in background: $e");
       }
     }
 
-    // 3. Trigger background sync as fallback
+    // schedule background sync as fallback for failed or offline scenarios
     if (Platform.isAndroid || Platform.isIOS) {
       Workmanager().registerOneOffTask("sync-now", "sync-task");
     }
@@ -147,12 +149,13 @@ class RentalHybridRepo implements AbstractRentalRepo {
     return true;
   }
 
+  // updates rental locally then attempts to push changes to server
   @override
   Future<bool> updateRental(int localId, Map<String, dynamic> rental) async {
-    // 1. Update locally immediately (with pending_sync: 1)
+    // save update locally first with pending sync flag
     await _localRepo.updateRental(localId, {...rental, 'pending_sync': 1});
 
-    // 2. Try to sync immediately if online
+    // try to sync the update immediately if online
     if (await ConnectivityService.isOnline()) {
       try {
         final localData = await _localRepo.getData();
@@ -164,9 +167,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
         final String? remoteId = record['remote_id'];
 
         if (remoteId != null) {
-          print(
-            "RentalHybridRepo: Syncing update for rental $remoteId with state=${rental['state']}, payment_state=${rental['payment_state']}",
-          );
+          print("syncing update for rental $remoteId");
 
           final response = await http.put(
             Uri.parse('${ApiConfig.baseUrl}/rentals/$remoteId'),
@@ -180,41 +181,31 @@ class RentalHybridRepo implements AbstractRentalRepo {
             }),
           );
 
-          print(
-            "RentalHybridRepo: Update response status: ${response.statusCode}",
-          );
+          print("update response status: ${response.statusCode}");
 
           if (response.statusCode == 200 || response.statusCode == 201) {
-            // Mark as synced locally
+            // mark as synced in local db
             await _localRepo.updateRental(localId, {
               ...rental,
               'pending_sync': 0,
               'remote_id': remoteId,
             });
-            print(
-              "RentalHybridRepo: Rental update synced immediately to Firebase",
-            );
+            print("rental update synced to firebase");
             return true;
           } else {
-            print(
-              "RentalHybridRepo: Failed to sync, status: ${response.statusCode}, body: ${response.body}",
-            );
+            print("failed to sync, status: ${response.statusCode}");
           }
         } else {
-          print(
-            "RentalHybridRepo: No remote_id found, will sync in background",
-          );
+          print("no remote_id found, will sync in background");
         }
       } catch (e) {
-        print(
-          "RentalHybridRepo: Immediate sync failed, will retry in background: $e",
-        );
+        print("immediate sync failed, will retry in background: $e");
       }
     } else {
-      print("RentalHybridRepo: Offline, rental will sync in background");
+      print("offline, rental will sync in background");
     }
 
-    // 3. Trigger background sync as fallback
+    // schedule background sync as fallback
     if (Platform.isAndroid || Platform.isIOS) {
       Workmanager().registerOneOffTask("sync-task-update", "sync-task");
     }
@@ -222,6 +213,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
     return true;
   }
 
+  // deletes locally and attempts remote deletion if online
   @override
   Future<bool> deleteRental(int localId) async {
     final localData = await _localRepo.getData();
@@ -231,6 +223,7 @@ class RentalHybridRepo implements AbstractRentalRepo {
     );
     final String? remoteId = record['remote_id'];
 
+    // try to delete from server if we have connectivity and remote id
     if (await ConnectivityService.isOnline() && remoteId != null) {
       try {
         await http.delete(

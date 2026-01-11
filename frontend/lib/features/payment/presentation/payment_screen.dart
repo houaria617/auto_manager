@@ -1,4 +1,4 @@
-// lib/features/payments/presentation/payments_screen.dart
+// payment management screen for a rental with add payment and export
 
 import 'package:auto_manager/core/services/pdf_export.dart';
 import 'package:auto_manager/logic/cubits/payment/payment_cubit.dart';
@@ -22,7 +22,6 @@ class PaymentsScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => PaymentCubit()..loadPayments(rentalId, totalAmount),
       child: Builder(
-        // Need Builder to get the context containing PaymentCubit
         builder: (context) {
           return Scaffold(
             backgroundColor: Colors.white,
@@ -35,7 +34,6 @@ class PaymentsScreen extends StatelessWidget {
               elevation: 0,
               leading: const BackButton(color: Colors.black),
               actions: [
-                // --- EXPORT BUTTON ---
                 IconButton(
                   icon: const Icon(Icons.print, color: Colors.black),
                   tooltip: "Print Statement",
@@ -61,7 +59,7 @@ class PaymentsScreen extends StatelessWidget {
     );
   }
 
-  // --- EXPORT LOGIC ---
+  // generates and shares pdf payment statement
   Future<void> _handleExport(BuildContext context) async {
     final state = context.read<PaymentCubit>().state;
 
@@ -82,11 +80,11 @@ class PaymentsScreen extends StatelessWidget {
       } catch (e) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Error generating PDF: $e")));
+        ).showSnackBar(SnackBar(content: Text("error generating pdf: $e")));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please wait for data to load.")),
+        const SnackBar(content: Text("please wait for data to load.")),
       );
     }
   }

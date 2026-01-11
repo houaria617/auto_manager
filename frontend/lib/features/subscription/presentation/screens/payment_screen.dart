@@ -1,3 +1,5 @@
+// placeholder payment screen with language switcher
+
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ class PaymentScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 237, 240, 245),
       ),
+      // temporary language picker for testing
       body: Center(
         child: BlocBuilder<LocaleCubit, Locale>(
           builder: (context, locale) {

@@ -1,32 +1,27 @@
+// main settings screen with account options and logout
+
 import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_manager/features/settings/agency_info_screen.dart';
-// Localization
 import 'package:auto_manager/l10n/app_localizations.dart';
-
-// Cubits
 import 'package:auto_manager/logic/cubits/locale/locale_cubit.dart';
-
-// Screens
 import 'package:auto_manager/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:auto_manager/features/auth/presentation/login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  // --- Helper for navigating to Agency Info ---
+  // navigates to agency profile screen
   void _navigateToAgencyInfo(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AgencyInfoScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const AgencyInfoScreen()),
     );
   }
 
-  // --- Helper for Logout Logic ---
+  // shows logout confirmation dialog
   void _handleLogout(BuildContext context) {
     showDialog(
       context: context,
@@ -40,8 +35,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(dialogContext); // Close dialog
-              // Call logout from AuthCubit
+              Navigator.pop(dialogContext);
               context.read<AuthCubit>().logout();
             },
             child: Text(
@@ -54,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // --- Helper for Language Dialog ---
+  // shows language picker dropdown dialog
   void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -289,7 +283,7 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-// Optional Coming Soon Screen
+// fallback coming soon placeholder screen
 class ComingSoonScreen extends StatelessWidget {
   final String title;
   const ComingSoonScreen({super.key, required this.title});

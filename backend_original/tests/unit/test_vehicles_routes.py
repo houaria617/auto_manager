@@ -1,14 +1,9 @@
-"""
-Unit tests for vehicles routes.
-Tests the validation logic and route handlers for the vehicles blueprint.
-These tests focus on authentication and basic error handling.
-"""
 from unittest.mock import patch
 
 
+# checks that creating a vehicle without auth returns 401
 @patch('firebase_admin.firestore.client')
 def test_create_vehicle_requires_auth(mock_firestore, client):
-    """Test that vehicle creation requires authentication"""
     payload = {
         'name': 'Toyota Corolla',
         'plate': 'ABC-123',
@@ -16,34 +11,33 @@ def test_create_vehicle_requires_auth(mock_firestore, client):
         'state': 'available',
     }
 
-    # Without authorization header, should get 401
     response = client.post('/vehicles/', json=payload)
 
     assert response.status_code == 401
     assert 'error' in response.json
 
 
+# checks that listing vehicles without auth returns 401
 @patch('firebase_admin.firestore.client')
 def test_get_all_vehicles_requires_auth(mock_firestore, client):
-    """Test that getting all vehicles requires authentication"""
     response = client.get('/vehicles/')
 
     assert response.status_code == 401
     assert 'error' in response.json
 
 
+# checks that fetching a single vehicle without auth returns 401
 @patch('firebase_admin.firestore.client')
 def test_get_vehicle_by_id_requires_auth(mock_firestore, client):
-    """Test that getting a specific vehicle requires authentication"""
     response = client.get('/vehicles/vehicle_123')
 
     assert response.status_code == 401
     assert 'error' in response.json
 
 
+# checks that updating a vehicle without auth returns 401
 @patch('firebase_admin.firestore.client')
 def test_update_vehicle_requires_auth(mock_firestore, client):
-    """Test that updating a vehicle requires authentication"""
     payload = {
         'name': 'Updated Name',
         'state': 'rented',
@@ -55,18 +49,18 @@ def test_update_vehicle_requires_auth(mock_firestore, client):
     assert 'error' in response.json
 
 
+# checks that deleting a vehicle without auth returns 401
 @patch('firebase_admin.firestore.client')
 def test_delete_vehicle_requires_auth(mock_firestore, client):
-    """Test that deleting a vehicle requires authentication"""
     response = client.delete('/vehicles/vehicle_123')
 
     assert response.status_code == 401
     assert 'error' in response.json
 
 
+# checks that an invalid jwt token gets rejected
 @patch('firebase_admin.firestore.client')
 def test_create_vehicle_invalid_token(mock_firestore, client):
-    """Test that invalid token is rejected"""
     payload = {
         'name': 'Toyota Corolla',
         'plate': 'ABC-123',

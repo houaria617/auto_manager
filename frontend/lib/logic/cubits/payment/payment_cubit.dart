@@ -1,3 +1,5 @@
+// manages payment data and calculates totals for a rental
+
 import 'package:auto_manager/databases/repo/payment/payment_abstract.dart';
 import 'package:auto_manager/databases/repo/payments/payment_hybrid_repo.dart';
 import 'package:auto_manager/databases/repo/rentals/rental_repository.dart';
@@ -11,6 +13,7 @@ class PaymentCubit extends Cubit<PaymentState> {
 
   PaymentCubit() : super(PaymentInitial());
 
+  // loads payments and calculates totals for a rental
   Future<void> loadPayments(int rentalId, double totalRentalCost) async {
     emit(PaymentLoading());
     try {
@@ -26,17 +29,18 @@ class PaymentCubit extends Cubit<PaymentState> {
         ),
       );
     } catch (e) {
-      emit(PaymentError(message: "Failed to load payments: $e"));
+      emit(PaymentError(message: "failed to load payments: $e"));
     }
   }
 
+  // adds payment and updates rental status if fully paid
   Future<void> addPayment(
     int rentalId,
     double amount,
     double totalRentalCost,
   ) async {
     try {
-      // 1. Add Payment (This is now fast and offline-first)
+      // add payment record
       final newPayment = {
         'rental_id': rentalId,
         'date': DateTime.now().toIso8601String(),
@@ -44,13 +48,13 @@ class PaymentCubit extends Cubit<PaymentState> {
       };
       await _paymentRepo.addPayment(newPayment);
 
-      // 2. Check if fully paid
+      // check if rental is now fully paid
       final totalPaid = await _paymentRepo.getTotalPaid(rentalId);
 
       if (totalPaid >= totalRentalCost) {
         final rentals = await _rentalRepo.getData();
 
-        // SAFE SEARCH: Instead of firstWhere, use where().toList()
+        // safely find matching rental
         final matches = rentals
             .where((element) => element['id'] == rentalId)
             .toList();
@@ -59,16 +63,15 @@ class PaymentCubit extends Cubit<PaymentState> {
           final updatedRental = Map<String, dynamic>.from(matches.first);
           updatedRental['payment_state'] = 'Paid';
 
-          // This will now update locally and trigger background sync
           await _rentalRepo.updateRental(rentalId, updatedRental);
         }
       }
 
-      // 3. Reload UI (Loads from local DB immediately)
+      // refresh ui with new data
       await loadPayments(rentalId, totalRentalCost);
     } catch (e) {
-      print("Cubit Error: $e");
-      emit(PaymentError(message: "Failed to add payment: $e"));
+      print("cubit error: $e");
+      emit(PaymentError(message: "failed to add payment: $e"));
     }
   }
 }

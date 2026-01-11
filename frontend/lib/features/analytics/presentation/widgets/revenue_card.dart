@@ -1,4 +1,4 @@
-// lib/features/analytics/presentation/widgets/revenue_card.dart
+// revenue card with line chart showing daily revenue trends
 
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 class RevenueCard extends StatelessWidget {
   final double revenue;
-  final List<double> chartData; // List of 7 doubles (Mon-Sun)
+  final List<double> chartData;
 
   const RevenueCard({
     super.key,
@@ -25,7 +25,7 @@ class RevenueCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Text
+            // header label
             Text(
               AppLocalizations.of(context)!.revenue,
               style: TextStyle(
@@ -36,12 +36,12 @@ class RevenueCard extends StatelessWidget {
             ),
             const SizedBox(height: 5),
 
-            // Amount and Percentage
+            // amount with percentage change indicator
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '\$${revenue.toStringAsFixed(0)}', // Removed decimal for cleaner look
+                  '\$${revenue.toStringAsFixed(0)}',
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -55,7 +55,10 @@ class RevenueCard extends StatelessWidget {
                     children: [
                       Text(
                         AppLocalizations.of(context)!.thisWeek,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Icon(
@@ -78,12 +81,12 @@ class RevenueCard extends StatelessWidget {
             ),
             const SizedBox(height: 25),
 
-            // CHART AREA
+            // line chart showing weekly revenue
             SizedBox(
               height: 180,
               child: LineChart(
                 LineChartData(
-                  gridData: const FlGridData(show: false), // Hide grid lines
+                  gridData: const FlGridData(show: false),
                   titlesData: FlTitlesData(
                     show: true,
                     rightTitles: const AxisTitles(
@@ -94,7 +97,7 @@ class RevenueCard extends StatelessWidget {
                     ),
                     leftTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
-                    ), // Hide Y-axis numbers
+                    ),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
@@ -126,11 +129,11 @@ class RevenueCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(show: false), // Hide border box
+                  borderData: FlBorderData(show: false),
                   minX: 0,
                   maxX: 6,
                   minY: 0,
-                  // Add a little buffer to Y so the line doesn't hit the top
+                  // add buffer so line doesn't touch top edge
                   maxY:
                       (chartData.reduce(
                         (curr, next) => curr > next ? curr : next,
@@ -143,12 +146,10 @@ class RevenueCard extends StatelessWidget {
                         return FlSpot(index.toDouble(), chartData[index]);
                       }),
                       isCurved: true,
-                      color: Colors.blue[400], // Line Color
+                      color: Colors.blue[400],
                       barWidth: 3,
                       isStrokeCapRound: true,
-                      dotData: const FlDotData(
-                        show: false,
-                      ), // Hide dots on points
+                      dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
                         gradient: LinearGradient(

@@ -2,13 +2,14 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 
+# tests analytics stats with mocked rental and car data
 @patch('firebase_admin.firestore.client')
 def test_get_analytics_stats_success(mock_firestore, client):
-    # Mock Firestore queries
+    # setup mock db
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
 
-    # Mock rentals
+    # create mock rental document
     mock_rental_doc = MagicMock()
     mock_rental_doc.to_dict.return_value = {
         'agency_id': '1',
@@ -18,12 +19,13 @@ def test_get_analytics_stats_success(mock_firestore, client):
         'client_id': 1,
         'car_id': '1'
     }
-    mock_db.collection().where().stream.side_effect = [
-        [mock_rental_doc],  # For rentals
-        [MagicMock(id='1', to_dict=lambda: {'name': 'Car1', 'plate': 'ABC123'})],  # For cars
-        [MagicMock(to_dict=lambda: {'agency_id': 1, 'id': 1})]  # For clients
-    ]
 
+    # setup mock streams
+    mock_db.collection().where().stream.side_effect = [
+        [mock_rental_doc],
+        [MagicMock(id='1', to_dict=lambda: {'name': 'Car1', 'plate': 'ABC123'})],
+        [MagicMock(to_dict=lambda: {'agency_id': 1, 'id': 1})]
+    ]
 
     response = client.get('/analytics/stats?agency_id=1&timeframe=All Time')
 
@@ -31,7 +33,7 @@ def test_get_analytics_stats_success(mock_firestore, client):
     data = response.json
     assert data['totalRevenue'] == 100.0
     assert data['totalRentals'] == 1
-    assert data['avgDurationDays'] == 4  # 5 days - 1 = 4? Wait, calculation
+    assert data['avgDurationDays'] == 4
     assert len(data['topCars']) == 1
     assert data['topCars'][0]['name'] == 'Car1 ABC123'
     assert data['totalClients'] == 1

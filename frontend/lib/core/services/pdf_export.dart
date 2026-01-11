@@ -1,19 +1,19 @@
-// lib/core/services/pdf_export_service.dart
-
 import 'package:auto_manager/logic/cubits/analytics/analytics_state.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+// generates pdf reports for analytics and payment statements
 class PdfExportService {
+  // creates and opens the analytics report pdf
   Future<void> generateAndPrintPdf(
     AnalyticsLoaded data,
     String timeframe,
   ) async {
     final pdf = pw.Document();
 
-    // Add a page to the PDF
+    // build the main report page
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -21,17 +21,17 @@ class PdfExportService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // 1. Header
+              // report title and timeframe
               _buildHeader(timeframe),
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 20),
 
-              // 2. Key Metrics Grid
+              // revenue, rentals, avg duration
               _buildMetricsRow(data),
               pw.SizedBox(height: 30),
 
-              // 3. Top Cars Table
+              // most rented vehicles table
               pw.Text(
                 "Top Rented Vehicles",
                 style: pw.TextStyle(
@@ -44,7 +44,7 @@ class PdfExportService {
 
               pw.SizedBox(height: 30),
 
-              // 4. Client Stats
+              // client statistics
               pw.Text(
                 "Client Overview",
                 style: pw.TextStyle(
@@ -55,7 +55,7 @@ class PdfExportService {
               pw.SizedBox(height: 10),
               _buildClientSummary(data),
 
-              // Footer
+              // push footer to bottom
               pw.Spacer(),
               pw.Divider(),
               pw.Row(
@@ -73,15 +73,14 @@ class PdfExportService {
       ),
     );
 
-    // This opens the native Print/Share dialog on Android/iOS/Desktop
+    // opens native print dialog on all platforms
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
       name: 'AutoManager_Report_$timeframe.pdf',
     );
   }
 
-  // --- Helper Widgets for PDF ---
-
+  // builds the report header with title and period
   pw.Widget _buildHeader(String timeframe) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -103,11 +102,11 @@ class PdfExportService {
             ),
           ],
         ),
-        // You can add a logo here if you have one loaded as an image
       ],
     );
   }
 
+  // creates the row of key metrics
   pw.Widget _buildMetricsRow(AnalyticsLoaded data) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -122,6 +121,7 @@ class PdfExportService {
     );
   }
 
+  // individual metric box with label and value
   pw.Widget _buildMetricBox(String title, String value) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(15),
@@ -151,6 +151,7 @@ class PdfExportService {
     );
   }
 
+  // creates the top vehicles table
   pw.Widget _buildCarsTable(List<Map<String, dynamic>> cars) {
     return pw.Table.fromTextArray(
       headers: ['Rank', 'Car Model', 'Rentals Count'],
@@ -173,6 +174,7 @@ class PdfExportService {
     );
   }
 
+  // client count summary row
   pw.Widget _buildClientSummary(AnalyticsLoaded data) {
     return pw.Row(
       children: [
@@ -187,6 +189,7 @@ class PdfExportService {
     );
   }
 
+  // generates a detailed payment statement for a specific rental
   Future<void> generatePaymentStatement({
     required int rentalId,
     required double totalRentalCost,
@@ -204,7 +207,7 @@ class PdfExportService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // 1. Header
+              // statement header with rental id
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -235,7 +238,7 @@ class PdfExportService {
               pw.Divider(),
               pw.SizedBox(height: 20),
 
-              // 2. Financial Summary Box
+              // financial summary showing total, paid, and remaining
               pw.Container(
                 padding: const pw.EdgeInsets.all(15),
                 decoration: pw.BoxDecoration(
@@ -263,7 +266,7 @@ class PdfExportService {
 
               pw.SizedBox(height: 30),
 
-              // 3. Transaction History Table
+              // list of all payment transactions
               pw.Text(
                 "Transaction History",
                 style: pw.TextStyle(
@@ -291,11 +294,10 @@ class PdfExportService {
                 ),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.blue),
                 cellAlignment: pw.Alignment.centerLeft,
-                // Right align the Amount column (index 2)
                 cellAlignments: {2: pw.Alignment.centerRight},
               ),
 
-              // Footer
+              // footer message
               pw.Spacer(),
               pw.Divider(),
               pw.Center(child: pw.Text("Thank you for your business.")),
@@ -311,6 +313,7 @@ class PdfExportService {
     );
   }
 
+  // helper for financial stat display
   pw.Widget _buildTextStat(
     String label,
     double value, {

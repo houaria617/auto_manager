@@ -1,10 +1,10 @@
-// lib/features/Clients/data/client_db.dart
-
 import 'package:sqflite/sqflite.dart';
 import 'client_abstract.dart';
-import '../../../../databases/dbhelper.dart'; // Adjust path if needed
+import '../../../../databases/dbhelper.dart';
 
+// sqlite implementation for client storage
 class ClientDB extends AbstractClientRepo {
+  // returns all clients from local database
   @override
   Future<List<Map<String, dynamic>>> getAllClients() async {
     final database = await DBHelper.getDatabase();
@@ -12,6 +12,7 @@ class ClientDB extends AbstractClientRepo {
         ''');
   }
 
+  // removes a client by id
   @override
   Future<bool> deleteClient(int index) async {
     final database = await DBHelper.getDatabase();
@@ -22,6 +23,7 @@ class ClientDB extends AbstractClientRepo {
     return count > 0;
   }
 
+  // saves a new client and returns generated id
   @override
   Future<int> insertClient(Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
@@ -33,6 +35,7 @@ class ClientDB extends AbstractClientRepo {
     return clientID;
   }
 
+  // updates an existing client by id
   @override
   Future<bool> updateClient(int id, Map<String, dynamic> client) async {
     final database = await DBHelper.getDatabase();
@@ -45,6 +48,7 @@ class ClientDB extends AbstractClientRepo {
     return count > 0;
   }
 
+  // looks up a single client by id
   @override
   Future<Map<String, dynamic>?> getClient(int index) async {
     final database = await DBHelper.getDatabase();

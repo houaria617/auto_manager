@@ -1,18 +1,16 @@
+// card showing rental id, duration, and payment status
+
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-// ============================================================================
-// Widget Components: rental_summary_card.dart
-// ============================================================================
 class RentalSummaryCard extends StatelessWidget {
-  // Now accepts the Map directly from the database/cubit
   final Map<String, dynamic> rentalData;
 
   const RentalSummaryCard({super.key, required this.rentalData});
 
   @override
   Widget build(BuildContext context) {
-    // Extract data for cleaner usage in the widget tree
+    // extract and format data from rental map
     final int rentalId = rentalData['id'];
     final double amount = (rentalData['total_amount'] is int)
         ? (rentalData['total_amount'] as int).toDouble()
@@ -20,7 +18,7 @@ class RentalSummaryCard extends StatelessWidget {
 
     final String paymentStatus = rentalData['payment_state'] ?? 'Pending';
 
-    // Calculate total days
+    // calculate rental duration in days
     final DateTime start =
         DateTime.tryParse(rentalData['date_from'] ?? '') ?? DateTime.now();
     final DateTime end =

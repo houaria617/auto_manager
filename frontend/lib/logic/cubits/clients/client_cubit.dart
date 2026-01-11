@@ -1,19 +1,14 @@
+// manages client list state and crud operations
+
 import 'package:bloc/bloc.dart';
 import '../../../databases/repo/Client/client_abstract.dart';
-
-// // Proper state class
-// class ClientState {
-//   final bool isLoading;
-//   final String? error;
-
-//   ClientState({this.isLoading = false, this.error});
-// }
 
 class ClientCubit extends Cubit<List<Map<String, dynamic>>> {
   ClientCubit() : super(<Map<String, dynamic>>[]);
 
   final AbstractClientRepo _clientRepo = AbstractClientRepo.getInstance();
 
+  // adds client or returns existing id if phone already exists
   Future<int> addClient(Map<String, dynamic> client) async {
     print('inside addClient in client cubit');
     final clients = await _clientRepo.getAllClients();
@@ -33,11 +28,13 @@ class ClientCubit extends Cubit<List<Map<String, dynamic>>> {
     return clientID;
   }
 
+  // loads all clients from repository
   void getClients() async {
     emit(await _clientRepo.getAllClients());
     print('got all clients successfully');
   }
 
+  // filters clients by name or phone
   void clientsSearch(String searchText) async {
     final clients = await _clientRepo.getAllClients();
     List<Map<String, dynamic>> filteredClients = [];

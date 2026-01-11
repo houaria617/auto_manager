@@ -1,9 +1,11 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
+
+# tests successful client creation with mocked firestore
 @patch('firebase_admin.firestore.client')
 def test_create_client_success(mock_firestore, client):
-    # Mock the Firestore document creation
+    # setup mock db
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc_ref = MagicMock()
@@ -15,15 +17,17 @@ def test_create_client_success(mock_firestore, client):
         "phone": "123456789",
         "password": "securepassword"
     }
-    
+
     response = client.post('/clients/', json=payload)
-    
+
     assert response.status_code == 201
     assert response.json['id'] == "test_id_123"
 
+
+# tests 404 response when client not found
 @patch('firebase_admin.firestore.client')
 def test_get_client_not_found(mock_firestore, client):
-    # Mock a document that does not exist
+    # mock a non-existent document
     mock_db = MagicMock()
     mock_firestore.return_value = mock_db
     mock_doc = MagicMock()
@@ -31,6 +35,6 @@ def test_get_client_not_found(mock_firestore, client):
     mock_db.collection().document().get.return_value = mock_doc
 
     response = client.get('/clients/nonexistent_id')
-    
+
     assert response.status_code == 404
     assert response.json['error'] == "Client not found"

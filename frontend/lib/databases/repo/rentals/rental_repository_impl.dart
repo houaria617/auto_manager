@@ -1,16 +1,15 @@
-// lib/databases/repo/rentals/rental_repository_impl.dart
+// local sqlite implementation of rental repository
 
 import 'package:sqflite/sqflite.dart';
-import 'rental_repository.dart'; // or rental_abstract.dart depending on your naming
-import '../../dbhelper.dart'; // <--- ADD THIS IMPORT
+import 'rental_repository.dart';
+import '../../dbhelper.dart';
 
 class RentalDB extends AbstractRentalRepo {
+  // fetches all rentals with client and car names joined in
   @override
   Future<List<Map<String, dynamic>>> getData() async {
     final database = await DBHelper.getDatabase();
 
-    // We use a LEFT JOIN to get the names from other tables
-    // without changing the 'rental' table structure.
     final List<Map<String, dynamic>> result = await database.rawQuery('''
       SELECT 
         rental.*, 
@@ -25,6 +24,7 @@ class RentalDB extends AbstractRentalRepo {
     return result;
   }
 
+  // removes a rental record by its local id
   @override
   Future<bool> deleteRental(int index) async {
     final database = await DBHelper.getDatabase();
@@ -32,13 +32,14 @@ class RentalDB extends AbstractRentalRepo {
     return true;
   }
 
+  // adds a new rental to local database with upsert behavior
   @override
   Future<bool> insertRental(Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
 
-    // Make sure remote_id is included in the map
+    // filter to only include expected columns
     final filtered = {
-      'remote_id': rental['remote_id'], // MUST BE HERE
+      'remote_id': rental['remote_id'],
       'client_id': rental['client_id'],
       'car_id': rental['car_id'],
       'date_from': rental['date_from'],
@@ -48,22 +49,21 @@ class RentalDB extends AbstractRentalRepo {
       'state': rental['state'] ?? 'ongoing',
     };
 
+    // replace on conflict since remote_id is unique
     await database.insert(
       "rental",
       filtered,
-      // This now works because remote_id is marked as UNIQUE in step 1
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     return true;
   }
 
-  // lib/databases/repo/rentals/rental_repository_impl.dart
-
+  // updates an existing rental record with provided fields only
   @override
   Future<bool> updateRental(int index, Map<String, dynamic> rental) async {
     final database = await DBHelper.getDatabase();
 
-    // Build update map with all provided fields
+    // only include fields that were actually passed in
     final dataToUpdate = <String, dynamic>{};
 
     if (rental.containsKey('client_id')) {

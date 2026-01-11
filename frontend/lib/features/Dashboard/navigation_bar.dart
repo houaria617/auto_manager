@@ -1,3 +1,5 @@
+// bottom navigation bar for main app screens
+
 import 'package:auto_manager/features/analytics/presentation/analytics.dart';
 import 'package:auto_manager/features/rentals/presentation/rentals.dart';
 import 'package:auto_manager/features/vehicles/presentation/screens/vehicles_screen.dart';
@@ -14,8 +16,10 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
+  // dashboard is the default selected tab
   static int selectedIndex = 2;
 
+  // handles navigation to different screens based on tapped index
   void onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
@@ -28,7 +32,6 @@ class _NavBarState extends State<NavBar> {
         );
         break;
       case 1:
-        // Navigate to Rentals page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => RentalsScreen()),
@@ -42,14 +45,12 @@ class _NavBarState extends State<NavBar> {
         );
         break;
       case 3:
-        // Navigate to Cars page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => VehiclesScreen()),
         );
         break;
       case 4:
-        // Navigate to Analytics page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => ReportsScreen()),

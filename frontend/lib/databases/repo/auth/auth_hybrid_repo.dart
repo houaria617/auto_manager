@@ -7,23 +7,21 @@ import 'package:auto_manager/databases/repo/auth/auth_db_repo.dart';
 import 'package:auto_manager/features/auth/data/models/user_model.dart';
 import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart';
 
-/// Hybrid implementation of authentication repository
-/// Tries backend first, falls back to local SharedPreferences
-/// Location: lib/databases/repo/auth/auth_hybrid_repo.dart
+// hybrid auth repo - tries api first, falls back to local
 class AuthHybridRepo implements AuthAbstractRepo {
-  final String baseUrl = ApiConfig.baseUrl; // your local ip or localhost
+  final String baseUrl = ApiConfig.baseUrl;
   final AuthDbRepo _localRepo = AuthDbRepo();
   final SharedPrefsManager _prefsManager = SharedPrefsManager();
 
-  /// Change user password/////////////////////////////////////////////////////////////////////////
+  // updates password on the server
   Future<Map<String, dynamic>> changePassword({
     required String oldPassword,
     required String newPassword,
   }) async {
-    // Try online first
+    // can only change password when online
     if (await ConnectivityService.isOnline()) {
       try {
-        print('🌐 Attempting to change password online...');
+        print('\ud83c\udf10 Attempting to change password online...');
 
         final token = await _prefsManager.getAuthToken();
 
@@ -48,7 +46,7 @@ class AuthHybridRepo implements AuthAbstractRepo {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-          print('✅ Password changed successfully');
+          print('\u2705 Password changed successfully');
           return {
             'success': true,
             'message': data['message'] ?? 'Password changed successfully',
@@ -67,12 +65,12 @@ class AuthHybridRepo implements AuthAbstractRepo {
           };
         }
       } catch (e) {
-        print('❌ Online password change error: $e');
+        print('\u274c Online password change error: $e');
         return {'success': false, 'message': 'Network error: ${e.toString()}'};
       }
     }
 
-    // Offline mode - cannot change password
+    // password changes require internet
     return {
       'success': false,
       'message':
@@ -80,15 +78,14 @@ class AuthHybridRepo implements AuthAbstractRepo {
     };
   }
 
-  /// Update user profile (name and phone)/////////////////////////////////////////////////////////////////////////
+  // updates user profile info on the server
   Future<Map<String, dynamic>> updateProfile({
     String? name,
     String? phone,
   }) async {
-    // Try online update first
     if (await ConnectivityService.isOnline()) {
       try {
-        print('🌐 Attempting online profile update...');
+        print('\ud83c\udf10 Attempting online profile update...');
 
         final token = await _prefsManager.getAuthToken();
 
@@ -96,6 +93,7 @@ class AuthHybridRepo implements AuthAbstractRepo {
           return {'success': false, 'message': 'No authentication token found'};
         }
 
+        // build payload with only provided fields
         final body = <String, dynamic>{};
         if (name != null) body['name'] = name;
         if (phone != null) body['phone'] = phone;
@@ -114,14 +112,10 @@ class AuthHybridRepo implements AuthAbstractRepo {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-          // Extract updated user data
           final userData = data['user'] as Map<String, dynamic>;
-
-          // Create user model from backend response
           final user = UserModel.fromBackendJson(userData);
 
-          // Update SharedPreferences
+          // update local storage with new data
           await _prefsManager.saveUserData(
             userId: user.id,
             username: user.username,
@@ -129,44 +123,41 @@ class AuthHybridRepo implements AuthAbstractRepo {
             fullUser: user,
           );
 
-          print('✅ Online profile update successful');
+          print('\u2705 Online profile update successful');
           return {'success': true, 'message': data['message'], 'user': user};
         } else {
-          print('❌ Backend update failed: ${response.body}');
+          print('\u274c Backend update failed: ${response.body}');
           return {'success': false, 'message': 'Update failed'};
         }
       } catch (e) {
-        print('❌ Online update error: $e');
+        print('\u274c Online update error: $e');
         return {'success': false, 'message': 'Network error: ${e.toString()}'};
       }
     }
 
-    // Offline: Can't update on backend, but can update local data
-    print('📱 Offline - cannot update profile on server');
+    // profile updates require internet
+    print('\ud83d\udcf1 Offline - cannot update profile on server');
     return {
       'success': false,
       'message': 'No internet connection. Please try again when online.',
     };
   }
 
-  /////////////////////////////////////////////////////////////////////////////////////////
+  // authenticates user with the backend
   @override
   Future<UserModel?> login({
     required String username,
     required String password,
   }) async {
-    // Try online login first
+    // try api login first
     if (await ConnectivityService.isOnline()) {
       try {
-        print('🌐 Attempting online login...');
+        print('\ud83c\udf10 Attempting online login...');
 
         final response = await http.post(
           Uri.parse(ApiConfig.loginUrl),
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'email': username, // Backend uses 'email' not 'username'
-            'password': password,
-          }),
+          body: jsonEncode({'email': username, 'password': password}),
         );
 
         print('Response status: ${response.statusCode}');
@@ -174,15 +165,11 @@ class AuthHybridRepo implements AuthAbstractRepo {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-          // Extract token and user data
           final token = data['token'] as String;
           final userData = data['user'] as Map<String, dynamic>;
-
-          // Create user model from backend response
           final user = UserModel.fromBackendJson(userData);
 
-          // Save to SharedPreferences
+          // save session locally
           await _prefsManager.saveUserData(
             userId: user.id,
             username: user.username,
@@ -190,31 +177,32 @@ class AuthHybridRepo implements AuthAbstractRepo {
             fullUser: user,
           );
 
-          print('✅ Online login successful');
+          print('\u2705 Online login successful');
           return user;
         } else if (response.statusCode == 401) {
-          // Invalid credentials - don't fall back to offline
-          print('❌ Invalid email or password');
+          // wrong credentials, dont fall back
+          print('\u274c Invalid email or password');
           return null;
         } else {
-          // Other errors - fall back to offline if available
-          print('❌ Backend login failed: ${response.body}');
-          print('📱 Falling back to offline login...');
+          // server error, try offline
+          print('\u274c Backend login failed: ${response.body}');
+          print('\ud83d\udcf1 Falling back to offline login...');
           return await _localRepo.login(username: username, password: password);
         }
       } catch (e) {
-        print('❌ Online login error: $e');
-        // Only fall back to offline for network errors
-        print('📱 Falling back to offline login...');
+        // network error, try offline
+        print('\u274c Online login error: $e');
+        print('\ud83d\udcf1 Falling back to offline login...');
         return await _localRepo.login(username: username, password: password);
       }
     }
 
-    // Offline mode - use local login
-    print('📱 Using offline login...');
+    // no internet, use local login
+    print('\ud83d\udcf1 Using offline login...');
     return await _localRepo.login(username: username, password: password);
   }
 
+  // registers new user on the backend
   @override
   Future<UserModel?> signup({
     required String username,
@@ -223,10 +211,9 @@ class AuthHybridRepo implements AuthAbstractRepo {
     required String email,
     required String phone,
   }) async {
-    // Try online signup first
     if (await ConnectivityService.isOnline()) {
       try {
-        print('🌐 Attempting online signup...');
+        print('\ud83c\udf10 Attempting online signup...');
 
         final response = await http.post(
           Uri.parse(ApiConfig.signupUrl),
@@ -234,7 +221,7 @@ class AuthHybridRepo implements AuthAbstractRepo {
           body: jsonEncode({
             'email': email,
             'password': password,
-            'name': companyName, // Backend uses 'name' for company/agency name
+            'name': companyName,
             'phone': phone,
           }),
         );
@@ -244,15 +231,11 @@ class AuthHybridRepo implements AuthAbstractRepo {
 
         if (response.statusCode == 201) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-          // Extract token and user data
           final token = data['token'] as String;
           final userData = data['user'] as Map<String, dynamic>;
-
-          // Create user model from backend response
           final user = UserModel.fromBackendJson(userData);
 
-          // Save to SharedPreferences
+          // save new user session
           await _prefsManager.saveUserData(
             userId: user.id,
             username: user.username,
@@ -260,18 +243,18 @@ class AuthHybridRepo implements AuthAbstractRepo {
             fullUser: user,
           );
 
-          print('✅ Online signup successful');
+          print('\u2705 Online signup successful');
           return user;
         } else {
-          print('❌ Backend signup failed: ${response.body}');
+          print('\u274c Backend signup failed: ${response.body}');
         }
       } catch (e) {
-        print('❌ Online signup error: $e');
+        print('\u274c Online signup error: $e');
       }
     }
 
-    // Fall back to offline/local signup
-    print('📱 Falling back to offline signup...');
+    // fall back to local signup
+    print('\ud83d\udcf1 Falling back to offline signup...');
     return await _localRepo.signup(
       username: username,
       password: password,
@@ -281,12 +264,13 @@ class AuthHybridRepo implements AuthAbstractRepo {
     );
   }
 
+  // logs out user locally and on server
   @override
   Future<void> logout() async {
-    // Try to call backend logout if online
+    // notify server if online
     if (await ConnectivityService.isOnline()) {
       try {
-        print('🌐 Attempting online logout...');
+        print('\ud83c\udf10 Attempting online logout...');
 
         final token = await _prefsManager.getAuthToken();
 
@@ -302,12 +286,12 @@ class AuthHybridRepo implements AuthAbstractRepo {
           print('Logout response: ${response.statusCode}');
         }
       } catch (e) {
-        print('❌ Online logout error: $e');
+        print('\u274c Online logout error: $e');
       }
     }
 
-    // Always clear local data
-    print('📱 Clearing local data...');
+    // always clear local data
+    print('\ud83d\udcf1 Clearing local data...');
     await _localRepo.logout();
   }
 
@@ -318,17 +302,16 @@ class AuthHybridRepo implements AuthAbstractRepo {
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    // Try to get full user data first
+    // try full user data first
     final fullUser = await _prefsManager.getFullUserData();
     if (fullUser != null) {
       return fullUser;
     }
-
-    // Fall back to basic user data
+    // fall back to basic data
     return await _localRepo.getCurrentUser();
   }
 
-  /// Verify token with backend (optional, but useful)
+  // checks if stored token is still valid
   Future<bool> verifyToken() async {
     if (!await ConnectivityService.isOnline()) {
       return false;
@@ -356,7 +339,7 @@ class AuthHybridRepo implements AuthAbstractRepo {
     }
   }
 
-  /// Get auth token for API calls
+  // exposes the auth token for other api calls
   Future<String?> getAuthToken() async {
     return await _prefsManager.getAuthToken();
   }

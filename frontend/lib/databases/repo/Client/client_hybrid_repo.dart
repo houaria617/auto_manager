@@ -6,11 +6,13 @@ import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart
 import 'client_abstract.dart';
 import 'client_db.dart';
 
+// syncs clients between local sqlite and flask api
 class ClientHybridRepo extends AbstractClientRepo {
   final String baseUrl = ApiConfig.baseUrl;
   final AbstractClientRepo _localRepo = ClientDB();
   final SharedPrefsManager _prefsManager = SharedPrefsManager();
 
+  // fetches clients from server if online, merges with local data
   @override
   Future<List<Map<String, dynamic>>> getAllClients() async {
     if (await ConnectivityService.isOnline()) {
@@ -22,7 +24,8 @@ class ClientHybridRepo extends AbstractClientRepo {
 
         if (response.statusCode == 200) {
           final List data = json.decode(response.body);
-          // Map remote fields to local DB schema and avoid unsupported columns
+
+          // map server fields to local schema
           final List<Map<String, dynamic>> localData = data
               .map<Map<String, dynamic>>((raw) {
                 final map = raw as Map<String, dynamic>;
@@ -34,7 +37,7 @@ class ClientHybridRepo extends AbstractClientRepo {
               })
               .toList();
 
-          // De-duplicate by phone: update if exists, insert otherwise
+          // upsert by phone to avoid duplicates
           final existing = await _localRepo.getAllClients();
           final Map<String, int> byPhone = {
             for (final row in existing)
@@ -53,38 +56,43 @@ class ClientHybridRepo extends AbstractClientRepo {
               byPhone[phone] = newId;
             }
           }
-          // Return authoritative local view which includes integer ids
+
           return await _localRepo.getAllClients();
         }
       } catch (e) {
-        // Fall back to local on error
+        // fall back to local on error
       }
     }
     return _localRepo.getAllClients();
   }
 
+  // creates client locally and pushes to server if online
   @override
   Future<int> insertClient(Map<String, dynamic> client) async {
     final userId = await _prefsManager.getUserId();
-    // Build payload for server; keep local schema clean (no agency_id column)
+
+    // server payload includes agency_id
     final payload = {
       'full_name': client['full_name'] ?? client['name'],
       'phone': client['phone'],
       'agency_id': userId,
     };
+
+    // local payload has no agency_id
     final localClient = {
       'full_name': client['full_name'] ?? client['name'] ?? '',
       'phone': client['phone'] ?? '',
       'state': client['state'] ?? 'idle',
     };
 
-    // Upsert locally by phone to avoid duplicates
+    // check if client already exists by phone
     final existing = await _localRepo.getAllClients();
     final existingMatch = existing.firstWhere(
       (row) => (row['phone'] ?? '') == localClient['phone'],
       orElse: () => {},
     );
 
+    // try to push to server first
     if (await ConnectivityService.isOnline()) {
       try {
         final response = await http
@@ -101,13 +109,14 @@ class ClientHybridRepo extends AbstractClientRepo {
             await _localRepo.updateClient(id, localClient);
             return id;
           }
-          // Insert normalized local client
           return await _localRepo.insertClient(localClient);
         }
       } catch (e) {
-        // Fall back to local on error
+        // fall back to local on error
       }
     }
+
+    // offline: save locally only
     if (existingMatch.isNotEmpty) {
       final id = existingMatch['id'] as int;
       await _localRepo.updateClient(id, localClient);
@@ -116,6 +125,7 @@ class ClientHybridRepo extends AbstractClientRepo {
     return await _localRepo.insertClient(localClient);
   }
 
+  // fetches single client from server or local
   @override
   Future<Map<String, dynamic>?> getClient(int index) async {
     if (await ConnectivityService.isOnline()) {
@@ -131,6 +141,7 @@ class ClientHybridRepo extends AbstractClientRepo {
     return _localRepo.getClient(index);
   }
 
+  // updates client locally and on server
   @override
   Future<bool> updateClient(int index, Map<String, dynamic> client) async {
     if (await ConnectivityService.isOnline()) {
@@ -150,6 +161,7 @@ class ClientHybridRepo extends AbstractClientRepo {
     return await _localRepo.updateClient(index, client);
   }
 
+  // removes client locally and on server
   @override
   Future<bool> deleteClient(int index) async {
     if (await ConnectivityService.isOnline()) {

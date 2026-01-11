@@ -3,6 +3,7 @@ from datetime import date
 from typing import Optional
 import bcrypt
 
+# represents a customer in the system
 @dataclass
 class Client:
     full_name: str
@@ -12,6 +13,7 @@ class Client:
     def to_dict(self):
         return asdict(self)
 
+# car model used primarily for legacy or local references
 @dataclass
 class Car:
     agency_id: int
@@ -26,20 +28,20 @@ class Car:
     def to_dict(self):
         return asdict(self)
 
+# vehicle model for firestore storage with string ids
 @dataclass
 class Vehicle:
-    """Vehicle model for the Vehicles feature (alias of Car with enhanced fields)"""
-    agency_id: str  # Firestore uses string IDs
+    agency_id: str
     name: str
     plate: str
     rent_price: float = 0.0
-    state: str = 'available'  # available, rented, maintenance
+    state: str = 'available'
     maintenance_date: Optional[str] = None
     return_from_maintenance: Optional[str] = None
-    id: Optional[str] = None  # Firestore document ID
+    id: Optional[str] = None
 
+    # converts the vehicle to a dict for saving to firestore
     def to_dict(self):
-        """Convert to dict for Firestore storage"""
         data = {
             'agency_id': self.agency_id,
             'name': self.name,
@@ -53,9 +55,9 @@ class Vehicle:
             data['return_from_maintenance'] = self.return_from_maintenance
         return data
 
+    # builds a vehicle object from a firestore document
     @classmethod
     def from_dict(cls, data: dict, doc_id: Optional[str] = None):
-        """Create Vehicle from Firestore document"""
         return cls(
             id=doc_id,
             agency_id=data.get('agency_id', ''),
@@ -67,6 +69,7 @@ class Vehicle:
             return_from_maintenance=data.get('return_from_maintenance'),
         )
 
+# represents a rental agency that owns vehicles
 @dataclass
 class Agency:
     name: str
@@ -76,25 +79,25 @@ class Agency:
     phone: str
     id: Optional[int] = None
 
+    # converts to dict but excludes the password for safety
     def to_dict(self):
-        """Convert to dict, excluding password"""
         data = asdict(self)
-        # Don't include password in dict representation
         if 'password' in data:
             del data['password']
         return data
     
+    # hashes a plaintext password using bcrypt
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash a password for storing"""
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
     
+    # checks if the provided password matches the stored hash
     @staticmethod
     def verify_password(stored_password: str, provided_password: str) -> bool:
-        """Verify a stored password against one provided by user"""
         return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
 
+# represents a rental contract linking client to car
 @dataclass
 class Rental:
     client_id: int
@@ -110,6 +113,7 @@ class Rental:
     def to_dict(self):
         return asdict(self)
 
+# tracks individual payments made towards a rental
 @dataclass
 class Payment:
     rental_id: int
@@ -119,13 +123,15 @@ class Payment:
 
     def to_dict(self):
         return asdict(self)
-    
+
+# logs recent actions in the system for the dashboard
 @dataclass
 class RecentActivity:
     description: str
     activity_date: date
     id: Optional[int] = None
-# notifications 
+
+# stores fcm tokens for push notifications
 @dataclass
 class FCMToken:
     user_id: int  # This is your agency_id

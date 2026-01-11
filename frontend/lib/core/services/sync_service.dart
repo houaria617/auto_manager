@@ -4,14 +4,15 @@ import 'package:auto_manager/core/config/api_config.dart';
 import 'package:auto_manager/databases/dbhelper.dart';
 import 'package:auto_manager/features/auth/data/models/shared_prefs_manager.dart';
 
+// handles background sync of local sqlite data to the flask backend
 class SyncService {
   static final _prefs = SharedPrefsManager();
 
-  /// This is the main function called by the Background Workmanager
+  // main entry point called by the background workmanager
   static Future<void> performSync() async {
     final db = await DBHelper.getDatabase();
 
-    // 1. Get Auth Token
+    // need auth token for api requests
     final token = await _prefs.getAuthToken();
     if (token == null) {
       print("SyncService: No token found. Skipping sync.");
@@ -23,14 +24,10 @@ class SyncService {
       'Authorization': 'Bearer $token',
     };
 
-    // ---------------------------------------------------------
-    // STEP 1: SYNC PENDING VEHICLES
-    // ---------------------------------------------------------
+    // vehicles must sync first since rentals reference them
     await _syncVehicles(db, headers);
 
-    // ---------------------------------------------------------
-    // STEP 2: SYNC PENDING RENTALS
-    // ---------------------------------------------------------
+    // grab all rentals that need to be pushed to server
     final List<Map<String, dynamic>> pendingRentals = await db.query(
       'rental',
       where: 'pending_sync = ?',
@@ -39,12 +36,12 @@ class SyncService {
 
     print("SyncService: Found ${pendingRentals.length} rentals to sync.");
 
+    // process each pending rental
     for (var r in pendingRentals) {
       try {
         http.Response response;
 
-        // If remote_id is null, it's a NEW rental (POST)
-        // If remote_id exists, it's an UPDATE (PUT)
+        // new rentals get posted, existing ones get updated
         if (r['remote_id'] == null) {
           response = await http.post(
             Uri.parse('${ApiConfig.baseUrl}/rentals/'),
@@ -56,7 +53,7 @@ class SyncService {
               'date_to': r['date_to'],
               'total_amount': r['total_amount'],
               'payment_state': r['payment_state'],
-              'rental_state': r['state'], // Backend uses rental_state
+              'rental_state': r['state'],
             }),
           );
         } else {
@@ -70,6 +67,7 @@ class SyncService {
           );
         }
 
+        // mark as synced if server accepted it
         if (response.statusCode == 201 || response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final remoteId = data['id'] ?? r['remote_id'];
@@ -87,9 +85,7 @@ class SyncService {
       }
     }
 
-    // ---------------------------------------------------------
-    // STEP 3: SYNC PENDING PAYMENTS
-    // ---------------------------------------------------------
+    // now handle payments that need syncing
     final List<Map<String, dynamic>> pendingPayments = await db.query(
       'payment',
       where: 'pending_sync = ?',
@@ -100,7 +96,7 @@ class SyncService {
 
     for (var p in pendingPayments) {
       try {
-        // Find the remote_id of the rental this payment belongs to
+        // payments need their parent rental synced first
         final List<Map<String, dynamic>> rentalMatches = await db.query(
           'rental',
           where: 'id = ?',
@@ -116,16 +112,18 @@ class SyncService {
 
         final remoteRentalId = rentalMatches.first['remote_id'];
 
+        // push the payment to the server
         final response = await http.post(
           Uri.parse('${ApiConfig.baseUrl}/payments/'),
           headers: headers,
           body: jsonEncode({
-            'rental_id': remoteRentalId, // Use the String Firestore ID
+            'rental_id': remoteRentalId,
             'paid_amount': p['paid_amount'],
             'payment_date': p['date'],
           }),
         );
 
+        // mark as synced on success
         if (response.statusCode == 201) {
           final data = jsonDecode(response.body);
           await db.update(
@@ -144,11 +142,12 @@ class SyncService {
     print("SyncService: Sync process finished.");
   }
 
-  /// Syncs pending vehicles (cars) to the Flask backend
+  // pushes pending vehicles to the flask backend
   static Future<void> _syncVehicles(
     dynamic db,
     Map<String, String> headers,
   ) async {
+    // find all cars with pending changes
     final List<Map<String, dynamic>> pendingCars = await db.query(
       'car',
       where: 'pending_sync = ?',
@@ -161,7 +160,7 @@ class SyncService {
       try {
         http.Response response;
 
-        // Prepare payload for API
+        // build payload matching the api schema
         final payload = {
           'name': car['name'],
           'plate': car['plate'],
@@ -171,8 +170,7 @@ class SyncService {
           'return_from_maintenance': car['return_from_maintenance'],
         };
 
-        // If remote_id is null, it's a NEW vehicle (POST)
-        // If remote_id exists, it's an UPDATE (PUT)
+        // create new or update existing based on remote id
         if (car['remote_id'] == null) {
           response = await http.post(
             Uri.parse('${ApiConfig.baseUrl}/vehicles/'),
@@ -187,11 +185,11 @@ class SyncService {
           );
         }
 
+        // save remote id and clear pending flag
         if (response.statusCode == 201 || response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final remoteId = data['id'] ?? car['remote_id'];
 
-          // Reconciliation: Update local DB with remote_id and mark as synced
           await db.update(
             'car',
             {'pending_sync': 0, 'remote_id': remoteId},

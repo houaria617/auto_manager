@@ -1,18 +1,14 @@
 import 'package:auto_manager/features/auth/data/models/user_model.dart';
 
-/// Abstract repository for authentication operations
-/// Defines contract for login, signup, logout
-/// Location: lib/data/repo/auth/auth_abstract_repo.dart
+// contract for auth operations like login, signup, logout
 abstract class AuthAbstractRepo {
-  /// Login with username and password
-  /// Returns UserModel if successful, null if failed
+  // authenticates user with email and password
   Future<UserModel?> login({
     required String username,
     required String password,
   });
 
-  /// Register new user
-  /// Returns UserModel if successful, null if failed
+  // creates a new user account
   Future<UserModel?> signup({
     required String username,
     required String password,
@@ -21,14 +17,12 @@ abstract class AuthAbstractRepo {
     required String phone,
   });
 
-  /// Logout current user
-  /// Clears shared preferences
+  // logs out current user and clears local data
   Future<void> logout();
 
-  /// Check if user is currently logged in
+  // checks if there's an active session
   Future<bool> isLoggedIn();
 
-  /// Get current logged in user
-  /// Returns UserModel if logged in, null otherwise
+  // returns current user if logged in
   Future<UserModel?> getCurrentUser();
 }

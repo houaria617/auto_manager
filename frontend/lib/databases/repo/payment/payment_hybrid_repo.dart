@@ -1,5 +1,3 @@
-// lib/databases/repo/payment/payment_hybrid_repo.dart
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:auto_manager/core/config/api_config.dart';
@@ -11,10 +9,12 @@ import 'package:workmanager/workmanager.dart';
 import 'payment_abstract.dart';
 import 'payment_db.dart';
 
+// syncs payments between local sqlite and flask api
 class PaymentHybridRepo implements AbstractPaymentRepo {
   final AbstractPaymentRepo _localRepo = PaymentDB();
   final SharedPrefsManager _prefsManager = SharedPrefsManager();
 
+  // builds auth headers for api requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _prefsManager.getAuthToken();
     return {
@@ -23,6 +23,7 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
     };
   }
 
+  // fetches payments from server if online, merges with local
   @override
   Future<List<Map<String, dynamic>>> getPaymentsForRental(
     int localRentalId,
@@ -31,7 +32,7 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
       try {
         final List rawRentals = await RentalDB().getData();
 
-        // SAFE LOOKUP: Use where().toList()
+        // find the rental's remote id
         final matches = rawRentals
             .where((r) => r['id'] == localRentalId)
             .toList();
@@ -50,6 +51,7 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
 
             if (response.statusCode == 200) {
               final List data = json.decode(response.body);
+              // upsert server payments into local storage
               for (var item in data) {
                 await _localRepo.insertData({
                   'remote_id': item['remote_id'] ?? item['id'],
@@ -70,14 +72,14 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
     return localData.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  // saves payment locally and tries to push to server
   @override
   Future<void> insertData(Map<String, dynamic> data) async {
-    // Try the online logic, but wrap it so it can't crash the UI
     if (await ConnectivityService.isOnline()) {
       try {
         final List rawRentals = await RentalDB().getData();
 
-        // SEARCH SAFELY: Instead of firstWhere, we use a loop or where
+        // find remote rental id
         String? remoteRentalId;
         for (var r in rawRentals) {
           if (r['id'] == data['rental_id']) {
@@ -103,9 +105,9 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
 
           if (response.statusCode == 201) {
             final res = json.decode(response.body);
-            // Sync successful, save with remote_id
+            // synced successfully, save with remote id
             await _localRepo.insertData({...data, 'remote_id': res['id']});
-            return; // Success!
+            return;
           }
         }
       } catch (e) {
@@ -113,8 +115,7 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
       }
     }
 
-    // If ANY of the above fails (Offline, No Rental found, API Error, Exception)
-    // We JUST save it locally. NO CRASH.
+    // offline or sync failed, save locally only
     await _localRepo.insertData(data);
   }
 
@@ -122,12 +123,13 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
   Future<double> getTotalPaid(int rentalId) async =>
       await _localRepo.getTotalPaid(rentalId);
 
+  // adds payment locally and triggers background sync
   @override
   Future<bool> addPayment(Map<String, dynamic> payment) async {
-    // 1. Save locally IMMEDIATELY
+    // save locally right away for instant feedback
     await _localRepo.insertData({...payment, 'pending_sync': 1});
 
-    // 2. Trigger sync in background
+    // schedule background sync on mobile
     if (Platform.isAndroid || Platform.isIOS) {
       Workmanager().registerOneOffTask(
         "payment-sync-${DateTime.now().millisecondsSinceEpoch}",
@@ -135,7 +137,7 @@ class PaymentHybridRepo implements AbstractPaymentRepo {
       );
     }
 
-    return true; // <--- Add this
+    return true;
   }
 
   @override

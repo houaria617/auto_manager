@@ -4,42 +4,42 @@ from app.db.auth_service import AuthService
 
 auth_bp = Blueprint('auth', __name__)
 
+# decorator that protects routes requiring a valid jwt token
 def token_required(f):
-    """Decorator to protect routes that require authentication"""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
         
-        # Get token from header
+        # try to extract the token from the authorization header
         if 'Authorization' in request.headers:
             auth_header = request.headers['Authorization']
             try:
-                token = auth_header.split(' ')[1]  # Bearer <token>
+                token = auth_header.split(' ')[1]
             except IndexError:
                 return jsonify({'error': 'Invalid token format'}), 401
         
         if not token:
             return jsonify({'error': 'Token is missing'}), 401
         
-        # Verify token
+        # check if the token is valid and not expired
         valid, payload = AuthService.verify_jwt_token(token)
         
         if not valid:
             return jsonify({'error': 'Invalid or expired token'}), 401
         
-        # Add user info to request
+        # attach user info to the request for use in route handlers
         request.current_user = payload
         return f(*args, **kwargs)
     
     return decorated
 
+# handles new agency registration
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
-    """Register a new agency"""
     try:
         data = request.get_json()
         
-        # Validate required fields
+        # make sure all required fields are present
         required_fields = ['email', 'password', 'name', 'phone']
         for field in required_fields:
             if field not in data or not data[field]:
@@ -50,15 +50,15 @@ def signup():
         name = data['name'].strip()
         phone = data['phone'].strip()
         
-        # Validate password strength
+        # enforce minimum password length
         if len(password) < 6:
             return jsonify({'error': 'Password must be at least 6 characters'}), 400
         
-        # Validate email format
+        # basic email format check
         if '@' not in email or '.' not in email:
             return jsonify({'error': 'Invalid email format'}), 400
         
-        # Create user
+        # create the new user in firestore
         success, message, user_data = AuthService.create_user(
             email=email,
             password=password,
@@ -67,7 +67,7 @@ def signup():
         )
         
         if success:
-            # Generate JWT token
+            # give them a token so they can start making authenticated requests
             token = AuthService.generate_jwt_token(user_data['id'], email)
             
             return jsonify({
@@ -81,24 +81,24 @@ def signup():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# authenticates a user with email and password
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """Login with email and password"""
     try:
         data = request.get_json()
         
-        # Validate required fields
+        # both fields are required to login
         if not data.get('email') or not data.get('password'):
             return jsonify({'error': 'Email and password are required'}), 400
         
         email = data['email'].strip()
         password = data['password']
         
-        # Verify credentials
+        # check if the credentials match whats in the database
         success, message, user_data = AuthService.verify_credentials(email, password)
         
         if success:
-            # Generate JWT token
+            # generate a fresh token for this session
             token = AuthService.generate_jwt_token(user_data['id'], email)
             
             return jsonify({
@@ -112,9 +112,9 @@ def login():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# checks if a jwt token is still valid
 @auth_bp.route('/verify-token', methods=['POST'])
 def verify_token():
-    """Verify if a token is valid"""
     try:
         data = request.get_json()
         token = data.get('token')
@@ -138,10 +138,10 @@ def verify_token():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# returns the profile of the currently logged in user
 @auth_bp.route('/me', methods=['GET'])
 @token_required
 def get_current_user():
-    """Get current authenticated user"""
     try:
         user_id = request.current_user.get('user_id')
         
@@ -155,15 +155,15 @@ def get_current_user():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# allows users to change their name or phone
 @auth_bp.route('/update-profile', methods=['PUT'])
 @token_required
 def update_profile():
-    """Update user profile"""
     try:
         data = request.get_json()
         user_id = request.current_user.get('user_id')
         
-        # Only allow updating certain fields
+        # only allow specific fields to be updated for security
         allowed_fields = ['name', 'phone']
         update_data = {k: v for k, v in data.items() if k in allowed_fields}
         
@@ -173,7 +173,7 @@ def update_profile():
         success, message = AuthService.update_user(user_id, update_data)
         
         if success:
-            # Get updated user data
+            # return the updated user data
             user_data = AuthService.get_user_by_id(user_id)
             return jsonify({
                 'message': message,
@@ -185,10 +185,10 @@ def update_profile():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# lets a user change their password after verifying the old one
 @auth_bp.route('/change-password', methods=['PUT'])
 @token_required
 def change_password():
-    """Change user password"""
     try:
         data = request.get_json()
         user_id = request.current_user.get('user_id')
@@ -202,19 +202,19 @@ def change_password():
         if len(new_password) < 6:
             return jsonify({'error': 'New password must be at least 6 characters'}), 400
         
-        # Get user data to verify old password
+        # fetch user to verify the old password
         user_data = AuthService.get_user_by_id(user_id)
         if not user_data:
             return jsonify({'error': 'User not found'}), 404
         
-        # Verify old password
+        # make sure they know their current password
         email = user_data.get('email')
         success, _, _ = AuthService.verify_credentials(email, old_password)
         
         if not success:
             return jsonify({'error': 'Old password is incorrect'}), 401
         
-        # Update password
+        # save the new password
         success, message = AuthService.update_user(user_id, {'password': new_password})
         
         if success:
@@ -225,10 +225,10 @@ def change_password():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# permanently removes a users account from the system
 @auth_bp.route('/delete-account', methods=['DELETE'])
 @token_required
 def delete_account():
-    """Delete user account"""
     try:
         user_id = request.current_user.get('user_id')
         
@@ -242,8 +242,8 @@ def delete_account():
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
 
+# logs out the user, client should discard the token
 @auth_bp.route('/logout', methods=['POST'])
 @token_required
 def logout():
-    """Logout user (client should remove token)"""
     return jsonify({'message': 'Logout successful. Please remove token from client.'}), 200

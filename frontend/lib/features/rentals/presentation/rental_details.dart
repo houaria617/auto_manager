@@ -1,25 +1,23 @@
+// detailed view of a single rental with actions to complete or cancel
+
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Widgets
 import 'package:auto_manager/features/rentals/presentation/widgets/action_buttons.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/info_card.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/rental_period_card.dart';
 import 'package:auto_manager/features/rentals/presentation/widgets/rental_summary_card.dart';
 
 class RentalDetailsScreen extends StatelessWidget {
-  // We pass the initial rental data from the list screen
+  // receives initial rental data from list screen
   final Map<String, dynamic> rental;
 
   const RentalDetailsScreen({super.key, required this.rental});
 
   @override
   Widget build(BuildContext context) {
-    // We assume RentalCubit is provided by the parent (RentalsScreen or Global)
-    // If not, wrap this in BlocProvider, but usually Detail screens share the List's cubit.
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
@@ -51,26 +49,25 @@ class _RentalDetailsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<RentalCubit, RentalState>(
       builder: (context, state) {
-        // 1. Start with the initial data passed from the list
+        // start with initial data passed from list
         Map<String, dynamic> currentData = initialRental;
 
-        // 2. If the Cubit has fresh data, try to find the updated version
+        // try to get updated data from cubit if available
         if (state is RentalLoaded) {
           try {
-            // FIND the rental in the list
             final rawRental = state.rentals.firstWhere(
               (element) => element['id'] == initialRental['id'],
             );
 
-            // CAST it to Map<String, dynamic> to fix the error
             currentData = Map<String, dynamic>.from(rawRental);
           } catch (e) {
-            // If firstWhere fails (item deleted), show a message
-            return Center(child: Text(AppLocalizations.of(context)!.rentalNoLongerExists));
+            return Center(
+              child: Text(AppLocalizations.of(context)!.rentalNoLongerExists),
+            );
           }
         }
 
-        // 3. Extract IDs safely (handling potential nulls with defaults if necessary)
+        // extract ids with safe defaults
         final int clientId = currentData['client_id'] ?? 0;
         final int carId = currentData['car_id'] ?? 0;
         final int rentalId = currentData['id'] ?? 0;

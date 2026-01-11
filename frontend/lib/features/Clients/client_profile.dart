@@ -1,11 +1,9 @@
+// detailed view of a single client with their rental history
+
 import 'package:auto_manager/features/rentals/presentation/rental_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Cubits
 import 'package:auto_manager/logic/cubits/clients/profile_cubit.dart';
-
-// Localization
 import 'package:auto_manager/l10n/app_localizations.dart';
 
 class ClientProfile extends StatefulWidget {
@@ -17,13 +15,14 @@ class ClientProfile extends StatefulWidget {
 }
 
 class _ClientProfileState extends State<ClientProfile> {
+  // loads client's rental history on open
   @override
   void initState() {
     super.initState();
     context.read<ProfileCubit>().getRentals(widget.client['id']);
   }
 
-  // Helper to translate status for Profile
+  // translates rental status to localized string
   String _getProfileStatus(BuildContext context, String? status) {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -37,7 +36,7 @@ class _ClientProfileState extends State<ClientProfile> {
     }
   }
 
-  // Helper to translate client state
+  // translates client state to localized string
   String _getClientState(BuildContext context, String? state) {
     if (state == 'active') {
       return AppLocalizations.of(context)!.statusActive;

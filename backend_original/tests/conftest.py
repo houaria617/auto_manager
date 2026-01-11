@@ -1,6 +1,8 @@
 import pytest
-from app import create_app # Ensure this matches your app factory location
+from app import create_app
 
+
+# creates a test app instance with testing mode enabled
 @pytest.fixture
 def app():
     app = create_app()
@@ -9,12 +11,14 @@ def app():
     })
     yield app
 
+
+# provides a test client for making http requests
 @pytest.fixture
 def client(app):
-    """A test client for the app."""
     return app.test_client()
 
+
+# provides a cli runner for testing click commands
 @pytest.fixture
 def runner(app):
-    """A test runner for the app's Click commands."""
     return app.test_cli_runner()

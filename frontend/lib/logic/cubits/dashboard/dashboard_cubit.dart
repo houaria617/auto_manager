@@ -1,9 +1,12 @@
+// manages dashboard statistics and recent activity feed
+
 import 'package:auto_manager/databases/repo/Client/client_abstract.dart';
 import 'package:bloc/bloc.dart';
 import '../../../databases/repo/Rental/rental_abstract.dart';
 import '../../../databases/repo/Car/car_abstract.dart';
 import '../../../databases/repo/Activity/activity_abstract.dart';
 
+// holds all dashboard stat values
 class DashboardStatistics {
   final int ongoingRentals;
   final int availableCars;
@@ -22,17 +25,18 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
   DashboardCubit()
     : super(DashboardStatistics(0, 0, 0, <Map<String, dynamic>>[]));
 
+  // repo instances for data access
   final _rentalRepo = AbstractRentalRepo.getInstance();
   final _carRepo = AbstractCarRepo.getInstance();
   final _activityRepo = AbstractActivityRepo.getInstance();
-  // ignore: unused_field
   final _clientRepo = AbstractClientRepo.getInstance();
 
-  // Helper: Get Today's date as String "YYYY-MM-DD"
+  // formats today's date as iso string
   String _getTodayIso() {
     return DateTime.now().toIso8601String().split('T')[0];
   }
 
+  // loads recent activities from database
   void loadActivities() async {
     final recentActivities = await _activityRepo.getActivities();
     emit(
@@ -45,13 +49,14 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
     );
   }
 
+  // adds new activity and refreshes list
   void addActivity(Map<String, dynamic> activity) async {
     if (activity['description'] == null || activity['description'] == '') {
       loadActivities();
       return;
     }
 
-    // Ensure date is string to prevent UI crashes
+    // ensure date is stored as string for consistent parsing
     Map<String, dynamic> safeActivity = Map.from(activity);
     if (safeActivity['date'] is DateTime) {
       safeActivity['date'] = (safeActivity['date'] as DateTime)
@@ -62,15 +67,14 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
     loadActivities();
   }
 
-  // ✅ NEW: Automatic Reminder Check
+  // checks for due rentals and maintenance and adds reminders
   Future<void> checkForDailyReminders() async {
     final todayStr = _getTodayIso();
 
-    // 1. Load current activities to check for duplicates
-    // We don't want to add the same reminder 5 times a day
+    // load existing activities to avoid duplicates
     final existingActivities = await _activityRepo.getActivities();
 
-    // --- CHECK RENTALS DUE TODAY ---
+    // check rentals ending today
     final dueRentals = await _rentalRepo.getRentalsDueOn(todayStr);
 
     for (var rental in dueRentals) {
@@ -79,7 +83,7 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
 
       final String reminderText = "⚠️ Due: $clientName returns $carName today";
 
-      // Check if we already added this reminder today
+      // skip if already added today
       bool alreadyExists = existingActivities.any((act) {
         final actDate = act['date'].toString().split('T')[0];
         return actDate == todayStr && act['description'] == reminderText;
@@ -93,7 +97,7 @@ class DashboardCubit extends Cubit<DashboardStatistics> {
       }
     }
 
-    // --- CHECK MAINTENANCE DUE TODAY ---
+    // check cars with maintenance due today
     final maintenanceCars = await _carRepo.getCarsMaintenanceOn(todayStr);
 
     for (var car in maintenanceCars) {

@@ -1,3 +1,5 @@
+// agency profile edit screen with password change dialog
+
 import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +20,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isEditing = false;
   bool _isLoading = false;
   bool _isSaving = false;
@@ -30,16 +32,17 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
     _loadUserData();
   }
 
+  // populates form fields from current user data
   void _loadUserData() async {
     setState(() => _isLoading = true);
-    
+
     final authState = context.read<AuthCubit>().state;
-    
+
     if (authState is AuthAuthenticated) {
       _companyNameController.text = authState.user.username;
       _phoneController.text = authState.user.phone ?? '';
     }
-    
+
     setState(() => _isLoading = false);
   }
 
@@ -47,6 +50,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
     setState(() => _isEditing = !_isEditing);
   }
 
+  // saves profile changes to backend
   void _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -54,8 +58,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
 
     try {
       final authRepo = AuthHybridRepo();
-      
-      // Call update profile API
+
       final result = await authRepo.updateProfile(
         name: _companyNameController.text.trim(),
         phone: _phoneController.text.trim(),
@@ -64,9 +67,8 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
       if (!mounted) return;
 
       if (result['success']) {
-        // Refresh user data in cubit
         await context.read<AuthCubit>().checkAuthStatus();
-        
+
         setState(() {
           _isEditing = false;
           _isSaving = false;
@@ -80,7 +82,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
         );
       } else {
         setState(() => _isSaving = false);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Update failed'),
@@ -90,7 +92,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
       }
     } catch (e) {
       setState(() => _isSaving = false);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -100,11 +102,13 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
     }
   }
 
+  // cancels edit mode and reloads original data
   void _handleCancel() {
-    _loadUserData(); // Reload original data
+    _loadUserData();
     setState(() => _isEditing = false);
   }
 
+  // shows password change dialog with validation
   void _showChangePasswordDialog() {
     _oldPasswordController.clear();
     _newPasswordController.clear();
@@ -163,9 +167,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
           ),
           ElevatedButton(
             onPressed: () => _handleChangePassword(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
             child: _isChangingPassword
                 ? const SizedBox(
                     width: 20,
@@ -228,7 +230,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
 
     try {
       final authRepo = AuthHybridRepo();
-      
+
       final result = await authRepo.changePassword(
         oldPassword: _oldPasswordController.text,
         newPassword: _newPasswordController.text,
@@ -238,7 +240,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
 
       if (result['success']) {
         Navigator.pop(dialogContext);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Password changed successfully!'),
@@ -289,10 +291,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
         ),
         title: const Text(
           'Agency Information',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
           if (!_isEditing && !_isLoading)
@@ -352,18 +351,16 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                             hintText: 'Enter company name',
                             prefixIcon: const Icon(Icons.business),
                             filled: true,
-                            fillColor: _isEditing ? Colors.white : Colors.grey[100],
+                            fillColor: _isEditing
+                                ? Colors.white
+                                : Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -396,9 +393,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                             fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                           ),
                         ),
@@ -414,18 +409,16 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                             hintText: 'Enter phone number',
                             prefixIcon: const Icon(Icons.phone),
                             filled: true,
-                            fillColor: _isEditing ? Colors.white : Colors.grey[100],
+                            fillColor: _isEditing
+                                ? Colors.white
+                                : Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -455,9 +448,7 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                             fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                           ),
                         ),
@@ -471,7 +462,9 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                                 child: OutlinedButton(
                                   onPressed: _isSaving ? null : _handleCancel,
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -494,7 +487,9 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.blue,
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -528,7 +523,9 @@ class _AgencyInfoScreenState extends State<AgencyInfoScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

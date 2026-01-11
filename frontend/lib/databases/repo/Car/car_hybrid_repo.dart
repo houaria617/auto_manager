@@ -1,5 +1,3 @@
-// lib/databases/repo/Car/car_hybrid_repo.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:auto_manager/core/services/connectivity_service.dart';
@@ -13,7 +11,7 @@ class CarHybridRepo extends AbstractCarRepo {
   final AbstractCarRepo _localRepo = CarDB();
   final SharedPrefsManager _prefsManager = SharedPrefsManager();
 
-  // --- Helper for Headers ---
+  // builds the auth headers needed for api requests
   Future<Map<String, String>> _getHeaders() async {
     final token = await _prefsManager.getAuthToken();
     return {
@@ -22,6 +20,7 @@ class CarHybridRepo extends AbstractCarRepo {
     };
   }
 
+  // fetches cars from the server if online, then merges with local data
   @override
   Future<List<Map<String, dynamic>>> getData() async {
     if (await ConnectivityService.isOnline()) {
@@ -34,7 +33,7 @@ class CarHybridRepo extends AbstractCarRepo {
         if (response.statusCode == 200) {
           final List data = json.decode(response.body);
 
-          // Get existing local cars
+          // build lookup maps for matching existing local cars
           final existingCars = await _localRepo.getAllCars();
           final Map<String, int> byRemoteId = {};
           final Map<String, int> byPlate = {};
@@ -49,12 +48,11 @@ class CarHybridRepo extends AbstractCarRepo {
             }
           }
 
-          // Sync cloud data into local SQLite
+          // upsert each car from the server into local storage
           for (var item in data) {
             final remoteId = item['id'];
             final plate = item['plate'];
 
-            // Normalize data to match your SQLite schema
             final Map<String, dynamic> carMap = {
               'remote_id': remoteId,
               'pending_sync': 0,
@@ -67,6 +65,7 @@ class CarHybridRepo extends AbstractCarRepo {
               'return_from_maintenance': item['return_from_maintenance'] ?? '',
             };
 
+            // figure out if this car already exists locally
             int? targetId;
             if (remoteId != null && byRemoteId.containsKey(remoteId)) {
               targetId = byRemoteId[remoteId];
@@ -88,12 +87,13 @@ class CarHybridRepo extends AbstractCarRepo {
     return _localRepo.getData();
   }
 
+  // creates a new car locally and pushes to server if online
   @override
   Future<int> insertCar(Map<String, dynamic> car) async {
     final userId = await _prefsManager.getUserId();
     final headers = await _getHeaders();
 
-    // Prepare payload for server
+    // prepare the data format the server expects
     final payload = {
       'agency_id': userId,
       'name': car['name'],
@@ -104,7 +104,7 @@ class CarHybridRepo extends AbstractCarRepo {
       'return_from_maintenance': car['return_from_maintenance'],
     };
 
-    // Prepare local car data
+    // prepare the data format for local sqlite
     final localCar = {
       'name': car['name'],
       'plate': car['plate'],
@@ -115,6 +115,7 @@ class CarHybridRepo extends AbstractCarRepo {
       'pending_sync': 1,
     };
 
+    // try to push to server first if we have internet
     if (await ConnectivityService.isOnline()) {
       try {
         print("CarHybridRepo: Sending POST to $baseUrl/vehicles/");
@@ -144,23 +145,24 @@ class CarHybridRepo extends AbstractCarRepo {
     return await _localRepo.insertCar(localCar);
   }
 
+  // gets a car from local storage by its id
   @override
   Future<Map<String, dynamic>?> getCar(int id) async {
-    // For specific items, local is usually faster and more reliable
     return _localRepo.getCar(id);
   }
 
+  // updates a car locally and syncs to server if online
   @override
   Future<void> updateCar(int id, Map<String, dynamic> car) async {
     final headers = await _getHeaders();
 
-    // Get the existing record to find remote_id
+    // need the remote id to update on the server
     final existing = await _localRepo.getCar(id);
     final remoteId = existing?['remote_id'];
 
-    // Update locally
     await _localRepo.updateCar(id, car);
 
+    // push update to server if we can
     if (await ConnectivityService.isOnline() && remoteId != null) {
       try {
         final payload = {
@@ -185,11 +187,11 @@ class CarHybridRepo extends AbstractCarRepo {
     }
   }
 
+  // updates just the status field locally and on server
   @override
   Future<void> updateCarStatus(int carId, String status) async {
     final headers = await _getHeaders();
 
-    // Get the existing record to find remote_id
     final existing = await _localRepo.getCar(carId);
     final remoteId = existing?['remote_id'];
 
@@ -210,11 +212,11 @@ class CarHybridRepo extends AbstractCarRepo {
     }
   }
 
+  // removes a car from local storage and server
   @override
   Future<void> deleteCar(int id) async {
     final headers = await _getHeaders();
 
-    // Get the existing record to find remote_id
     final existing = await _localRepo.getCar(id);
     final remoteId = existing?['remote_id'];
 
@@ -231,16 +233,19 @@ class CarHybridRepo extends AbstractCarRepo {
     }
   }
 
+  // counts available cars from local data
   @override
   Future<int> countAvailableCars() async {
     return _localRepo.countAvailableCars();
   }
 
+  // same as getdata, just an alias
   @override
   Future<List<Map<String, dynamic>>> getAllCars() async {
     return getData();
   }
 
+  // finds cars with maintenance on a specific date
   @override
   Future<List<Map<String, dynamic>>> getCarsMaintenanceOn(
     String dateIsoString,
@@ -248,7 +253,7 @@ class CarHybridRepo extends AbstractCarRepo {
     return _localRepo.getCarsMaintenanceOn(dateIsoString);
   }
 
-  // --- Sync Support Methods ---
+  // delegates sync methods to the local repo since thats where the data lives
 
   @override
   Future<List<Map<String, dynamic>>> getUnsyncedCars() async {

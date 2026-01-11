@@ -1,3 +1,5 @@
+// registration screen for new agency accounts
+
 import 'package:auto_manager/logic/cubits/auth/auth_cubit.dart';
 import 'package:auto_manager/logic/cubits/auth/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // form state and text controllers
   final _formKey = GlobalKey<FormState>();
   final _companyNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -33,6 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  // validates form and triggers signup via cubit
   void _handleRegister() {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
@@ -42,7 +46,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      // Call AuthCubit to signup
       context.read<AuthCubit>().signup(
         username: _usernameController.text.trim(),
         password: _passwordController.text,

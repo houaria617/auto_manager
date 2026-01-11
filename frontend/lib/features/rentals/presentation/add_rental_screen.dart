@@ -1,3 +1,5 @@
+// form screen for creating a new rental with client and car selection
+
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
 import 'package:auto_manager/logic/cubits/clients/client_cubit.dart';
@@ -16,25 +18,26 @@ class AddRentalScreen extends StatefulWidget {
 class _AddRentalScreenState extends State<AddRentalScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // repository instances
   final _clientRepo = AbstractClientRepo.getInstance();
   final _carRepo = AbstractCarRepo.getInstance();
 
   final _priceController = TextEditingController();
 
+  // date selection state
   DateTime? _startDate;
   DateTime? _endDate;
   String? _dateError;
 
-  // Data lists
+  // dropdown data and selections
   List<Map<String, dynamic>> _clients = [];
   List<Map<String, dynamic>> _cars = [];
-
-  // Selections
   int? _selectedClientId;
   int? _selectedCarId;
 
   bool _isLoading = true;
 
+  // loads clients and available cars on init
   @override
   void initState() {
     super.initState();
@@ -47,17 +50,17 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
     super.dispose();
   }
 
+  // fetches clients and filters cars to only show available ones
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
       final rawClients = await _clientRepo.getAllClients();
-      final rawCars = await _carRepo.getData(); // This now queries 'cars' table
+      final rawCars = await _carRepo.getData();
 
       if (mounted) {
         setState(() {
           _clients = List<Map<String, dynamic>>.from(rawClients);
 
-          // Filter: Only show cars that are 'Available'
           _cars = List<Map<String, dynamic>>.from(rawCars).where((car) {
             final state =
                 car['state']?.toString().trim().toLowerCase() ?? 'available';
@@ -68,12 +71,12 @@ class _AddRentalScreenState extends State<AddRentalScreen> {
         });
       }
     } catch (e) {
-      debugPrint("Error loading data: $e");
+      debugPrint("error loading data: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // ✅ FULL DIALOG LOGIC FOR ADDING CLIENTS
+  // shows dialog to add a new client inline
   Future<void> _showAddClientDialog() async {
     final fullNameController = TextEditingController();
     final phoneController = TextEditingController();

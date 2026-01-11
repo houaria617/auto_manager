@@ -1,15 +1,11 @@
+// list view of all clients with search functionality
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Cubits
 import 'package:auto_manager/logic/cubits/clients/client_cubit.dart';
-
-// Localization
 import 'package:auto_manager/l10n/app_localizations.dart';
-
-// UI Components
 import 'package:auto_manager/features/Dashboard/navigation_bar.dart';
-import 'client_profile.dart'; // Ensure this points to the file below
+import 'client_profile.dart';
 
 class ClientsList extends StatefulWidget {
   const ClientsList({super.key});
@@ -19,13 +15,14 @@ class ClientsList extends StatefulWidget {
 }
 
 class _ClientsListState extends State<ClientsList> {
+  // loads clients when screen opens
   @override
   void initState() {
     super.initState();
     context.read<ClientCubit>().getClients();
   }
 
-  // Helper to localize status strings coming from DB
+  // translates status codes to localized strings
   String _getLocalizedStatus(BuildContext context, String? status) {
     switch (status?.toLowerCase()) {
       case 'active':

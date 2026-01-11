@@ -1,4 +1,3 @@
-// cars_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../features/vehicles/data/models/vehicle_model.dart';
 import '../../../databases/repo/Car/car_abstract.dart';
@@ -10,16 +9,14 @@ class CarsCubit extends Cubit<CarsState> {
   final _carRepo = AbstractCarRepo.getInstance();
   late DashboardCubit dashboardCubit;
 
-  // 2. Load Vehicles Method - FIX APPLIED HERE
+  // fetches all vehicles from the repo and updates the ui state
   Future<void> loadVehicles() async {
     try {
       emit(CarsLoading());
 
-      // Get List<Map<String, dynamic>> from repository and convert to List<Vehicle>
       final List<Map<String, dynamic>> rawVehicles = await _carRepo
           .getAllCars();
 
-      // Map the database results to Vehicle objects
       final List<Vehicle> vehicles = rawVehicles.map((map) {
         return Vehicle.fromMap(map);
       }).toList();
@@ -30,7 +27,7 @@ class CarsCubit extends Cubit<CarsState> {
     }
   }
 
-  // 3. Add Vehicle Method - Offline-First: saves locally first, syncs later
+  // saves a new vehicle locally with pending sync flag, then refreshes the list
   void addVehicle(Map<String, dynamic> vehicle) async {
     print('inside add vehicle');
     emit(CarsLoading());
@@ -50,10 +47,11 @@ class CarsCubit extends Cubit<CarsState> {
             vehicle['return_from_maintenance'] ??
             vehicle['returnFromMaintenance'] ??
             '',
-        'pending_sync': 1, // Mark as dirty - needs to be synced
+        'pending_sync': 1,
       });
       print('added car successfully');
 
+      // update dashboard stats and log the activity
       dashboardCubit.countAvailableCars();
       dashboardCubit.addActivity({
         'description':
@@ -61,7 +59,6 @@ class CarsCubit extends Cubit<CarsState> {
         'date': DateTime.now(),
       });
 
-      // Reload vehicles immediately (Offline-First: UI updates instantly)
       await loadVehicles();
       print('passed succ');
     } catch (e) {
@@ -70,7 +67,7 @@ class CarsCubit extends Cubit<CarsState> {
     }
   }
 
-  // 4. Update Vehicle Method
+  // updates an existing vehicle by its id
   Future<void> updateVehicle(Map<String, dynamic> vehicle) async {
     if (vehicle['id'] == null) {
       print('Error: Cannot update vehicle without an ID.');
@@ -78,16 +75,14 @@ class CarsCubit extends Cubit<CarsState> {
     }
 
     try {
-      // Use the toMap function on the model for update
       await _carRepo.updateCar(vehicle['id']!, vehicle);
-
       await loadVehicles();
     } catch (e) {
       print('Error updating vehicle: $e');
     }
   }
 
-  // 5. Delete Vehicle Method
+  // removes a vehicle from the database
   Future<void> deleteVehicle(Map<String, dynamic> vehicle) async {
     if (vehicle['id'] == null) {
       print('Error: Cannot delete vehicle without an ID.');
@@ -96,7 +91,6 @@ class CarsCubit extends Cubit<CarsState> {
 
     try {
       await _carRepo.deleteCar(vehicle['id']!);
-
       await loadVehicles();
     } catch (e) {
       print('Error deleting vehicle: $e');

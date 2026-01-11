@@ -2,24 +2,27 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+// handles sqlite database setup and migrations
 class DBHelper {
   static const _database_name = "auto_manager.db";
-  static const _database_version = 3; // Bumped for car sync columns
+  static const _database_version = 3;
 
   static Database? _database;
 
+  // singleton pattern - returns existing db or creates new one
   static Future<Database> getDatabase() async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
+  // opens or creates the database with all tables
   static Future<Database> _initDatabase() async {
     return openDatabase(
       join(await getDatabasesPath(), _database_name),
       version: _database_version,
       onCreate: (database, version) async {
-        // 1. Client
+        // clients table for customer info
         await database.execute('''
            CREATE TABLE client (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +32,7 @@ class DBHelper {
            )
          ''');
 
-        // 2. Car (Singular) - with sync columns for offline-first
+        // cars table with sync columns for offline-first
         await database.execute('''
            CREATE TABLE car (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +47,7 @@ class DBHelper {
            )
          ''');
 
-        // 3. Activity
+        // activity log for recent actions
         await database.execute('''
            CREATE TABLE activity (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,31 +56,31 @@ class DBHelper {
            )
          ''');
 
-        // 4. Rental (References car singular)
+        // rentals linking clients to cars
         await database.execute('''
   CREATE TABLE rental (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     remote_id TEXT UNIQUE,
-    pending_sync INTEGER DEFAULT 0, -- 1 = Needs to be sent to Flask
+    pending_sync INTEGER DEFAULT 0,
     client_id INTEGER, car_id INTEGER, date_from TEXT, date_to TEXT,
     total_amount REAL, payment_state TEXT, state TEXT
   )
 ''');
 
+        // payments tracking money per rental
         await database.execute('''
   CREATE TABLE payment (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     remote_id TEXT UNIQUE,
-    pending_sync INTEGER DEFAULT 0, -- 1 = Needs to be sent to Flask
-    rental_id INTEGER, -- Local SQLite ID
+    pending_sync INTEGER DEFAULT 0,
+    rental_id INTEGER,
     date TEXT, paid_amount REAL
   )
 ''');
       },
       onUpgrade: (database, oldVersion, newVersion) async {
-        // Handle database migration
+        // v2 migration: fix client table column names
         if (oldVersion < 2) {
-          // Check if full_name column exists
           final tableInfo = await database.rawQuery(
             'PRAGMA table_info(client)',
           );
@@ -86,7 +89,7 @@ class DBHelper {
           );
 
           if (!hasFullName) {
-            // Recreate the client table with correct schema
+            // rebuild table with correct schema
             await database.execute('''
               CREATE TABLE client_new (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,6 +99,7 @@ class DBHelper {
               )
             ''');
 
+            // migrate existing data
             try {
               final oldData = await database.rawQuery('SELECT * FROM client');
               if (oldData.isNotEmpty) {
@@ -109,19 +113,17 @@ class DBHelper {
                 }
               }
             } catch (e) {
-              // No old data or error copying, continue with empty table
               print('No old data to migrate: $e');
             }
 
-            // Drop old table and rename new one
+            // swap tables
             await database.execute('DROP TABLE IF EXISTS client');
             await database.execute('ALTER TABLE client_new RENAME TO client');
           }
         }
 
-        // Migration for version 3: Add sync columns to car table
+        // v3 migration: add sync columns to car table
         if (oldVersion < 3) {
-          // Check if remote_id column exists in car table
           final carTableInfo = await database.rawQuery(
             'PRAGMA table_info(car)',
           );
@@ -130,7 +132,6 @@ class DBHelper {
           );
 
           if (!hasRemoteId) {
-            // Add sync columns to existing car table
             await database.execute(
               'ALTER TABLE car ADD COLUMN remote_id TEXT UNIQUE',
             );

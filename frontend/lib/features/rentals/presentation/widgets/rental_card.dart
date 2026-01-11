@@ -1,4 +1,4 @@
-// lib/features/rentals/presentation/widgets/rental_card.dart
+// card widget displaying rental summary in list view
 
 import 'package:auto_manager/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -63,10 +63,11 @@ class RentalCard extends StatelessWidget {
     );
   }
 
+  // determines badge color and text based on rental state
   Widget _buildStatusBadge(BuildContext context) {
     String state = (rental['state'] ?? 'Unknown').toString();
 
-    // Check for Overdue
+    // check if rental is past due date
     DateTime end = DateTime.tryParse(rental['date_to'] ?? '') ?? DateTime.now();
     bool isOverdue =
         DateTime.now().isAfter(end) && state.toLowerCase() != 'completed';
@@ -119,7 +120,10 @@ class RentalCard extends StatelessWidget {
   Widget _buildCustomerName(BuildContext context) {
     final name =
         rental['client_name'] ??
-        (rental['full_name'] ?? AppLocalizations.of(context)!.clientNumber(rental['client_id'].toString()));
+        (rental['full_name'] ??
+            AppLocalizations.of(
+              context,
+            )!.clientNumber(rental['client_id'].toString()));
     return Text(
       name.toString(),
       style: const TextStyle(
@@ -133,7 +137,10 @@ class RentalCard extends StatelessWidget {
   Widget _buildVehicleInfo(BuildContext context) {
     final carModel =
         rental['car_model'] ??
-        (rental['name_model'] ?? AppLocalizations.of(context)!.carNumber(rental['car_id'].toString()));
+        (rental['name_model'] ??
+            AppLocalizations.of(
+              context,
+            )!.carNumber(rental['car_id'].toString()));
     return Row(
       children: [
         const Icon(Icons.directions_car, size: 18, color: Color(0xFF2563EB)),
@@ -163,7 +170,8 @@ class RentalCard extends StatelessWidget {
     if (daysLeft >= 0) {
       daysText = AppLocalizations.of(context)!.daysLabel(daysLeft);
     } else {
-      daysText = '${daysLeft.abs()} ${AppLocalizations.of(context)!.daysOverdue}';
+      daysText =
+          '${daysLeft.abs()} ${AppLocalizations.of(context)!.daysOverdue}';
     }
 
     double amount = (rental['total_amount'] is int)
