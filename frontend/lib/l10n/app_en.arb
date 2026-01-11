@@ -1,0 +1,301 @@
+{
+    "@@locale": "en",
+    "appName": "Auto Manager",
+    "comingSoon": "Coming Soon",
+    "logout": "Logout",
+    "cancel": "Cancel",
+    "add": "Add",
+    "save": "Save",
+    "confirm": "Confirm",
+    "error": "Error",
+    "required": "Required",
+    "loginTitle": "Login",
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Sign In",
+    "navDashboard": "Dashboard",
+    "navRentals": "Rentals",
+    "navCars": "Cars",
+    "navClients": "Clients",
+    "navAnalytics": "Analytics",
+    "settingsTitle": "Settings",
+    "agencyInfo": "Agency Information",
+    "agencyInfoSubtitle": "Update agency details.",
+    "appLanguage": "App Language",
+    "appLanguageSubtitle": "Select preferred language.",
+    "subscription": "Subscription",
+    "subscriptionPlan": "Current Plan: Free",
+    "rentalsTitle": "Rentals",
+    "tabOngoing": "Ongoing",
+    "tabCompleted": "Completed",
+    "noRentalsOngoing": "No ongoing rentals",
+    "noRentalsCompleted": "No completed rentals",
+    "newRental": "New Rental",
+    "rentalDetails": "Rental Details",
+    "renewRental": "Renew Rental",
+    "returnCar": "Return Car",
+    "managePayments": "Manage Payments",
+    "viewPaymentHistory": "Payment History",
+    "rentalSummary": "Rental Summary",
+    "rentalPeriod": "Rental Period",
+    "daysLeft": "days left",
+    "daysOverdue": "days overdue",
+    "addRentalTitle": "New Rental",
+    "selectClient": "Select Client",
+    "selectCar": "Select Car",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "totalPrice": "Total Price",
+    "saveRental": "Save Rental",
+    "paymentsTitle": "Payments",
+    "remainingBalance": "Remaining Balance",
+    "totalPaid": "Total Paid",
+    "balanceDue": "Balance Due",
+    "addPayment": "Add Payment",
+    "enterAmount": "Enter Amount",
+    "pay": "Pay",
+    "paymentHistory": "Transaction History",
+    "analyticsTitle": "Reports & Analytics",
+    "totalRevenue": "Total Revenue",
+    "totalRentals": "Total Rentals",
+    "avgDuration": "Avg. Duration",
+    "topCars": "Top Rented Cars",
+    "clientStats": "Client Statistics",
+    "exportPdf": "Export PDF",
+    "client": "Client",
+    "car": "Car",
+    "selectDate": "Select Date",
+    "pleaseSelectDates": "Please select start and end dates",
+    "pleaseSelectClient": "Please select a client",
+    "pleaseSelectCar": "Please select a car",
+    "pleaseEnterPrice": "Please enter price",
+    "invalidNumber": "Invalid number",
+    "addNewClient": "Add New Client",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phoneNumber": "Phone Number",
+    "addNewCar": "Add New Car",
+    "carNameModel": "Car Name (Model)",
+    "plateNumber": "Plate Number",
+    "dailyRentPrice": "Daily Rent Price",
+    "dateError": "End date must be after or equal to start date",
+    "pricePerDay": "{price}/day",
+    "@pricePerDay": {
+        "placeholders": {
+            "price": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalId": "Rental ID: {id}",
+    "@rentalId": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalNoLongerExists": "This rental no longer exists.",
+    "upgradeToPremium": "Upgrade to Premium",
+    "free": "Free",
+    "zeroDA": "0DA",
+    "accessBasicFeatures": "Access basic features",
+    "limitedRentals": "Limited rental entries (10 max)",
+    "limitedCars": "Limited car entries (10 max)",
+    "premium": "Premium",
+    "premiumPrice": "5999DA / month",
+    "accessAllFeatures": "Access all features",
+    "unlimitedRentals": "Unlimited rental entries",
+    "unlimitedCars": "Unlimited car entries",
+    "rentalHistoryAnalytics": "Rental history & analytics",
+    "customReminders": "Custom reminders for customers",
+    "recommended": "Recommended",
+    "returnCarComplete": "Return Car (Complete)",
+    "rentalCompleted": "Rental Completed",
+    "extendRentalDuration": "Extend the rental duration.",
+    "additionalDays": "Additional Days",
+    "days": "days",
+    "estimatedDailyRate": "Estimated Daily Rate:",
+    "extraCost": "Extra Cost:",
+    "confirmRenew": "Confirm Renew",
+    "renewedSuccess": "Renewed for {days} days. Added ${amount} to total.",
+    "@renewedSuccess": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            },
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "errorRenewing": "Error renewing rental: {error}",
+    "@errorRenewing": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "statusOngoing": "ONGOING",
+    "statusCompleted": "COMPLETED",
+    "statusOverdue": "OVERDUE",
+    "rentalIdLabel": "Rental ID: {id}",
+    "@rentalIdLabel": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "clientNumber": "Client #{id}",
+    "@clientNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "carNumber": "Car #{id}",
+    "@carNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "viewClient": "View Client",
+    "viewCar": "View Car",
+    "noPhoneInfo": "No phone info",
+    "unknownPlate": "Unknown Plate",
+    "rentalIdColon": "Rental ID: {id}",
+    "@rentalIdColon": {
+        "placeholders": {
+            "id": {
+                "type": "int"
+            }
+        }
+    },
+    "daysLabel": "{days} days",
+    "@daysLabel": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "start": "Start",
+    "end": "End",
+    "ongoingRentals": "Ongoing Rentals",
+    "availableCars": "Available Cars",
+    "dueToday": "Due Today",
+    "recentActivities": "Recent Activities",
+    "carRentedBy": "Car {plate} rented by {client}",
+    "@carRentedBy": {
+        "placeholders": {
+            "plate": {
+                "type": "String"
+            },
+            "client": {
+                "type": "String"
+            }
+        }
+    },
+    "revenue": "Revenue",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "allTime": "All Time",
+    "custom": "Custom",
+    "totalClients": "Total Clients",
+    "newClients": "New Clients",
+    "repeatClients": "Repeat Clients",
+    "generatingPdf": "Generating PDF Report...",
+    "errorGeneratingPdf": "Error generating PDF: {error}",
+    "@errorGeneratingPdf": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "pleaseWaitForData": "Please wait for data to load.",
+    "clientsTitle": "Clients",
+    "noClientFound": "No Client Found",
+    "searchClientHint": "Search by name or phone number",
+    "clientProfileTitle": "Client Profile",
+    "noRecentActivities": "No recent activities",
+    "ninLabel": "NIN",
+    "statusActive": "ACTIVE",
+    "statusIdle": "IDLE",
+    "days": "Days",
+    "totalRents": "TOTAL RENTS",
+    "rentHistory": "Rent History",
+    "from": "from",
+    "to": "to",
+    "totalIs": "Total is",
+    "statusCompleted": "Completed",
+    "statusOngoing": "Ongoing",
+    "unknown": "Unknown",
+    "noPhone": "No phone",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "dashboardTitle": "Dashboard",
+    "appName": "Auto Manager",
+    "ongoingRentals": "Ongoing Rentals",
+    "availableCars": "Available Cars",
+    "dueToday": "Due Today",
+    "recentActivities": "Recent Activities",
+    "noRecentActivities": "No recent activities",
+    "newRental": "New Rental",
+    "atTime": "at",
+    "myVehicles": "My Vehicles",
+    "searchCarPlaceholder": "Search for a car or plate...",
+    "failedToLoadData": "Failed to load data",
+    "noVehiclesMatchFilter": "No vehicles match the filter",
+    "addFirstVehicle": "Add Your First Vehicle",
+    "tapPlusToBegin": "Tap the \"+\" button to begin.",
+    "vehicleDetails": "Vehicle Details",
+    "unknownName": "Unknown Name",
+    "plateNumber": "Plate Number",
+    "pricePerDay": "Price {value}",
+    "returnDate": "Return Date",
+    "availableOn": "Available On",
+    "nextMaintenance": "Next Maintenance",
+    "deleteVehicleTitle": "Delete vehicle",
+    "deleteVehicleConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "@deleteVehicleConfirm": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "editVehicle": "Edit Vehicle",
+    "carName": "Car Name",
+    "nextMaintenanceOptional": "Next Maintenance Date (optional)",
+    "rentPricePerDay": "Rent Price (per Day)",
+    "availabilityDate": "Availability Date",
+    "save": "Save",
+    "deletedVehicle": "Deleted \"{name}\"",
+    "@deletedVehicle": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "statusAvailable": "Available",
+    "statusRented": "Rented",
+    "statusMaintenance": "Maintenance",
+    "filterAll": "All",
+    "labelClient": "Client",
+    "labelCar": "Car",
+    "labelStartDate": "Start Date",
+    "labelEndDate": "End Date",
+    "labelTotalPrice": "Total Price",
+    "selectDate": "Select Date",
+    "selectClient": "Select Client",
+    "selectCar": "Select Car",
+    "saveRental": "Save Rental",
+    "logoutConfirmation": "Are you sure you want to logout?"
+}

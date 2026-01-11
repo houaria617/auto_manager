@@ -1,0 +1,175 @@
+// main rentals screen with ongoing and completed tabs
+
+import 'package:auto_manager/logic/cubits/rental/rental_cubit.dart';
+import 'package:auto_manager/logic/cubits/rental/rental_state.dart';
+import 'package:auto_manager/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../Dashboard/navigation_bar.dart';
+import 'package:auto_manager/features/rentals/presentation/add_rental_screen.dart';
+import 'package:auto_manager/features/rentals/presentation/rental_details.dart';
+import 'package:auto_manager/features/rentals/presentation/widgets/rental_card.dart';
+import 'package:auto_manager/features/rentals/presentation/widgets/tab_button.dart';
+
+class RentalsScreen extends StatelessWidget {
+  const RentalsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // uses global cubit instance from main.dart
+    return const _RentalsScreenContent();
+  }
+}
+
+class _RentalsScreenContent extends StatefulWidget {
+  const _RentalsScreenContent();
+
+  @override
+  State<_RentalsScreenContent> createState() => _RentalsScreenContentState();
+}
+
+class _RentalsScreenContentState extends State<_RentalsScreenContent> {
+  // tracks which tab is active
+  bool _showCompleted = false;
+
+  void _toggleView(bool showCompleted) {
+    setState(() {
+      _showCompleted = showCompleted;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[200],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            // The list is wrapped in BlocBuilder to react to Global Database changes
+            Expanded(
+              child: BlocBuilder<RentalCubit, RentalState>(
+                builder: (context, state) {
+                  if (state is RentalLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is RentalError) {
+                    return Center(child: Text('Error: ${state.message}'));
+                  } else if (state is RentalLoaded) {
+                    return _buildRentalsList(state.rentals);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: const NavBar(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _handleAddRental(context),
+        backgroundColor: const Color(0xFF2563EB),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.rentalsTitle,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1a1a1a),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              TabButton(
+                label: AppLocalizations.of(context)!.tabOngoing,
+                isSelected: !_showCompleted,
+                onTap: () => _toggleView(false),
+              ),
+              const SizedBox(width: 8),
+              TabButton(
+                label: AppLocalizations.of(context)!.tabCompleted,
+                isSelected: _showCompleted,
+                onTap: () => _toggleView(true),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // builds filtered list based on ongoing or completed toggle
+  Widget _buildRentalsList(List<Map> allRentals) {
+    final filteredList = allRentals.where((rental) {
+      final state = (rental['state'] ?? '').toString().toLowerCase();
+      final isCompletedState = state == 'completed' || state == 'returned';
+
+      return _showCompleted ? isCompletedState : !isCompletedState;
+    }).toList();
+
+    if (filteredList.isEmpty) {
+      return Center(
+        child: Text(
+          _showCompleted
+              ? AppLocalizations.of(context)!.noRentalsCompleted
+              : AppLocalizations.of(context)!.noRentalsOngoing,
+          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: filteredList.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        // Explicitly cast the map to Map<String, dynamic> to prevent type errors
+        final rentalItem = Map<String, dynamic>.from(filteredList[index]);
+
+        return RentalCard(
+          rental: rentalItem,
+          isOngoingView: !_showCompleted,
+          onTap: () {
+            _handleRentalTap(context, rentalItem);
+          },
+        );
+      },
+    );
+  }
+
+  // navigates to rental details screen
+  void _handleRentalTap(BuildContext context, Map<String, dynamic> rental) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RentalDetailsScreen(rental: rental)),
+    );
+  }
+
+  // navigates to add rental screen
+  void _handleAddRental(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddRentalScreen()),
+    );
+  }
+}

@@ -46,3 +46,6 @@ auto_manager/
 - **offline first:** always try to save/load from local db if the network is down. the sync service pushes changes later.
 - **feature separation:** keep things related to "cars" in the `vehicles` folder, "payments" in the `subscription` folder, etc.
 - **clean state:** logic goes in cubits, not inside the ui widgets.
+
+
+

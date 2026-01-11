@@ -1,0 +1,287 @@
+{
+    "@@locale": "fr",
+    "appName": "Auto Manager",
+    "comingSoon": "Bientôt disponible",
+    "logout": "Se déconnecter",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "save": "Enregistrer",
+    "confirm": "Confirmer",
+    "error": "Erreur",
+    "required": "Requis",
+    "loginTitle": "Connexion",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "loginButton": "Se connecter",
+    "navDashboard": "Tableau de bord",
+    "navRentals": "Locations",
+    "navCars": "Voitures",
+    "navClients": "Clients",
+    "navAnalytics": "Analytique",
+    "settingsTitle": "Paramètres",
+    "agencyInfo": "Infos agence",
+    "agencyInfoSubtitle": "Mettre à jour les détails.",
+    "appLanguage": "Langue",
+    "appLanguageSubtitle": "Changer la langue.",
+    "subscription": "Abonnement",
+    "subscriptionPlan": "Plan actuel : Gratuit",
+    "rentalsTitle": "Locations",
+    "tabOngoing": "En cours",
+    "tabCompleted": "Terminé",
+    "noRentalsOngoing": "Aucune location en cours",
+    "noRentalsCompleted": "Aucune location terminée",
+    "newRental": "Nouvelle Location",
+    "rentalDetails": "Détails",
+    "renewRental": "Renouveler",
+    "returnCar": "Retourner",
+    "managePayments": "Paiements",
+    "viewPaymentHistory": "Historique",
+    "rentalSummary": "Résumé",
+    "rentalPeriod": "Période",
+    "daysLeft": "jours restants",
+    "daysOverdue": "jours de retard",
+    "addRentalTitle": "Nouvelle Location",
+    "selectClient": "Sélectionner Client",
+    "selectCar": "Sélectionner Voiture",
+    "startDate": "Date début",
+    "endDate": "Date fin",
+    "totalPrice": "Prix Total",
+    "saveRental": "Enregistrer",
+    "paymentsTitle": "Paiements",
+    "remainingBalance": "Reste à payer",
+    "totalPaid": "Total Payé",
+    "balanceDue": "Solde Dû",
+    "addPayment": "Ajouter un paiement",
+    "enterAmount": "Entrer le montant",
+    "pay": "Payer",
+    "paymentHistory": "Historique des transactions",
+    "analyticsTitle": "Rapports",
+    "totalRevenue": "Revenu Total",
+    "totalRentals": "Total Locations",
+    "avgDuration": "Durée Moyenne",
+    "topCars": "Top Voitures",
+    "clientStats": "Statistiques Clients",
+    "exportPdf": "Exporter PDF",
+    "client": "Client",
+    "car": "Voiture",
+    "selectDate": "Sélectionner la date",
+    "pleaseSelectDates": "Veuillez sélectionner les dates de début et de fin",
+    "pleaseSelectClient": "Veuillez sélectionner un client",
+    "pleaseSelectCar": "Veuillez sélectionner une voiture",
+    "pleaseEnterPrice": "Veuillez entrer le prix",
+    "invalidNumber": "Nombre invalide",
+    "addNewClient": "Ajouter un nouveau client",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "phoneNumber": "Numéro de téléphone",
+    "addNewCar": "Ajouter une nouvelle voiture",
+    "carNameModel": "Nom de la voiture (Modèle)",
+    "plateNumber": "Numéro de plaque",
+    "dailyRentPrice": "Prix de location quotidien",
+    "dateError": "La date de fin doit être après ou égale à la date de début",
+    "pricePerDay": "{price}/jour",
+    "@pricePerDay": {
+        "placeholders": {
+            "price": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalId": "ID Location: {id}",
+    "@rentalId": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "rentalNoLongerExists": "Cette location n'existe plus.",
+    "upgradeToPremium": "Passer à Premium",
+    "free": "Gratuit",
+    "zeroDA": "0DA",
+    "accessBasicFeatures": "Accéder aux fonctionnalités de base",
+    "limitedRentals": "Entrées de location limitées (10 max)",
+    "limitedCars": "Entrées de voitures limitées (10 max)",
+    "premium": "Premium",
+    "premiumPrice": "5999DA / mois",
+    "accessAllFeatures": "Accéder à toutes les fonctionnalités",
+    "unlimitedRentals": "Entrées de location illimitées",
+    "unlimitedCars": "Entrées de voitures illimitées",
+    "rentalHistoryAnalytics": "Historique et analyses de location",
+    "customReminders": "Rappels personnalisés pour les clients",
+    "recommended": "Recommandé",
+    "returnCarComplete": "Retourner la voiture (Terminer)",
+    "rentalCompleted": "Location terminée",
+    "extendRentalDuration": "Prolonger la durée de location.",
+    "additionalDays": "Jours supplémentaires",
+    "days": "jours",
+    "estimatedDailyRate": "Tarif journalier estimé:",
+    "extraCost": "Coût supplémentaire:",
+    "confirmRenew": "Confirmer le renouvellement",
+    "renewedSuccess": "Renouvelé pour {days} jours. Ajouté ${amount} au total.",
+    "@renewedSuccess": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            },
+            "amount": {
+                "type": "String"
+            }
+        }
+    },
+    "errorRenewing": "Erreur lors du renouvellement de la location: {error}",
+    "@errorRenewing": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "statusOngoing": "EN COURS",
+    "statusCompleted": "TERMINÉ",
+    "statusOverdue": "EN RETARD",
+    "rentalIdLabel": "ID Location: {id}",
+    "@rentalIdLabel": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "clientNumber": "Client #{id}",
+    "@clientNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "carNumber": "Voiture #{id}",
+    "@carNumber": {
+        "placeholders": {
+            "id": {
+                "type": "String"
+            }
+        }
+    },
+    "viewClient": "Voir le client",
+    "viewCar": "Voir la voiture",
+    "noPhoneInfo": "Aucune info téléphone",
+    "unknownPlate": "Plaque inconnue",
+    "rentalIdColon": "ID Location: {id}",
+    "@rentalIdColon": {
+        "placeholders": {
+            "id": {
+                "type": "int"
+            }
+        }
+    },
+    "daysLabel": "{days} jours",
+    "@daysLabel": {
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "start": "Début",
+    "end": "Fin",
+    "ongoingRentals": "Locations en cours",
+    "availableCars": "Voitures disponibles",
+    "dueToday": "Échéance aujourd'hui",
+    "recentActivities": "Activités récentes",
+    "carRentedBy": "Voiture {plate} louée par {client}",
+    "@carRentedBy": {
+        "placeholders": {
+            "plate": {
+                "type": "String"
+            },
+            "client": {
+                "type": "String"
+            }
+        }
+    },
+    "revenue": "Revenu",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois",
+    "allTime": "Tout le temps",
+    "custom": "Personnalisé",
+    "totalClients": "Total Clients",
+    "newClients": "Nouveaux Clients",
+    "repeatClients": "Clients récurrents",
+    "generatingPdf": "Génération du rapport PDF...",
+    "errorGeneratingPdf": "Erreur lors de la génération du PDF: {error}",
+    "@errorGeneratingPdf": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "pleaseWaitForData": "Veuillez attendre le chargement des données.",
+    "clientsTitle": "Clients",
+    "noClientFound": "Aucun client trouvé",
+    "searchClientHint": "Rechercher par nom ou numéro",
+    "clientProfileTitle": "Profil Client",
+    "noRecentActivities": "Aucune activité récente",
+    "ninLabel": "NIN",
+    "statusActive": "ACTIF",
+    "statusIdle": "INACTIF",
+    "days": "Jours",
+    "totalRents": "TOTAL LOCATIONS",
+    "rentHistory": "Historique des locations",
+    "from": "de",
+    "to": "à",
+    "totalIs": "Total est",
+    "statusCompleted": "Terminé",
+    "statusOngoing": "En cours",
+    "unknown": "Inconnu",
+    "noPhone": "Pas de numéro",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "dashboardTitle": "Tableau de bord",
+    "appName": "Auto Manager",
+    "ongoingRentals": "Locations en cours",
+    "availableCars": "Voitures disponibles",
+    "dueToday": "Dû aujourd'hui",
+    "recentActivities": "Activités récentes",
+    "noRecentActivities": "Aucune activité récente",
+    "newRental": "Nouvelle location",
+    "atTime": "à",
+    "myVehicles": "Mes Véhicules",
+    "searchCarPlaceholder": "Rechercher voiture ou plaque...",
+    "failedToLoadData": "Échec du chargement des données",
+    "noVehiclesMatchFilter": "Aucun véhicule ne correspond au filtre",
+    "addFirstVehicle": "Ajoutez votre premier véhicule",
+    "tapPlusToBegin": "Appuyez sur le bouton \"+\" pour commencer.",
+    "vehicleDetails": "Détails du véhicule",
+    "unknownName": "Nom inconnu",
+    "plateNumber": "Numéro de plaque",
+    "pricePerDay": "Prix {value}",
+    "returnDate": "Date de retour",
+    "availableOn": "Disponible le",
+    "nextMaintenance": "Prochaine maintenance",
+    "deleteVehicleTitle": "Supprimer le véhicule",
+    "deleteVehicleConfirm": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible.",
+    "editVehicle": "Modifier le véhicule",
+    "carName": "Nom de la voiture",
+    "nextMaintenanceOptional": "Date prochaine maintenance (optionnel)",
+    "rentPricePerDay": "Prix location (par jour)",
+    "availabilityDate": "Date de disponibilité",
+    "save": "Enregistrer",
+    "deletedVehicle": "\"{name}\" supprimé",
+    "statusAvailable": "Disponible",
+    "statusRented": "Loué",
+    "statusMaintenance": "Maintenance",
+    "filterAll": "Tout",
+    "labelClient": "Client",
+    "labelCar": "Voiture",
+    "labelStartDate": "Date de début",
+    "labelEndDate": "Date de fin",
+    "labelTotalPrice": "Prix Total",
+    "selectDate": "Choisir une date",
+    "selectClient": "Choisir le client",
+    "selectCar": "Choisir la voiture",
+    "saveRental": "Enregistrer la location",
+    "logoutConfirmation": "Êtes-vous sûr de vouloir vous déconnecter ?"
+}
